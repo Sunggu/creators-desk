@@ -12,13 +12,13 @@
 
 | Concern | Pattern |
 |---|---|
-| Use case logic | Build a fake `TailscaleStatusRepository` via object literal, assert mapped view model |
-| Pure mapping (`toTailscaleStatusViewModel`) | Table-driven `it.each` over `BackendState` → `TailscaleStatusKind` |
-| Server-side normalization | Import `normalizeTailscaleCliOutput` from the Vite plugin and feed raw CLI JSON |
-| Failure paths | Repository that `throw`s → expect `kind: 'unavailable'` with empty `tailscaleIps` |
+| Use case logic | Build a fake repository via object literal, assert mapped view model |
+| Pure mapping | Table-driven `it.each` over input → expected output |
+| Server-side normalization | Import the normalizer from its source and feed raw input |
+| Failure paths | Repository that `throw`s → expect fallback/`unavailable` shape |
 
 ## Coverage Standard (Rule 5)
 
-- Any new backend-state mapping or DTO field must be covered in `src/core/application/use-cases/get-tailscale-status.spec.ts`.
-- Any new CLI output → payload normalization must be covered in `src/server/tailscale-status.plugin.spec.ts` (mirrors `server/` logic into `src/server/` for isolation).
+- Every use case and domain mapping must ship with a colocated `*.spec.ts`.
+- Any new backend input → DTO normalization must be covered by a unit test.
 - CI gate: all tests pass before reporting completion.
