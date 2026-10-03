@@ -5,42 +5,63 @@ import { EditorState } from '@codemirror/state';
 import { EditorView, keymap, lineNumbers } from '@codemirror/view';
 import { useEffect, useRef } from 'react';
 
-const obsidianTheme = EditorView.theme({
-  '&': {
-    color: '#e4e4e7',
-    backgroundColor: '#09090b',
-    height: '100%',
-    fontSize: '15px',
+const obsidianTheme = EditorView.theme(
+  {
+    '&': {
+      color: '#dcddde',
+      backgroundColor: '#1e1e22',
+      height: '100%',
+      fontSize: '15px',
+    },
+    '.cm-scroller': {
+      overflow: 'auto',
+      height: '100%',
+    },
+    '.cm-content': {
+      fontFamily:
+        '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Apple Color Emoji", sans-serif',
+      padding: '32px 48px 120px 48px',
+      lineHeight: '1.75',
+      caretColor: '#a78bfa',
+      maxWidth: '820px',
+      marginLeft: 'auto',
+      marginRight: 'auto',
+    },
+    '&.cm-focused .cm-cursor': {
+      borderLeftColor: '#a78bfa',
+      borderLeftWidth: '2px',
+    },
+    '&.cm-focused .cm-selectionBackground, ::selection': {
+      backgroundColor: 'rgba(124, 58, 237, 0.32) !important',
+    },
+    '.cm-gutters': {
+      backgroundColor: '#1e1e22',
+      color: '#52525e',
+      borderRight: '1px solid #282830',
+      minWidth: '40px',
+    },
+    '.cm-activeLineGutter': {
+      backgroundColor: '#26262e',
+      color: '#a1a1aa',
+    },
+    '.cm-activeLine': {
+      backgroundColor: 'rgba(255, 255, 255, 0.025)',
+    },
   },
-  '.cm-content': {
-    fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-    padding: '24px 32px',
-    lineHeight: '1.7',
-    caretColor: '#38bdf8',
-  },
-  '&.cm-focused .cm-cursor': {
-    borderLeftColor: '#38bdf8',
-  },
-  '&.cm-focused .cm-selectionBackground, ::selection': {
-    backgroundColor: 'rgba(56, 189, 248, 0.25)',
-  },
-  '.cm-gutters': {
-    backgroundColor: '#09090b',
-    color: '#52525b',
-    borderRight: '1px solid #18181b',
-  },
-  '.cm-activeLineGutter': {
-    backgroundColor: '#18181b',
-    color: '#a1a1aa',
-  },
-  '.cm-activeLine': {
-    backgroundColor: 'rgba(39, 39, 42, 0.3)',
-  },
-}, { dark: true });
+  { dark: true },
+);
+
+export interface EditorStats {
+  words: number;
+  chars: number;
+  cursorLine: number;
+  cursorCol: number;
+}
 
 interface UseCodeMirrorOptions {
   initialContent: string;
   onChange: (doc: string) => void;
+  onStatsChange?: (stats: EditorStats) => void;
   debounceMs?: number;
 }
 
@@ -52,9 +73,26 @@ export function useCodeMirror(
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onChangeRef = useRef(options.onChange);
   onChangeRef.current = options.onChange;
+  const onStatsChangeRef = useRef(options.onStatsChange);
+  onStatsChangeRef.current = options.onStatsChange;
 
   useEffect(() => {
     if (!containerRef.current) return;
+
+    const computeStats = (state: EditorState) => {
+      const doc = state.doc.toString();
+      const chars = doc.length;
+      const trimmed = doc.trim();
+      const words = trimmed ? trimmed.split(/\s+/).length : 0;
+      const head = state.selection.main.head;
+      const line = state.doc.lineAt(head);
+      onStatsChangeRef.current?.({
+        words,
+        chars,
+        cursorLine: line.number,
+        cursorCol: head - line.from + 1,
+      });
+    };
 
     const startState = EditorState.create({
       doc: options.initialContent,
@@ -67,6 +105,9 @@ export function useCodeMirror(
         EditorView.lineWrapping,
         keymap.of([...defaultKeymap, ...historyKeymap]),
         EditorView.updateListener.of((update) => {
+          if (update.docChanged || update.selectionSet) {
+            computeStats(update.state);
+          }
           if (update.docChanged) {
             const doc = update.state.doc.toString();
             if (debounceTimerRef.current) {
@@ -86,6 +127,7 @@ export function useCodeMirror(
     });
 
     viewRef.current = view;
+    computeStats(startState);
 
     return () => {
       if (debounceTimerRef.current) {
@@ -94,10 +136,8 @@ export function useCodeMirror(
       view.destroy();
       viewRef.current = null;
     };
-    // Re-initialize only when containerRef changes or new file mounted
   }, [containerRef, options.debounceMs]);
 
-  // Keep doc in sync if initialContent changed externally
   useEffect(() => {
     const view = viewRef.current;
     if (!view) return;

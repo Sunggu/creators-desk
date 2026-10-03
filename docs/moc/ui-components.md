@@ -8,15 +8,14 @@
 
 | Component | File | Props | Purpose |
 |---|---|---|---|
-| `VaultLauncher` | `src/components/vault/vault-launcher.tsx` | `{ vaults, isLoading, onSelectVault, onCreateVault, onDeleteVault }` | First-landing Vault selection & creation screen |
-| `VaultCard` | `src/components/vault/vault-card.tsx` | `{ vault, onSelect, onDelete }` | Individual Vault item card with action buttons |
-| `CreateVaultDialog` | `src/components/vault/create-vault-dialog.tsx` | `{ isOpen, onClose, onSubmit }` | Modal dialog to name and create a new Vault |
-| `WorkspaceLayout` | `src/components/workspace/workspace-layout.tsx` | `{ vault, onExitVault }` | Shell integrating Topbar, File Explorer, and Editor |
-| `WorkspaceTopbar` | `src/components/workspace/workspace-topbar.tsx` | `{ vault, activeFileName, onExitVault, isSaving }` | Top navigation with Vault switch & save status |
-| `FileExplorer` | `src/components/sidebar/file-explorer.tsx` | `{ nodes, activeFileId, onSelectFile, ... }` | Hierarchical file/folder tree explorer |
-| `FileTreeItem` | `src/components/sidebar/file-tree-item.tsx` | `{ node, depth, isActive, isExpanded, ... }` | Single file or folder row with inline actions |
-| `FileExplorerToolbar` | `src/components/sidebar/file-explorer-toolbar.tsx` | `{ onNewFile, onNewFolder, onRefresh }` | Toolbar with quick actions for files/folders |
-| `MarkdownEditor` | `src/components/editor/markdown-editor.tsx` | `{ activeFile, onSavingChange }` | CodeMirror 6 markdown editor with auto-save |
+| `ObsidianShell` | `src/components/layout/obsidian-shell.tsx` | `{ vault, vaults, onSelectVault, onCreateVault, onDeleteVault }` | Master Obsidian desktop-like 3-pane shell |
+| `ObsidianRibbon` | `src/components/ribbon/obsidian-ribbon.tsx` | `{ isSidebarOpen, onToggleSidebar, onOpenVaultModal }` | Narrow 44px icon action rail |
+| `ObsidianSidebar` | `src/components/sidebar/obsidian-sidebar.tsx` | `{ vault, nodes, activeFileId, onOpenVaultModal, ... }` | Vault dropdown & hierarchical file explorer |
+| `FileTreeItem` | `src/components/sidebar/file-tree-item.tsx` | `{ node, depth, isActive, isExpanded, ... }` | Single file or folder row with inline rename/delete |
+| `ObsidianTabBar` | `src/components/tabs/obsidian-tab-bar.tsx` | `{ activeFile, onNewNote, onCloseNote }` | Active note tabs with close & add tab buttons |
+| `ObsidianEditor` | `src/components/editor/obsidian-editor.tsx` | `{ activeFile, onSavingChange, onStatsChange, onNewNote }` | CodeMirror 6 markdown editor with auto-save & stats |
+| `ObsidianStatusBar` | `src/components/statusbar/obsidian-status-bar.tsx` | `{ stats, isSaving }` | Bottom bar: words, chars, cursor Ln/Col, save state |
+| `ObsidianVaultModal` | `src/components/vault/obsidian-vault-modal.tsx` | `{ isOpen, activeVaultId, vaults, onClose, ... }` | Obsidian-style modal for switching and managing vaults |
 
 ## Lego Rules
 
@@ -24,8 +23,12 @@
 - 컴포넌트 안에서 데이터를 직접 가져오지 않는다 — hook과 use case는 상위 계층에 둔다.
 - 순수 표시용 매핑은 컴포넌트 내부에 두고, 비즈니스 매핑은 use case에 둔다.
 
-## Design Tokens (Tailwind v4)
+## Design Tokens (Obsidian Dark Theme)
 
-- Background: `zinc-950` 페이지 / `zinc-900/60` 카드, `zinc-800` 보더.
-- 상태 점: emerald = saved, amber = saving, sky = active.
-- Accent: `sky-400`.
+- Ribbon: `#121215`
+- Sidebar: `#18181b`
+- Tab Bar: `#141417`
+- Editor: `#1e1e22`
+- Status Bar: `#121215`
+- Borders: `#26262e`
+- Accent: Obsidian Violet `#7c3aed` / `#a78bfa`

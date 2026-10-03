@@ -1,0 +1,161 @@
+import { useState } from 'react';
+import type { FileNodeDto } from '../../core/domain/file-node.dto';
+import type { VaultDto } from '../../core/domain/vault.dto';
+import FileTreeItem from './file-tree-item';
+
+interface ObsidianSidebarProps {
+  vault: VaultDto;
+  nodes: FileNodeDto[];
+  activeFileId: string | null;
+  onOpenVaultModal: () => void;
+  onSelectFile: (fileId: string) => void;
+  onCreateFile: (name: string, parentId?: string | null) => Promise<unknown>;
+  onCreateFolder: (name: string, parentId?: string | null) => Promise<unknown>;
+  onRenameNode: (id: string, newName: string) => Promise<unknown>;
+  onDeleteNode: (id: string) => Promise<unknown>;
+  onRefresh: () => void;
+}
+
+export default function ObsidianSidebar({
+  vault,
+  nodes,
+  activeFileId,
+  onOpenVaultModal,
+  onSelectFile,
+  onCreateFile,
+  onCreateFolder,
+  onRenameNode,
+  onDeleteNode,
+  onRefresh,
+}: ObsidianSidebarProps) {
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+
+  const toggleFolder = (id: string) => {
+    setExpandedFolders((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleNewFile = (parentId: string | null = null) => {
+    const name = prompt('새 노트 이름:', 'Untitled');
+    if (name) {
+      onCreateFile(name, parentId);
+      if (parentId) setExpandedFolders((prev) => new Set(prev).add(parentId));
+    }
+  };
+
+  const handleNewFolder = (parentId: string | null = null) => {
+    const name = prompt('새 폴더 이름:', '새 폴더');
+    if (name) {
+      onCreateFolder(name, parentId);
+      if (parentId) setExpandedFolders((prev) => new Set(prev).add(parentId));
+    }
+  };
+
+  const renderTree = (parentId: string | null, depth: number) => {
+    const children = nodes.filter((n) => n.parentId === parentId);
+    if (children.length === 0) return null;
+
+    return children.map((node) => {
+      const isExpanded = expandedFolders.has(node.id);
+      return (
+        <div key={node.id}>
+          <FileTreeItem
+            node={node}
+            depth={depth}
+            isActive={node.id === activeFileId}
+            isExpanded={isExpanded}
+            onToggleExpand={toggleFolder}
+            onSelect={onSelectFile}
+            onRename={async (id, newName) => {
+              await onRenameNode(id, newName);
+            }}
+            onDelete={async (id) => {
+              await onDeleteNode(id);
+            }}
+            onCreateChildFile={(pid) => handleNewFile(pid)}
+            onCreateChildFolder={(pid) => handleNewFolder(pid)}
+          />
+          {node.type === 'folder' && isExpanded && renderTree(node.id, depth + 1)}
+        </div>
+      );
+    });
+  };
+
+  return (
+    <aside className="flex h-full w-64 shrink-0 flex-col border-r border-[#26262e] bg-[#18181b] select-none text-zinc-300">
+      {/* Vault Title Bar (Obsidian style) */}
+      <div
+        onClick={onOpenVaultModal}
+        className="flex h-10 cursor-pointer items-center justify-between border-b border-[#24242a] px-3.5 hover:bg-[#202026] transition"
+        title="다른 Vault 열기 / 관리"
+      >
+        <div className="flex items-center space-x-2 overflow-hidden">
+          <span className="flex h-2 w-2 rounded-full bg-violet-400" />
+          <span className="text-xs font-bold tracking-tight text-zinc-100 truncate">
+            {vault.name}
+          </span>
+        </div>
+        <svg className="h-3.5 w-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+
+      {/* Toolbar */}
+      <div className="flex items-center justify-between px-3 py-1.5 text-zinc-400 border-b border-[#202026]">
+        <span className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
+          탐색기
+        </span>
+        <div className="flex items-center space-x-1">
+          <button
+            onClick={() => handleNewFile(null)}
+            className="rounded p-1 hover:bg-[#25252c] hover:text-zinc-100 transition"
+            title="새 노트"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+          <button
+            onClick={() => handleNewFolder(null)}
+            className="rounded p-1 hover:bg-[#25252c] hover:text-zinc-100 transition"
+            title="새 폴더"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+            </svg>
+          </button>
+          <button
+            onClick={onRefresh}
+            className="rounded p-1 hover:bg-[#25252c] hover:text-zinc-100 transition"
+            title="새로고침"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Tree items */}
+      <div className="flex-1 overflow-y-auto py-1">
+        {nodes.length === 0 ? (
+          <div className="p-4 text-center text-xs text-zinc-500">
+            노트가 없습니다.
+            <button
+              onClick={() => handleNewFile(null)}
+              className="mt-2 block w-full text-center text-violet-400 hover:underline"
+            >
+              + 새 노트 만들기
+            </button>
+          </div>
+        ) : (
+          renderTree(null, 0)
+        )}
+      </div>
+    </aside>
+  );
+}
