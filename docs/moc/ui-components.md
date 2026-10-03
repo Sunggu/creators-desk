@@ -6,10 +6,17 @@
 
 ## Catalog
 
-아직 구현된 컴포넌트 없음. `src/App.tsx`는 빈 셸.
-
 | Component | File | Props | Purpose |
 |---|---|---|---|
+| `VaultLauncher` | `src/components/vault/vault-launcher.tsx` | `{ vaults, isLoading, onSelectVault, onCreateVault, onDeleteVault }` | First-landing Vault selection & creation screen |
+| `VaultCard` | `src/components/vault/vault-card.tsx` | `{ vault, onSelect, onDelete }` | Individual Vault item card with action buttons |
+| `CreateVaultDialog` | `src/components/vault/create-vault-dialog.tsx` | `{ isOpen, onClose, onSubmit }` | Modal dialog to name and create a new Vault |
+| `WorkspaceLayout` | `src/components/workspace/workspace-layout.tsx` | `{ vault, onExitVault }` | Shell integrating Topbar, File Explorer, and Editor |
+| `WorkspaceTopbar` | `src/components/workspace/workspace-topbar.tsx` | `{ vault, activeFileName, onExitVault, isSaving }` | Top navigation with Vault switch & save status |
+| `FileExplorer` | `src/components/sidebar/file-explorer.tsx` | `{ nodes, activeFileId, onSelectFile, ... }` | Hierarchical file/folder tree explorer |
+| `FileTreeItem` | `src/components/sidebar/file-tree-item.tsx` | `{ node, depth, isActive, isExpanded, ... }` | Single file or folder row with inline actions |
+| `FileExplorerToolbar` | `src/components/sidebar/file-explorer-toolbar.tsx` | `{ onNewFile, onNewFolder, onRefresh }` | Toolbar with quick actions for files/folders |
+| `MarkdownEditor` | `src/components/editor/markdown-editor.tsx` | `{ activeFile, onSavingChange }` | CodeMirror 6 markdown editor with auto-save |
 
 ## Lego Rules
 
@@ -20,6 +27,5 @@
 ## Design Tokens (Tailwind v4)
 
 - Background: `zinc-950` 페이지 / `zinc-900/60` 카드, `zinc-800` 보더.
-- 상태 점: emerald = running, amber = needs-login, sky = starting, rose = stopped, zinc = unavailable.
-- 배지: `color-500/15` 배경 + `color-300` 텍스트 + `color-500/30` 보더.
+- 상태 점: emerald = saved, amber = saving, sky = active.
 - Accent: `sky-400`.

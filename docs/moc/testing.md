@@ -9,16 +9,20 @@
 - **Vitest 5** — `npm test` / `pnpm test` (config: `vitest.config.ts`, environment `node`).
 - Tests are colocated with sources under `src/` (`*.spec.ts`).
 
-## Patterns
+## Test Suites
 
-아직 확립된 패턴 없음. 첫 use case 추가 시 아래 표에 패턴을 확정한다.
+| Suite | File | Focus |
+|---|---|---|
+| Vault Use Cases | `src/core/application/use-cases/vault.use-case.spec.ts` | Vault creation, listing by recency, cascading deletion, starter note creation |
+| File Node Use Cases | `src/core/application/use-cases/file-node.use-case.spec.ts` | .md extension normalization, renaming, recursive folder deletion, markdown content save & read |
+
+## Patterns
 
 | Concern | Pattern |
 |---|---|
-| Use case logic | Build a fake repository via object literal, assert mapped view model |
-| Pure mapping | Table-driven `it.each` over input → expected output |
-| Server-side normalization | Import the normalizer from its source and feed raw input |
-| Failure paths | Repository that `throw`s → expect fallback/`unavailable` shape |
+| In-Memory Repository | Pure Map-backed implementation of port interface (`InMemoryVaultRepository`, `InMemoryFileRepository`) |
+| Edge Case Validation | Table or isolated assertions on invalid input (empty vault name, non-existent file) |
+| Cascading Deletion | Verify recursive collection of descendant folder/file IDs |
 
 ## Coverage Standard (Rule 5)
 
