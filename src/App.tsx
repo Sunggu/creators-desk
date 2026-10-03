@@ -4,9 +4,9 @@ export default function App() {
       <div className="w-full max-w-sm space-y-6">
         <header className="text-center">
           <h1 className="text-2xl font-bold text-sky-400">Creators Desk</h1>
-          <p className="mt-2 text-sm text-zinc-400">작업 환경 상태 확인</p>
+          <p className="mt-2 text-sm text-zinc-400">구현된 기능 없음</p>
         </header>
       </div>
     </main>
-  );
+  )
 }

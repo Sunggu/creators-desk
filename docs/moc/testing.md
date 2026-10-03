@@ -1,14 +1,17 @@
-# Testing MOC
+# Testing Map of Content (MOC)
 
 > Mocking patterns, test setups, and coverage standards.
-> Target dirs: `src/**/*.spec.ts`.
+
+---
 
 ## Runner
 
-- **Vitest 5** — `pnpm test` (config: `vitest.config.ts`, environment `node`).
+- **Vitest 5** — `npm test` / `pnpm test` (config: `vitest.config.ts`, environment `node`).
 - Tests are colocated with sources under `src/` (`*.spec.ts`).
 
 ## Patterns
+
+아직 확립된 패턴 없음. 첫 use case 추가 시 아래 표에 패턴을 확정한다.
 
 | Concern | Pattern |
 |---|---|
@@ -19,6 +22,6 @@
 
 ## Coverage Standard (Rule 5)
 
+- 모든 use case·순수 함수·도메인 로직은 단위 테스트를 갖는다.
 - Every use case and domain mapping must ship with a colocated `*.spec.ts`.
-- Any new backend input → DTO normalization must be covered by a unit test.
-- CI gate: all tests pass before reporting completion.
+- 테스트는 `pnpm test` 또는 `npm test`로 실행되며, 완료 보고 전 전부 통과해야 한다.
