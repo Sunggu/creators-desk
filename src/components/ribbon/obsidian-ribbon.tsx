@@ -10,7 +10,7 @@ export default function ObsidianRibbon({
   onOpenVaultModal,
 }: ObsidianRibbonProps) {
   return (
-    <aside className="flex h-full w-11 shrink-0 flex-col items-center justify-between border-r border-[#26262e] bg-[#121215] py-2.5 text-zinc-400 select-none">
+    <aside className="hidden md:flex h-full w-11 shrink-0 flex-col items-center justify-between border-r border-[#26262e] bg-[#121215] py-2.5 text-zinc-400 select-none">
       {/* Top Icons */}
       <div className="flex flex-col items-center space-y-2">
         <button

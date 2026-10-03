@@ -10,32 +10,32 @@ export default function ObsidianStatusBar({
   isSaving,
 }: ObsidianStatusBarProps) {
   return (
-    <footer className="flex h-6 w-full items-center justify-between border-t border-[#26262e] bg-[#121215] px-3 text-[11px] text-zinc-500 select-none">
+    <footer className="flex h-6 w-full items-center justify-between border-t border-[#26262e] bg-[#121215] px-3 text-[11px] text-zinc-500 select-none overflow-hidden">
       {/* Left side */}
       <div className="flex items-center space-x-3">
-        <span>0개의 백링크</span>
+        <span className="hidden sm:inline">0개의 백링크</span>
       </div>
 
       {/* Right side */}
-      <div className="flex items-center space-x-4">
+      <div className="flex items-center space-x-3 sm:space-x-4">
         {isSaving ? (
           <span className="flex items-center space-x-1.5 text-amber-400">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span>저장 중...</span>
+            <span className="hidden xs:inline">저장 중...</span>
           </span>
         ) : (
           <span className="flex items-center space-x-1.5 text-zinc-500">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500/80" />
-            <span>저장됨</span>
+            <span className="hidden xs:inline">저장됨</span>
           </span>
         )}
 
         <span>{stats.words} 단어</span>
-        <span>{stats.chars} 자</span>
-        <span>
+        <span className="hidden sm:inline">{stats.chars} 자</span>
+        <span className="hidden md:inline">
           Ln {stats.cursorLine}, Col {stats.cursorCol}
         </span>
-        <span className="rounded bg-[#1e1e24] px-1.5 py-0.5 text-[10px] text-zinc-400 font-medium">
+        <span className="hidden sm:inline-block rounded bg-[#1e1e24] px-1.5 py-0.5 text-[10px] text-zinc-400 font-medium">
           Live Preview
         </span>
       </div>

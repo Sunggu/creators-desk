@@ -14,6 +14,7 @@ interface ObsidianSidebarProps {
   onRenameNode: (id: string, newName: string) => Promise<unknown>;
   onDeleteNode: (id: string) => Promise<unknown>;
   onRefresh: () => void;
+  onCloseMobile?: () => void;
 }
 
 export default function ObsidianSidebar({
@@ -27,6 +28,7 @@ export default function ObsidianSidebar({
   onRenameNode,
   onDeleteNode,
   onRefresh,
+  onCloseMobile,
 }: ObsidianSidebarProps) {
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
@@ -55,6 +57,11 @@ export default function ObsidianSidebar({
     }
   };
 
+  const handleFileSelect = (id: string) => {
+    onSelectFile(id);
+    onCloseMobile?.();
+  };
+
   const renderTree = (parentId: string | null, depth: number) => {
     const children = nodes.filter((n) => n.parentId === parentId);
     if (children.length === 0) return null;
@@ -69,7 +76,7 @@ export default function ObsidianSidebar({
             isActive={node.id === activeFileId}
             isExpanded={isExpanded}
             onToggleExpand={toggleFolder}
-            onSelect={onSelectFile}
+            onSelect={handleFileSelect}
             onRename={async (id, newName) => {
               await onRenameNode(id, newName);
             }}
@@ -86,22 +93,34 @@ export default function ObsidianSidebar({
   };
 
   return (
-    <aside className="flex h-full w-64 shrink-0 flex-col border-r border-[#26262e] bg-[#18181b] select-none text-zinc-300">
+    <aside className="flex h-full w-full md:w-64 shrink-0 flex-col border-r border-[#26262e] bg-[#18181b] select-none text-zinc-300">
       {/* Vault Title Bar (Obsidian style) */}
-      <div
-        onClick={onOpenVaultModal}
-        className="flex h-10 cursor-pointer items-center justify-between border-b border-[#24242a] px-3.5 hover:bg-[#202026] transition"
-        title="다른 Vault 열기 / 관리"
-      >
-        <div className="flex items-center space-x-2 overflow-hidden">
-          <span className="flex h-2 w-2 rounded-full bg-violet-400" />
+      <div className="flex h-10 items-center justify-between border-b border-[#24242a] px-3.5">
+        <div
+          onClick={onOpenVaultModal}
+          className="flex flex-1 cursor-pointer items-center space-x-2 overflow-hidden py-1 hover:text-white"
+          title="다른 Vault 열기 / 관리"
+        >
+          <span className="flex h-2 w-2 rounded-full bg-violet-400 shrink-0" />
           <span className="text-xs font-bold tracking-tight text-zinc-100 truncate">
             {vault.name}
           </span>
+          <svg className="h-3 w-3 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
         </div>
-        <svg className="h-3.5 w-3.5 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+
+        {onCloseMobile && (
+          <button
+            onClick={onCloseMobile}
+            className="md:hidden ml-2 rounded p-1 text-zinc-400 hover:text-zinc-100"
+            title="닫기"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Toolbar */}

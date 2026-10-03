@@ -8,12 +8,13 @@
 
 | Component | File | Props | Purpose |
 |---|---|---|---|
-| `ObsidianShell` | `src/components/layout/obsidian-shell.tsx` | `{ vault, vaults, onSelectVault, onCreateVault, onDeleteVault }` | Master Obsidian desktop-like 3-pane shell |
-| `ObsidianRibbon` | `src/components/ribbon/obsidian-ribbon.tsx` | `{ isSidebarOpen, onToggleSidebar, onOpenVaultModal }` | Narrow 44px icon action rail |
-| `ObsidianSidebar` | `src/components/sidebar/obsidian-sidebar.tsx` | `{ vault, nodes, activeFileId, onOpenVaultModal, ... }` | Vault dropdown & hierarchical file explorer |
+| `ObsidianShell` | `src/components/layout/obsidian-shell.tsx` | `{ vault, vaults, onSelectVault, onCreateVault, onDeleteVault }` | Master Obsidian responsive 3-pane & mobile drawer shell |
+| `ObsidianMobileHeader` | `src/components/mobile/obsidian-mobile-header.tsx` | `{ vault, activeFile, onOpenSidebar, onOpenVaultModal, onNewNote }` | Compact mobile top bar with hamburger, title & actions |
+| `ObsidianRibbon` | `src/components/ribbon/obsidian-ribbon.tsx` | `{ isSidebarOpen, onToggleSidebar, onOpenVaultModal }` | Desktop 44px icon action rail |
+| `ObsidianSidebar` | `src/components/sidebar/obsidian-sidebar.tsx` | `{ vault, nodes, activeFileId, onOpenVaultModal, ... }` | Vault dropdown & hierarchical file explorer (drawer on mobile) |
 | `FileTreeItem` | `src/components/sidebar/file-tree-item.tsx` | `{ node, depth, isActive, isExpanded, ... }` | Single file or folder row with inline rename/delete |
-| `ObsidianTabBar` | `src/components/tabs/obsidian-tab-bar.tsx` | `{ activeFile, onNewNote, onCloseNote }` | Active note tabs with close & add tab buttons |
-| `ObsidianEditor` | `src/components/editor/obsidian-editor.tsx` | `{ activeFile, onSavingChange, onStatsChange, onNewNote }` | CodeMirror 6 markdown editor with auto-save & stats |
+| `ObsidianTabBar` | `src/components/tabs/obsidian-tab-bar.tsx` | `{ activeFile, onNewNote, onCloseNote }` | Active note tabs with close & add tab buttons (desktop) |
+| `ObsidianEditor` | `src/components/editor/obsidian-editor.tsx` | `{ activeFile, onSavingChange, onStatsChange, onNewNote }` | CodeMirror 6 markdown editor with auto-save & responsive padding |
 | `ObsidianStatusBar` | `src/components/statusbar/obsidian-status-bar.tsx` | `{ stats, isSaving }` | Bottom bar: words, chars, cursor Ln/Col, save state |
 | `ObsidianVaultModal` | `src/components/vault/obsidian-vault-modal.tsx` | `{ isOpen, activeVaultId, vaults, onClose, ... }` | Obsidian-style modal for switching and managing vaults |
 

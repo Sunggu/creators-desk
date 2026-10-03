@@ -20,12 +20,20 @@ const obsidianTheme = EditorView.theme(
     '.cm-content': {
       fontFamily:
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Apple Color Emoji", sans-serif',
-      padding: '32px 48px 120px 48px',
+      padding: '20px 16px 120px 16px',
       lineHeight: '1.75',
       caretColor: '#a78bfa',
       maxWidth: '820px',
       marginLeft: 'auto',
       marginRight: 'auto',
+    },
+    '@media (min-width: 768px)': {
+      '.cm-content': {
+        padding: '32px 48px 120px 48px',
+      },
+      '.cm-gutters': {
+        minWidth: '40px',
+      },
     },
     '&.cm-focused .cm-cursor': {
       borderLeftColor: '#a78bfa',

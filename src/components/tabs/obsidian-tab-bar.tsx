@@ -14,7 +14,7 @@ export default function ObsidianTabBar({
   const cleanTitle = activeFile ? activeFile.name.replace(/\.md$/i, '') : '';
 
   return (
-    <div className="flex h-9 w-full items-center justify-between border-b border-[#26262e] bg-[#141417] px-2 select-none">
+    <div className="hidden md:flex h-9 w-full items-center justify-between border-b border-[#26262e] bg-[#141417] px-2 select-none">
       <div className="flex items-center space-x-1 overflow-x-auto">
         {activeFile ? (
           <div className="group relative flex h-7 items-center space-x-2 rounded-t-md border-t-2 border-violet-500 bg-[#1e1e22] px-3 text-xs font-medium text-zinc-100 shadow-xs">
