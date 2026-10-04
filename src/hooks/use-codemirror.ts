@@ -2,7 +2,7 @@ import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { markdown } from '@codemirror/lang-markdown';
 import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
-import { EditorView, keymap, lineNumbers } from '@codemirror/view';
+import { EditorView, keymap } from '@codemirror/view';
 import { useEffect, useRef } from 'react';
 
 const obsidianTheme = EditorView.theme(
@@ -20,20 +20,10 @@ const obsidianTheme = EditorView.theme(
     '.cm-content': {
       fontFamily:
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, "Apple Color Emoji", sans-serif',
-      padding: '20px 16px 120px 16px',
+      padding: '16px 0 120px 0',
       lineHeight: '1.75',
       caretColor: '#a78bfa',
-      maxWidth: '820px',
-      marginLeft: 'auto',
-      marginRight: 'auto',
-    },
-    '@media (min-width: 768px)': {
-      '.cm-content': {
-        padding: '32px 48px 120px 48px',
-      },
-      '.cm-gutters': {
-        minWidth: '40px',
-      },
+      maxWidth: '100%',
     },
     '&.cm-focused .cm-cursor': {
       borderLeftColor: '#a78bfa',
@@ -41,16 +31,6 @@ const obsidianTheme = EditorView.theme(
     },
     '&.cm-focused .cm-selectionBackground, ::selection': {
       backgroundColor: 'rgba(124, 58, 237, 0.32) !important',
-    },
-    '.cm-gutters': {
-      backgroundColor: '#1e1e22',
-      color: '#52525e',
-      borderRight: '1px solid #282830',
-      minWidth: '40px',
-    },
-    '.cm-activeLineGutter': {
-      backgroundColor: '#26262e',
-      color: '#a1a1aa',
     },
     '.cm-activeLine': {
       backgroundColor: 'rgba(255, 255, 255, 0.025)',
@@ -105,7 +85,6 @@ export function useCodeMirror(
     const startState = EditorState.create({
       doc: options.initialContent,
       extensions: [
-        lineNumbers(),
         history(),
         syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
         markdown(),

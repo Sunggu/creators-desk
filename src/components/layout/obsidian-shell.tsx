@@ -48,18 +48,12 @@ export default function ObsidianShell({
     setIsMobileSidebarOpen(false);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartXRef.current = e.touches[0].clientX;
-  };
-
+  const handleTouchStart = (e: React.TouchEvent) => { touchStartXRef.current = e.touches[0].clientX; };
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (touchStartXRef.current === null) return;
     const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
-    if (touchStartXRef.current < 45 && deltaX > 50) {
-      setIsMobileSidebarOpen(true);
-    } else if (isMobileSidebarOpen && deltaX < -50) {
-      setIsMobileSidebarOpen(false);
-    }
+    if (touchStartXRef.current < 45 && deltaX > 50) setIsMobileSidebarOpen(true);
+    else if (isMobileSidebarOpen && deltaX < -50) setIsMobileSidebarOpen(false);
     touchStartXRef.current = null;
   };
 
@@ -94,9 +88,11 @@ export default function ObsidianShell({
           <div className="hidden md:flex h-full shrink-0">
             <ObsidianSidebar
               vault={vault}
+              vaults={vaults}
               nodes={workspace.nodes}
               activeFileId={workspace.activeFileId}
               onOpenVaultModal={() => setIsVaultModalOpen(true)}
+              onSelectVault={onSelectVault}
               onSelectFile={workspace.selectFile}
               onCreateFile={workspace.createFile}
               onCreateFolder={workspace.createFolder}
@@ -121,11 +117,16 @@ export default function ObsidianShell({
         >
           <ObsidianSidebar
             vault={vault}
+            vaults={vaults}
             nodes={workspace.nodes}
             activeFileId={workspace.activeFileId}
             onOpenVaultModal={() => {
               setIsMobileSidebarOpen(false);
               setIsVaultModalOpen(true);
+            }}
+            onSelectVault={(id) => {
+              onSelectVault(id);
+              setIsMobileSidebarOpen(false);
             }}
             onSelectFile={(id) => {
               workspace.selectFile(id);

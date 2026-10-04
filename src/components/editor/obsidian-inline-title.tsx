@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { sanitizeFileName } from '../../utils/name-generator';
+import { INVALID_FILE_NAME_CHARS_REGEX, sanitizeFileName } from '../../utils/name-generator';
 
 interface ObsidianInlineTitleProps {
   title: string;
@@ -38,6 +38,12 @@ export default function ObsidianInlineTitle({
     onRename?.(sanitized);
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // 파일명으로 사용할 수 없는 문자(Regex: \ / : * ? " < > | 및 제어문자)를 필터링
+    const clean = e.target.value.replace(INVALID_FILE_NAME_CHARS_REGEX, '');
+    setVal(clean);
+  };
+
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -51,17 +57,18 @@ export default function ObsidianInlineTitle({
   };
 
   return (
-    <div className="max-w-[840px] mx-auto pt-8 px-4 md:px-12 select-text">
+    <div className="w-full select-text">
       <input
         ref={inputRef}
         type="text"
         value={val}
-        onChange={(e) => setVal(e.target.value)}
+        onChange={handleChange}
         onBlur={commit}
         onKeyDown={handleKeyDown}
         placeholder="제목 없는 노트"
         aria-label="Note title"
-        className="w-full bg-transparent text-3xl md:text-4xl font-extrabold text-white tracking-tight outline-none border-none placeholder:text-zinc-600 transition-opacity pb-2"
+        title="파일명에 \ / : * ? &quot; < > | 문자는 사용할 수 없습니다"
+        className="w-full bg-transparent text-3xl md:text-4xl font-extrabold text-white tracking-tight outline-none border-none placeholder:text-zinc-600 transition-opacity pb-1"
       />
     </div>
   );

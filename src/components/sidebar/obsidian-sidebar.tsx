@@ -2,12 +2,15 @@ import { useState } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import type { VaultDto } from '../../core/domain/vault.dto';
 import FileTreeItem from './file-tree-item';
+import VaultDropdown from './vault-dropdown';
 
 interface ObsidianSidebarProps {
   vault: VaultDto;
+  vaults: VaultDto[];
   nodes: FileNodeDto[];
   activeFileId: string | null;
   onOpenVaultModal: () => void;
+  onSelectVault: (vaultId: string) => void;
   onSelectFile: (fileId: string) => void;
   onCreateFile: (name?: string, parentId?: string | null) => Promise<unknown>;
   onCreateFolder: (name?: string, parentId?: string | null) => Promise<unknown>;
@@ -19,9 +22,11 @@ interface ObsidianSidebarProps {
 
 export default function ObsidianSidebar({
   vault,
+  vaults,
   nodes,
   activeFileId,
   onOpenVaultModal,
+  onSelectVault,
   onSelectFile,
   onCreateFile,
   onCreateFolder,
@@ -89,38 +94,9 @@ export default function ObsidianSidebar({
 
   return (
     <aside className="flex h-full w-full md:w-64 shrink-0 flex-col border-r border-[#26262e] bg-[#18181b] select-none text-zinc-300">
-      {/* Vault Title Bar (Obsidian style) */}
+      {/* 1. Top Toolbar (Explorer title + action buttons + mobile close) */}
       <div className="flex h-11 items-center justify-between border-b border-[#24242a] px-3.5">
-        <div
-          onClick={onOpenVaultModal}
-          className="flex flex-1 cursor-pointer items-center space-x-2 overflow-hidden py-1 hover:text-white"
-          title="다른 Vault 열기 / 관리"
-        >
-          <span className="flex h-2 w-2 rounded-full bg-violet-400 shrink-0" />
-          <span className="text-xs font-bold tracking-tight text-zinc-100 truncate">
-            {vault.name}
-          </span>
-          <svg className="h-3 w-3 text-zinc-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </div>
-
-        {onCloseMobile && (
-          <button
-            onClick={onCloseMobile}
-            className="md:hidden ml-2 rounded p-1 text-zinc-400 hover:text-zinc-100"
-            title="닫기"
-          >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        )}
-      </div>
-
-      {/* Toolbar */}
-      <div className="flex items-center justify-between px-3 py-2 text-zinc-400 border-b border-[#202026]">
-        <span className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
+        <span className="text-[11px] font-bold tracking-wider text-zinc-400 uppercase">
           탐색기
         </span>
         <div className="flex items-center space-x-1.5">
@@ -151,10 +127,21 @@ export default function ObsidianSidebar({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
           </button>
+          {onCloseMobile && (
+            <button
+              onClick={onCloseMobile}
+              className="md:hidden ml-1 rounded p-1 text-zinc-400 hover:text-zinc-100"
+              title="닫기"
+            >
+              <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Tree items */}
+      {/* 2. Middle: File Tree items */}
       <div className="flex-1 overflow-y-auto py-1">
         {nodes.length === 0 ? (
           <div className="p-4 text-center text-xs text-zinc-500">
@@ -170,6 +157,14 @@ export default function ObsidianSidebar({
           renderTree(null, 0)
         )}
       </div>
+
+      {/* 3. Bottom: Vault Selector Dropdown */}
+      <VaultDropdown
+        activeVault={vault}
+        vaults={vaults}
+        onSelectVault={onSelectVault}
+        onOpenVaultModal={onOpenVaultModal}
+      />
     </aside>
   );
 }

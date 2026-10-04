@@ -54,11 +54,14 @@ export default function ObsidianMarkdownPreview({
       className="h-full w-full overflow-y-auto bg-[#1e1e22] text-[#dcddde] select-text cursor-text"
       title="더블클릭하여 편집 모드로 전환"
     >
-      <div className="max-w-[840px] mx-auto px-4 md:px-12 pt-8 pb-32">
+      <div className="w-full max-w-[840px] mx-auto px-4 md:px-12 pt-6 pb-32">
         {/* Document Title Header */}
-        <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight pb-6 mb-8 border-b border-[#282830]/80">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight pb-1">
           {cleanTitle}
         </h1>
+
+        {/* Subtle Divider */}
+        <div className="mt-2 mb-4 border-b border-[#282830]/80" />
 
         {/* Rendered HTML Markdown Body */}
         <article

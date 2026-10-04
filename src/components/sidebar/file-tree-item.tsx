@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
+import { INVALID_FILE_NAME_CHARS_REGEX, sanitizeFileName } from '../../utils/name-generator';
 
 interface FileTreeItemProps {
   node: FileNodeDto;
@@ -26,10 +27,11 @@ export default function FileTreeItem({
   onCreateChildFile,
   onCreateChildFolder,
 }: FileTreeItemProps) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editName, setEditName] = useState(node.name);
-
   const isFolder = node.type === 'folder';
+  const cleanName = isFolder ? node.name : node.name.replace(/\.md$/i, '');
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(cleanName);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -41,12 +43,16 @@ export default function FileTreeItem({
   };
 
   const handleRenameSubmit = async () => {
-    if (!editName.trim()) {
-      setEditName(node.name);
+    const sanitized = sanitizeFileName(editName);
+    if (!sanitized) {
+      setEditName(cleanName);
       setIsEditing(false);
       return;
     }
-    await onRename(node.id, editName.trim());
+    const finalName = isFolder
+      ? sanitized
+      : (sanitized.toLowerCase().endsWith('.md') ? sanitized : `${sanitized}.md`);
+    await onRename(node.id, finalName);
     setIsEditing(false);
   };
 
@@ -88,19 +94,19 @@ export default function FileTreeItem({
             autoFocus
             value={editName}
             onClick={(e) => e.stopPropagation()}
-            onChange={(e) => setEditName(e.target.value)}
+            onChange={(e) => setEditName(e.target.value.replace(INVALID_FILE_NAME_CHARS_REGEX, ''))}
             onBlur={handleRenameSubmit}
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleRenameSubmit();
               if (e.key === 'Escape') {
-                setEditName(node.name);
+                setEditName(cleanName);
                 setIsEditing(false);
               }
             }}
             className="w-full rounded bg-zinc-800 px-1 py-0.5 text-xs text-zinc-100 outline-hidden ring-1 ring-sky-500"
           />
         ) : (
-          <span className="truncate">{node.name}</span>
+          <span className="truncate">{cleanName}</span>
         )}
       </div>
 
@@ -138,6 +144,7 @@ export default function FileTreeItem({
         <button
           onClick={(e) => {
             e.stopPropagation();
+            setEditName(cleanName);
             setIsEditing(true);
           }}
           title="이름 바꾸기"
@@ -151,7 +158,7 @@ export default function FileTreeItem({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            if (confirm(`'${node.name}'을(를) 삭제하시겠습니까?`)) {
+            if (confirm(`'${cleanName}'을(를) 삭제하시겠습니까?`)) {
               onDelete(node.id);
             }
           }}

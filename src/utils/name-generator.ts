@@ -1,5 +1,29 @@
+/**
+ * 파일/폴더명으로 사용할 수 없는 금지 문자 정규식
+ * - Windows/Linux/macOS 파일시스템 금지 특수문자: \ / : * ? " < > |
+ * - 제어 문자: ASCII 0x00 ~ 0x1F, 0x7F
+ */
+export const INVALID_FILE_NAME_CHARS_REGEX = /[\\/:*?"<>|\x00-\x1f\x7f]/g;
+
+/**
+ * 파일/폴더명 유효성 검사용 정규식
+ */
+export const INVALID_FILE_NAME_REGEX = /[\\/:*?"<>|\x00-\x1f\x7f]/;
+
+/**
+ * 파일명이 올바른지 검증하는 함수
+ */
+export function isValidFileName(name: string): boolean {
+  const trimmed = name.trim();
+  if (!trimmed) return false;
+  return !INVALID_FILE_NAME_REGEX.test(trimmed);
+}
+
+/**
+ * 파일명에서 금지된 문자를 제거하고 정제하는 함수
+ */
 export function sanitizeFileName(name: string): string {
-  return name.replace(/[\\/:*?"<>|]/g, '').trim();
+  return name.replace(INVALID_FILE_NAME_CHARS_REGEX, '').trim();
 }
 
 export function getUniqueFileName(
