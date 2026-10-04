@@ -1,13 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { FileNodeDto } from '../core/domain/file-node.dto';
-import {
-  manageFileNodeUseCase,
-  manageSessionUseCase,
-} from '../infrastructure/di';
-import {
-  getUniqueFileName,
-  getUniqueFolderName,
-} from '../utils/name-generator';
+import { manageFileNodeUseCase, manageSessionUseCase } from '../infrastructure/di';
+import { getUniqueFileName, getUniqueFolderName } from '../utils/name-generator';
+import { STARTER_CONTENT } from '../utils/starter-template';
 
 export function useActiveWorkspace(activeVaultId: string | null) {
   const [nodes, setNodes] = useState<FileNodeDto[]>([]);
@@ -44,7 +39,7 @@ export function useActiveWorkspace(activeVaultId: string | null) {
             parentId: null,
             name: 'Welcome.md',
             type: 'file',
-            content: `Creators Desk는 방해 없는 글쓰기와 생각의 연결을 위한 미니멀 마크다운 에디터입니다.\n\n## 주요 기능\n- **Live Preview & 읽기 뷰**: 마크다운 기호 없이 깔끔하게 렌더링된 문서를 바로 열람할 수 있습니다.\n- **[[지식 연결]] & #태그**: 노트 간의 유기적인 백링크와 태그를 지원합니다.\n- **몰입형 에디터**: 불필요한 줄 번호나 구분선 없이 생각의 흐름에만 집중할 수 있습니다.\n- **자동 동기화**: 작성 즉시 클라우드 및 로컬 환경에 실시간 저장됩니다.\n\n왼쪽 상단의 메뉴(☰)를 눌러 새 노트를 만들거나 폴더를 구성해보세요.\n`,
+            content: STARTER_CONTENT,
           });
           currentList = [starter];
           setNodes(currentList);
@@ -145,26 +140,26 @@ export function useActiveWorkspace(activeVaultId: string | null) {
     [refreshNodes],
   );
 
-  const deleteNode = useCallback(
-    async (id: string) => {
+  const deleteNode = useCallback(async (id: string) => {
+    await manageFileNodeUseCase.delete(id);
+    closeFile(id);
+    setNewlyCreatedFileId((prev) => (prev === id ? null : prev));
+    await refreshNodes();
+  }, [closeFile, refreshNodes]);
+
+  const deleteNodes = useCallback(async (ids: string[]) => {
+    for (const id of ids) {
       await manageFileNodeUseCase.delete(id);
       closeFile(id);
-      setNewlyCreatedFileId((prev) => (prev === id ? null : prev));
-      await refreshNodes();
-    },
-    [closeFile, refreshNodes],
-  );
+    }
+    await refreshNodes();
+  }, [closeFile, refreshNodes]);
 
-  const deleteNodes = useCallback(
-    async (ids: string[]) => {
-      for (const id of ids) {
-        await manageFileNodeUseCase.delete(id);
-        closeFile(id);
-      }
-      await refreshNodes();
-    },
-    [closeFile, refreshNodes],
-  );
+  const moveNode = useCallback(async (id: string, newParentId: string | null) => {
+    const updated = await manageFileNodeUseCase.move(id, newParentId);
+    await refreshNodes();
+    return updated;
+  }, [refreshNodes]);
 
   const openFiles = openFileIds
     .map((id) => nodes.find((n) => n.id === id && n.type === 'file'))
@@ -184,6 +179,7 @@ export function useActiveWorkspace(activeVaultId: string | null) {
     createFile,
     createFolder,
     renameNode,
+    moveNode,
     deleteNode,
     deleteNodes,
     selectFile,

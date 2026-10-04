@@ -19,20 +19,15 @@ export class ManageFileNodeUseCase {
       ? `${trimmed}.md`
       : trimmed;
 
-    const now = Date.now();
-    const id = typeof crypto !== 'undefined' && crypto.randomUUID
-      ? crypto.randomUUID()
-      : `node-${now}-${Math.random().toString(36).substring(2, 9)}`;
-
     const node: FileNodeDto = {
-      id,
+      id: crypto.randomUUID(),
       vaultId: dto.vaultId,
       parentId: dto.parentId ?? null,
       name: finalName,
       type: dto.type,
-      content: dto.type === 'file' ? (dto.content ?? '') : undefined,
-      createdAt: now,
-      updatedAt: now,
+      content: dto.content ?? '',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     };
 
     return this.fileRepo.create(node);
@@ -59,6 +54,26 @@ export class ManageFileNodeUseCase {
     });
   }
 
+  async move(id: string, newParentId: string | null): Promise<FileNodeDto> {
+    const target = await this.fileRepo.findById(id);
+    if (!target) throw new Error('File not found');
+    if (target.parentId === newParentId) return target;
+    if (newParentId === id) throw new Error('Cannot move a node into itself');
+
+    if (target.type === 'folder' && newParentId) {
+      const allNodes = await this.fileRepo.findByVaultId(target.vaultId);
+      const descendants = this.collectDescendantIds(id, allNodes);
+      if (descendants.includes(newParentId)) {
+        throw new Error('Cannot move a folder into its own descendant');
+      }
+    }
+
+    return this.fileRepo.update(id, {
+      parentId: newParentId,
+      updatedAt: Date.now(),
+    });
+  }
+
   async delete(id: string): Promise<void> {
     const target = await this.fileRepo.findById(id);
     if (!target) return;
@@ -79,7 +94,6 @@ export class ManageFileNodeUseCase {
   async listByVault(vaultId: string): Promise<FileNodeDto[]> {
     const nodes = await this.fileRepo.findByVaultId(vaultId);
     return [...nodes].sort((a, b) => {
-      // Folders first, then alphabetical
       if (a.type !== b.type) {
         return a.type === 'folder' ? -1 : 1;
       }

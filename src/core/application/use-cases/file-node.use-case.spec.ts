@@ -130,4 +130,31 @@ describe('File Node Use Cases', () => {
     await contentUseCase.saveContent(file.id, '# Updated Content');
     expect(await contentUseCase.getContent(file.id)).toBe('# Updated Content');
   });
+
+  it('moves files and folders and prevents circular moves', async () => {
+    const fileRepo = new InMemoryFileRepository();
+    const useCase = new ManageFileNodeUseCase(fileRepo);
+
+    const folderA = await useCase.createFile({ vaultId: 'v1', parentId: null, name: 'FolderA', type: 'folder' });
+    const folderB = await useCase.createFile({ vaultId: 'v1', parentId: null, name: 'FolderB', type: 'folder' });
+    const note = await useCase.createFile({ vaultId: 'v1', parentId: null, name: 'Note.md', type: 'file' });
+
+    // Move note into FolderA
+    const movedNote = await useCase.move(note.id, folderA.id);
+    expect(movedNote.parentId).toBe(folderA.id);
+
+    // Move FolderB into FolderA
+    const movedFolderB = await useCase.move(folderB.id, folderA.id);
+    expect(movedFolderB.parentId).toBe(folderA.id);
+
+    // Cannot move FolderA into FolderB (descendant circular reference)
+    await expect(useCase.move(folderA.id, folderB.id)).rejects.toThrow('Cannot move a folder into its own descendant');
+
+    // Cannot move into itself
+    await expect(useCase.move(folderA.id, folderA.id)).rejects.toThrow('Cannot move a node into itself');
+
+    // Move back to root
+    const rootNote = await useCase.move(note.id, null);
+    expect(rootNote.parentId).toBeNull();
+  });
 });

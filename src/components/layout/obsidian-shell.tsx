@@ -99,6 +99,7 @@ export default function ObsidianShell({
               onRenameNode={workspace.renameNode}
               onDeleteNode={workspace.deleteNode}
               onDeleteNodes={workspace.deleteNodes}
+              onMoveNode={workspace.moveNode}
               onRefresh={workspace.refreshNodes}
             />
           </div>
@@ -133,6 +134,7 @@ export default function ObsidianShell({
             onRenameNode={workspace.renameNode}
             onDeleteNode={workspace.deleteNode}
             onDeleteNodes={workspace.deleteNodes}
+            onMoveNode={workspace.moveNode}
             onRefresh={workspace.refreshNodes}
             onCloseMobile={() => setIsMobileSidebarOpen(false)}
           />

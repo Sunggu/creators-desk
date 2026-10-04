@@ -57,9 +57,7 @@ export default function ObsidianEditor({
     }
 
     load();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [activeFile?.id]);
 
   const handleDocChange = async (newDoc: string) => {
@@ -77,21 +75,31 @@ export default function ObsidianEditor({
   if (!activeFile) {
     return (
       <div className="flex h-full flex-1 flex-col items-center justify-center bg-[#1e1e22] text-zinc-500 select-none px-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#26262e] text-zinc-600 mb-4">
-          <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.25} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#26262e] text-violet-400 mb-4 shadow-inner">
+          <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
-        <p className="text-sm font-medium text-zinc-300">열려있는 노트가 없습니다</p>
-        <p className="mt-1 text-xs text-zinc-500 text-center">
-          왼쪽 탐색기 메뉴(☰)에서 노트를 선택하거나 새로 만드세요.
+        <p className="text-sm font-semibold text-zinc-200">열려있는 노트가 없습니다</p>
+        <p className="mt-1 text-xs text-zinc-500 text-center max-w-sm">
+          탐색기에서 노트를 클릭하여 열거나 드래그 앤 드롭으로 파일을 이동할 수 있습니다.
         </p>
-        <button
-          onClick={onNewNote}
-          className="mt-4 rounded-md bg-violet-600 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-500 active:bg-violet-700 transition"
-        >
-          + 새 노트 만들기
-        </button>
+
+        <div className="mt-4 flex items-center space-x-2">
+          <button
+            onClick={onNewNote}
+            className="rounded-md bg-violet-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-violet-500 active:bg-violet-700 transition cursor-pointer"
+          >
+            + 새 노트 만들기
+          </button>
+        </div>
+
+        <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-2 text-[11px] text-zinc-500 border-t border-[#26262e] pt-4">
+          <div><span className="text-zinc-400">드래그 앤 드롭</span>: 파일/폴더 이동</div>
+          <div><span className="text-zinc-400">Shift + 클릭</span>: 연속 범위 다중 선택</div>
+          <div><span className="text-zinc-400">Ctrl/Cmd + 클릭</span>: 개별 추가 다중 선택</div>
+          <div><span className="text-zinc-400">우클릭</span>: 컨텍스트 메뉴</div>
+        </div>
       </div>
     );
   }
