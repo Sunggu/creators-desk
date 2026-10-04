@@ -2,13 +2,15 @@ import { useRef, useState } from 'react';
 import type { VaultDto } from '../../core/domain/vault.dto';
 import { useActiveWorkspace } from '../../hooks/use-active-workspace';
 import type { EditorStats } from '../../hooks/use-codemirror';
-import ObsidianEditor from '../editor/obsidian-editor';
+import { usePanelLayout } from '../../hooks/use-panel-layout';
 import ObsidianMobileHeader from '../mobile/obsidian-mobile-header';
 import ObsidianRibbon from '../ribbon/obsidian-ribbon';
+import SettingsModal from '../settings/settings-modal';
 import ObsidianSidebar from '../sidebar/obsidian-sidebar';
 import ObsidianStatusBar from '../statusbar/obsidian-status-bar';
-import ObsidianTabBar from '../tabs/obsidian-tab-bar';
 import ObsidianVaultModal from '../vault/obsidian-vault-modal';
+import PanelContentRenderer from './panel-content-renderer';
+import WorkspacePanelContainer from './workspace-panel-container';
 
 interface ObsidianShellProps {
   vault: VaultDto;
@@ -25,9 +27,9 @@ export default function ObsidianShell({
   onCreateVault,
   onDeleteVault,
 }: ObsidianShellProps) {
-  const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isVaultModalOpen, setIsVaultModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
   const [isSaving, setIsSaving] = useState(false);
   const [stats, setStats] = useState<EditorStats>({
@@ -39,6 +41,7 @@ export default function ObsidianShell({
 
   const touchStartXRef = useRef<number | null>(null);
   const workspace = useActiveWorkspace(vault.id);
+  const layout = usePanelLayout();
 
   const toggleViewMode = () => setViewMode((m) => (m === 'edit' ? 'preview' : 'edit'));
 
@@ -63,7 +66,6 @@ export default function ObsidianShell({
       onTouchEnd={handleTouchEnd}
       className="flex h-screen h-[100dvh] w-screen flex-col overflow-hidden bg-[#1e1e22] text-[#dcddde] font-sans antialiased"
     >
-      {/* Mobile Top Header (Hidden on Desktop) */}
       <ObsidianMobileHeader
         vault={vault}
         activeFile={workspace.activeFile}
@@ -74,38 +76,61 @@ export default function ObsidianShell({
         onNewNote={handleCreateNewNote}
       />
 
-      {/* Main Workspace Area */}
       <div className="flex flex-1 overflow-hidden relative">
-        {/* Desktop Left Ribbon */}
         <ObsidianRibbon
-          isSidebarOpen={isDesktopSidebarOpen}
-          onToggleSidebar={() => setIsDesktopSidebarOpen((prev) => !prev)}
+          isSidebarOpen={layout.isExplorerOpen}
+          isSplitPreviewOpen={layout.isSplitPreviewOpen}
+          onToggleSidebar={layout.toggleExplorer}
+          onToggleSplitPreview={() => layout.toggleSplitPreview(workspace.activeFileId)}
           onOpenVaultModal={() => setIsVaultModalOpen(true)}
+          onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
         />
 
-        {/* Desktop File Explorer Sidebar */}
-        {isDesktopSidebarOpen && (
-          <div className="hidden md:flex h-full shrink-0">
-            <ObsidianSidebar
-              vault={vault}
-              vaults={vaults}
-              nodes={workspace.nodes}
-              activeFileId={workspace.activeFileId}
-              onOpenVaultModal={() => setIsVaultModalOpen(true)}
-              onSelectVault={onSelectVault}
-              onSelectFile={workspace.selectFile}
-              onCreateFile={workspace.createFile}
-              onCreateFolder={workspace.createFolder}
-              onRenameNode={workspace.renameNode}
-              onDeleteNode={workspace.deleteNode}
-              onDeleteNodes={workspace.deleteNodes}
-              onMoveNode={workspace.moveNode}
-              onRefresh={workspace.refreshNodes}
-            />
-          </div>
-        )}
+        {/* Flexible Desktop Workspace Panels */}
+        <div className="hidden md:flex flex-1 h-full overflow-hidden">
+          <WorkspacePanelContainer
+            panels={layout.panels}
+            onMovePanel={layout.movePanel}
+            onClosePanel={layout.closePanel}
+            onToggleSplitPreview={() => layout.toggleSplitPreview(workspace.activeFileId)}
+            renderPanelContent={(panel) => (
+              <PanelContentRenderer
+                panel={panel}
+                vault={vault}
+                vaults={vaults}
+                workspace={workspace}
+                viewMode={viewMode}
+                onToggleViewMode={toggleViewMode}
+                onSwitchToEdit={() => setViewMode('edit')}
+                onNewNote={handleCreateNewNote}
+                onOpenVaultModal={() => setIsVaultModalOpen(true)}
+                onSelectVault={onSelectVault}
+                onSavingChange={setIsSaving}
+                onStatsChange={setStats}
+              />
+            )}
+          />
+        </div>
 
-        {/* Mobile Sidebar Off-canvas Drawer with Backdrop */}
+        {/* Mobile Fullscreen Main Area */}
+        <div className="flex md:hidden flex-1 h-full overflow-hidden">
+          <PanelContentRenderer
+            panel={{ id: 'mobile-editor', type: 'editor', slot: 'center', title: '에디터' }}
+            vault={vault}
+            vaults={vaults}
+            workspace={workspace}
+            viewMode={viewMode}
+            onToggleViewMode={toggleViewMode}
+            onSwitchToEdit={() => setViewMode('edit')}
+            onNewNote={handleCreateNewNote}
+            onOpenVaultModal={() => setIsVaultModalOpen(true)}
+            onSelectVault={onSelectVault}
+            onSavingChange={setIsSaving}
+            onStatsChange={setStats}
+          />
+        </div>
+
+        {/* Mobile Sidebar Off-canvas Drawer */}
         <div
           onClick={() => setIsMobileSidebarOpen(false)}
           className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity duration-200 md:hidden ${
@@ -125,8 +150,8 @@ export default function ObsidianShell({
             onOpenVaultModal={() => { setIsMobileSidebarOpen(false); setIsVaultModalOpen(true); }}
             onSelectVault={(id) => { onSelectVault(id); setIsMobileSidebarOpen(false); }}
             onSelectFile={(id) => { workspace.selectFile(id); setIsMobileSidebarOpen(false); }}
-            onCreateFile={async (name, parentId) => {
-              const created = await workspace.createFile(name, parentId);
+            onCreateFile={async (name, pid) => {
+              const created = await workspace.createFile(name, pid);
               setIsMobileSidebarOpen(false);
               return created;
             }}
@@ -139,39 +164,10 @@ export default function ObsidianShell({
             onCloseMobile={() => setIsMobileSidebarOpen(false)}
           />
         </div>
-
-        {/* Main Editor Pane with Tab Bar */}
-        <main className="flex flex-1 flex-col overflow-hidden bg-[#1e1e22] w-full">
-          {/* Desktop Multi-tab Bar */}
-          <ObsidianTabBar
-            openFiles={workspace.openFiles}
-            activeFileId={workspace.activeFileId}
-            viewMode={viewMode}
-            onToggleViewMode={toggleViewMode}
-            onSelectTab={workspace.selectFile}
-            onCloseTab={workspace.closeFile}
-            onNewNote={handleCreateNewNote}
-          />
-
-          <div className="flex-1 overflow-hidden">
-            <ObsidianEditor
-              activeFile={workspace.activeFile}
-              viewMode={viewMode}
-              onSwitchToEdit={() => setViewMode('edit')}
-              onSavingChange={setIsSaving}
-              onStatsChange={setStats}
-              onNewNote={handleCreateNewNote}
-              onRenameFile={workspace.renameNode}
-              autoFocusTitle={workspace.isNewFile}
-            />
-          </div>
-        </main>
       </div>
 
-      {/* Bottom Status Bar */}
       <ObsidianStatusBar stats={stats} isSaving={isSaving} />
 
-      {/* Vault Switcher Modal */}
       <ObsidianVaultModal
         isOpen={isVaultModalOpen}
         activeVaultId={vault.id}
@@ -180,6 +176,12 @@ export default function ObsidianShell({
         onSelectVault={onSelectVault}
         onCreateVault={onCreateVault}
         onDeleteVault={onDeleteVault}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        activeVault={vault}
+        onClose={() => setIsSettingsModalOpen(false)}
       />
     </div>
   );

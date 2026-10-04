@@ -21,8 +21,12 @@
 | `ObsidianMarkdownView` | `src/components/editor/obsidian-markdown-view.tsx` | `{ fileId, fileName, initialContent, onDocChange, onStatsChange, ... }` | Distraction-free live editor centered with max-w-[840px] and consistent padding metrics |
 | `ObsidianMarkdownPreview` | `src/components/editor/obsidian-markdown-preview.tsx` | `{ title, content, onSwitchToEdit, onNavigateWikilink }` | Reading View aligned with editor metrics (max-w-[840px] centered) |
 | `ObsidianInlineTitle` | `src/components/editor/obsidian-inline-title.tsx` | `{ title, onRename, onEnter, autoFocus }` | Organic borderless document title heading synchronized with note file name |
-| `ObsidianStatusBar` | `src/components/statusbar/obsidian-status-bar.tsx` | `{ stats, isSaving }` | Bottom bar: words, chars, cursor Ln/Col, save state |
 | `ObsidianVaultModal` | `src/components/vault/obsidian-vault-modal.tsx` | `{ isOpen, activeVaultId, vaults, onClose, ... }` | Obsidian-style modal for switching and managing vaults |
+| `WorkspacePanelContainer` | `src/components/layout/workspace-panel-container.tsx` | `{ panels, onMovePanel, onClosePanel, onToggleSplitPreview, ... }` | Flexible 3-slot (left, center, right) split-window layout engine |
+| `PanelWindowHeader` | `src/components/layout/panel-window-header.tsx` | `{ panel, onMoveLeft, onMoveRight, onToggleSplit, onClose }` | Window pane header with dynamic slot repositioning, split view & close actions |
+| `PanelContentRenderer` | `src/components/layout/panel-content-renderer.tsx` | `{ panel, vault, vaults, workspace, ... }` | Content resolver delegating to explorer, editor, or preview based on panel type |
+| `SettingsModal` | `src/components/settings/settings-modal.tsx` | `{ isOpen, activeVault, onClose, onRenameVault }` | Project settings, editor preferences, and commercial MIT open-source license modal |
+| `OpenSourceLicensesView` | `src/components/settings/open-source-licenses-view.tsx` | `{}` | 100% Permissive MIT/Apache-2.0 commercial allowance badges and OSS package catalog |
 
 ## Lego Rules
 
