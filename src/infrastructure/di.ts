@@ -4,12 +4,17 @@ import { FileContentUseCase } from '../core/application/use-cases/file-content.u
 import { ListVaultsUseCase } from '../core/application/use-cases/list-vaults.use-case';
 import { ManageFileNodeUseCase } from '../core/application/use-cases/manage-file-node.use-case';
 import { ManageSessionUseCase } from '../core/application/use-cases/manage-session.use-case';
+import { HttpFileRepository } from './storage/http-file.repository';
+import { HttpVaultRepository } from './storage/http-vault.repository';
 import { IndexedDbFileRepository } from './storage/indexeddb-file.repository';
 import { IndexedDbVaultRepository } from './storage/indexeddb-vault.repository';
 import { LocalSessionRepository } from './storage/local-session.repository';
 
-export const vaultRepository = new IndexedDbVaultRepository();
-export const fileRepository = new IndexedDbFileRepository();
+export const indexedDbVaultRepository = new IndexedDbVaultRepository();
+export const indexedDbFileRepository = new IndexedDbFileRepository();
+
+export const vaultRepository = new HttpVaultRepository('/api/vaults', indexedDbVaultRepository);
+export const fileRepository = new HttpFileRepository('/api/vaults', indexedDbFileRepository);
 export const sessionRepository = new LocalSessionRepository();
 
 export const createVaultUseCase = new CreateVaultUseCase(vaultRepository, fileRepository);
@@ -22,3 +27,4 @@ export const deleteVaultUseCase = new DeleteVaultUseCase(
 export const manageFileNodeUseCase = new ManageFileNodeUseCase(fileRepository);
 export const fileContentUseCase = new FileContentUseCase(fileRepository);
 export const manageSessionUseCase = new ManageSessionUseCase(sessionRepository, vaultRepository);
+

@@ -25,12 +25,12 @@ Domain Layer (Pure DTOs, Entities, Invariants)
 
 ## 2. Dual-Target Infrastructure Contracts
 
-| Port | Description | SaaS Adapter (Cloudflare) | Self-Host Adapter (Docker) | Fallback/Local |
-|---|---|---|---|---|
-| `VaultRepository` | 볼트 생성, 목록, Alias 변경, 삭제 | `CloudflareD1VaultRepository` | `LocalSqliteVaultRepository` | `IndexedDbVaultRepository` |
-| `FileRepository` | 파일/폴더 트리 메타데이터 관리 | `CloudflareD1FileRepository` | `LocalSqliteFileRepository` | `IndexedDbFileRepository` |
-| `FileStoragePort` | 마크다운 원문 및 첨부파일 저장/스트리밍 | `CloudflareR2StorageAdapter` | `LocalFsStorageAdapter` | `BrowserIdbStorageAdapter` |
-| `SessionRepository` | 활성 볼트 및 최근 파일 세션 보관 | `LocalSessionRepository` | `LocalSessionRepository` | `LocalSessionRepository` |
+| Port | Description | SaaS Adapter (Cloudflare) | Self-Host Adapter (Docker) | Client HTTP Adapter | Offline Fallback |
+|---|---|---|---|---|---|
+| `VaultRepository` | 볼트 생성, 목록, Alias 변경, 삭제 | `CloudflareDbAdapter` (D1) | `LocalSqliteDbAdapter` (SQLite) | `HttpVaultRepository` | `IndexedDbVaultRepository` |
+| `FileRepository` | 파일/폴더 트리 메타데이터 관리 | `CloudflareDbAdapter` (D1) | `LocalSqliteDbAdapter` (SQLite) | `HttpFileRepository` | `IndexedDbFileRepository` |
+| `FileStoragePort` | 마크다운 원문 및 첨부파일 저장/스트리밍 | `CloudflareR2StorageAdapter` (R2) | `LocalFsStorageAdapter` (FS) | `HttpFileRepository` (`PUT/GET /content`) | Browser IndexedDB |
+| `SessionRepository` | 활성 볼트 및 최근 파일 세션 보관 | `LocalSessionRepository` | `LocalSessionRepository` | `LocalSessionRepository` | `LocalSessionRepository` |
 
 ---
 
@@ -45,13 +45,19 @@ Domain Layer (Pure DTOs, Entities, Invariants)
 2. **전문 검색 (`notes_fts` 가상 테이블)**: SQLite 내장 FTS5 엔진 기반 BM25 전문 검색.
 3. **AI 시맨틱 색인 (Cloudflare Vectorize)**: 노트 본문 벡터 임베딩을 통한 RAG 지식 생성.
 
+### ③ 개발/프로덕션 런타임 투명성
+- **로컬 개발 (`pnpm dev`)**: Vite 개발 서버 내부에서 `honoDevPlugin()`을 통해 `/api/*` 요청을 Hono 앱으로 직접 바인딩 (Local SQLite + FS 연동).
+- **독립형 셀프호스팅 (`pnpm serve` / Docker)**: `@hono/node-server` 단일 프로세스에서 React 정적 빌드 및 Universal Hono API 동시 서빙 (<30MB RAM).
+- **클라우드 SaaS (Cloudflare Pages)**: `functions/api/[[route]].ts`를 통해 Cloudflare Edge에서 D1 및 R2와 직접 통신.
+
 ---
 
 ## 4. Feature Map
 
 | Feature | Use Cases | Primary Components / Adapters |
 |---|---|---|
-| Vault Management | `ManageVaultUseCase`, `ListVaultsUseCase` | `ObsidianShell`, `ObsidianVaultModal`, `useVaults` |
-| Inline Title & Explorer | `ManageFileNodeUseCase` | `ObsidianInlineTitle`, `ObsidianSidebar`, `useActiveWorkspace` |
-| CodeMirror Markdown | `FileContentUseCase` | `ObsidianMarkdownView`, `ObsidianEditor`, `useCodeMirror` |
-| Hono Universal API | `/api/vaults`, `/api/files`, `/api/search` | `functions/api/[[route]].ts`, `src/infrastructure/api/` |
+| Vault Management | `ManageVaultUseCase`, `ListVaultsUseCase` | `ObsidianShell`, `ObsidianVaultModal`, `HttpVaultRepository` |
+| Inline Title & Explorer | `ManageFileNodeUseCase` | `ObsidianInlineTitle`, `ObsidianSidebar`, `HttpFileRepository` |
+| CodeMirror Markdown | `FileContentUseCase` | `ObsidianMarkdownView`, `ObsidianEditor`, `HttpFileRepository` |
+| Hono Universal API | `/api/vaults`, `/api/files`, `/api/search` | `src/server/app.ts`, `src/server/routes/*`, `functions/api/[[route]].ts` |
+

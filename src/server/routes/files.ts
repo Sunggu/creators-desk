@@ -107,15 +107,74 @@ filesRouter.put('/:key/files/:id/content', async (c) => {
   return c.json({ success: true, size, updatedAt: now });
 });
 
+filesRouter.patch('/:key/files/:id', async (c) => {
+  const { db } = getContextStorage(c);
+  const fileId = c.req.param('id');
+  const vaultKey = c.req.param('key');
+  const body = await c.req.json<{ name?: string; parentId?: string | null }>();
+
+  const existing = await db.first(
+    'SELECT id, vault_key, parent_id, name, type, r2_key, size, created_at, updated_at FROM file_nodes WHERE id = ? AND vault_key = ? LIMIT 1',
+    [fileId, vaultKey],
+  );
+  if (!existing) {
+    return c.json({ error: 'File not found' }, 404);
+  }
+
+  const now = Date.now();
+  let newName = existing.name as string;
+  if (body.name !== undefined) {
+    const trimmed = body.name.trim();
+    if (!trimmed) return c.json({ error: 'Name cannot be empty' }, 400);
+    newName = existing.type === 'file' && !trimmed.endsWith('.md') ? `${trimmed}.md` : trimmed;
+  }
+  const newParentId = body.parentId !== undefined ? body.parentId : existing.parent_id;
+
+  await db.run(
+    'UPDATE file_nodes SET name = ?, parent_id = ?, updated_at = ? WHERE id = ?',
+    [newName, newParentId, now, fileId],
+  );
+
+  return c.json({
+    id: fileId,
+    vaultId: vaultKey,
+    parentId: newParentId,
+    name: newName,
+    type: existing.type,
+    r2Key: existing.r2_key,
+    size: existing.size,
+    createdAt: existing.created_at,
+    updatedAt: now,
+  });
+});
+
 filesRouter.delete('/:key/files/:id', async (c) => {
   const { db, storage } = getContextStorage(c);
   const vaultKey = c.req.param('key');
   const fileId = c.req.param('id');
 
-  await db.run('DELETE FROM file_nodes WHERE id = ?', [fileId]);
-  await db.run('DELETE FROM notes_fts WHERE file_id = ?', [fileId]);
-  await db.run('DELETE FROM links WHERE source_file_id = ?', [fileId]);
-  await storage.delete(`vaults/${vaultKey}/files/${fileId}.md`);
+  const allNodes = await db.all('SELECT id, parent_id, type FROM file_nodes WHERE vault_key = ?', [vaultKey]);
+  const toDelete = [fileId];
+  const queue = [fileId];
+  while (queue.length > 0) {
+    const parent = queue.shift()!;
+    for (const row of allNodes) {
+      if (row.parent_id === parent) {
+        toDelete.push(row.id as string);
+        if (row.type === 'folder') {
+          queue.push(row.id as string);
+        }
+      }
+    }
+  }
 
-  return c.json({ success: true, id: fileId });
+  for (const id of toDelete) {
+    await db.run('DELETE FROM file_nodes WHERE id = ?', [id]);
+    await db.run('DELETE FROM notes_fts WHERE file_id = ?', [id]);
+    await db.run('DELETE FROM links WHERE source_file_id = ?', [id]);
+    await storage.delete(`vaults/${vaultKey}/files/${id}.md`);
+  }
+
+  return c.json({ success: true, deleted: toDelete });
 });
+

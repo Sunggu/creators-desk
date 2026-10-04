@@ -121,8 +121,15 @@ export default function ObsidianShell({
               setIsMobileSidebarOpen(false);
               setIsVaultModalOpen(true);
             }}
-            onSelectFile={workspace.selectFile}
-            onCreateFile={workspace.createFile}
+            onSelectFile={(id) => {
+              workspace.selectFile(id);
+              setIsMobileSidebarOpen(false);
+            }}
+            onCreateFile={async (name, parentId) => {
+              const created = await workspace.createFile(name, parentId);
+              setIsMobileSidebarOpen(false);
+              return created;
+            }}
             onCreateFolder={workspace.createFolder}
             onRenameNode={workspace.renameNode}
             onDeleteNode={workspace.deleteNode}
