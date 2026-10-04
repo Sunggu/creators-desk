@@ -42,7 +42,7 @@ export function useActiveWorkspace(activeVaultId: string | null) {
             parentId: null,
             name: 'Welcome.md',
             type: 'file',
-            content: `# Welcome to Creators Desk\n\nCreators Desk는 웹에서 동작하는 가볍고 순수한 마크다운 에디터입니다.\n\n- **Obsidian 호환**: 폴더 및 마크다운 파일 구조\n- **방해 없는 집필**: 군더더기 없는 미니멀 다크 테마\n- **자동 저장**: 작성 즉시 브라우저에 안전하게 보관\n\n왼쪽 상단의 메뉴(☰)를 눌러 새 노트를 만들거나 폴더를 구성해보세요.\n`,
+            content: `Creators Desk는 방해 없는 글쓰기와 생각의 연결을 위한 미니멀 마크다운 에디터입니다.\n\n## 주요 기능\n- **Live Preview & 읽기 뷰**: 우측 상단 모드 전환(📖/✏️) 버튼으로 마크다운 기호 없이 깔끔하게 렌더링된 문서를 바로 열람할 수 있습니다.\n- **[[지식 연결]] & #태그**: 노트 간의 유기적인 백링크와 태그를 지원합니다.\n- **몰입형 에디터**: 불필요한 줄 번호나 구분선 없이 생각의 흐름에만 집중할 수 있습니다.\n- **자동 동기화**: 작성 즉시 클라우드 및 로컬 환경에 실시간 저장됩니다.\n\n왼쪽 상단의 메뉴(☰)를 눌러 새 노트를 만들거나 폴더를 구성해보세요.\n`,
           });
           currentList = [starter];
           setNodes(currentList);

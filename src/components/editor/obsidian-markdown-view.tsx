@@ -2,7 +2,7 @@ import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { markdown } from '@codemirror/lang-markdown';
 import { defaultHighlightStyle, syntaxHighlighting } from '@codemirror/language';
 import { EditorState } from '@codemirror/state';
-import { EditorView, keymap, lineNumbers } from '@codemirror/view';
+import { EditorView, keymap } from '@codemirror/view';
 import { useEffect, useRef } from 'react';
 import type { EditorStats } from '../../hooks/use-codemirror';
 import ObsidianInlineTitle from './obsidian-inline-title';
@@ -14,6 +14,7 @@ const obsidianTheme = EditorView.theme(
       backgroundColor: '#1e1e22',
       height: '100%',
       fontSize: '15px',
+      outline: 'none',
     },
     '.cm-scroller': {
       overflow: 'visible',
@@ -21,7 +22,7 @@ const obsidianTheme = EditorView.theme(
         '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif',
     },
     '.cm-content': {
-      padding: '16px 20px 160px 20px',
+      padding: '4px 16px 180px 16px',
       lineHeight: '1.75',
       caretColor: '#a78bfa',
       maxWidth: '840px',
@@ -30,7 +31,7 @@ const obsidianTheme = EditorView.theme(
     },
     '@media (min-width: 768px)': {
       '.cm-content': {
-        padding: '24px 48px 180px 48px',
+        padding: '8px 48px 200px 48px',
       },
     },
     '&.cm-focused .cm-cursor': {
@@ -38,20 +39,41 @@ const obsidianTheme = EditorView.theme(
       borderLeftWidth: '2px',
     },
     '&.cm-focused .cm-selectionBackground, ::selection': {
-      backgroundColor: 'rgba(124, 58, 237, 0.35) !important',
-    },
-    '.cm-gutters': {
-      backgroundColor: '#1e1e22',
-      color: '#555560',
-      borderRight: '1px solid #282830',
-      minWidth: '32px',
-    },
-    '.cm-activeLineGutter': {
-      backgroundColor: '#26262e',
-      color: '#a1a1aa',
+      backgroundColor: 'rgba(124, 58, 237, 0.3) !important',
     },
     '.cm-activeLine': {
-      backgroundColor: 'rgba(255, 255, 255, 0.025)',
+      backgroundColor: 'rgba(255, 255, 255, 0.015)',
+    },
+    '.cm-header': {
+      fontWeight: '700',
+      color: '#ffffff',
+    },
+    '.cm-header-1': {
+      fontSize: '1.75rem',
+      lineHeight: '1.3',
+    },
+    '.cm-header-2': {
+      fontSize: '1.4rem',
+      lineHeight: '1.35',
+    },
+    '.cm-header-3': {
+      fontSize: '1.2rem',
+      lineHeight: '1.4',
+    },
+    '.cm-strong': {
+      fontWeight: '700',
+      color: '#ffffff',
+    },
+    '.cm-em': {
+      fontStyle: 'italic',
+      color: '#e4e4e7',
+    },
+    '.cm-link': {
+      color: '#a78bfa',
+      textDecoration: 'underline',
+    },
+    '.cm-url': {
+      color: '#818cf8',
     },
   },
   { dark: true },
@@ -105,7 +127,6 @@ export default function ObsidianMarkdownView({
     const startState = EditorState.create({
       doc: initialContent,
       extensions: [
-        lineNumbers(),
         history(),
         syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
         markdown(),

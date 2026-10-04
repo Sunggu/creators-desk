@@ -47,7 +47,7 @@ export class CreateVaultUseCase {
         parentId: null,
         name: 'Welcome.md',
         type: 'file',
-        content: `# Welcome to ${saved.alias}\n\nThis is your first note in Creators Desk.\n\n- Plain markdown editing\n- Fast & distraction-free\n- Automatically saved\n`,
+        content: `Welcome to ${saved.alias}\n\nThis is your first note in Creators Desk.\n\n- Plain markdown editing\n- Fast & distraction-free\n- Automatically saved\n`,
         createdAt: now,
         updatedAt: now,
       });

@@ -13,12 +13,12 @@
 | `ObsidianRibbon` | `src/components/ribbon/obsidian-ribbon.tsx` | `{ isSidebarOpen, onToggleSidebar, onOpenVaultModal }` | Desktop 44px icon action rail |
 | `ObsidianSidebar` | `src/components/sidebar/obsidian-sidebar.tsx` | `{ vault, nodes, activeFileId, onOpenVaultModal, ... }` | Vault dropdown & hierarchical file explorer (drawer on mobile) |
 | `FileTreeItem` | `src/components/sidebar/file-tree-item.tsx` | `{ node, depth, isActive, isExpanded, ... }` | Single file or folder row with inline rename/delete |
-| `ObsidianTabBar` | `src/components/tabs/obsidian-tab-bar.tsx` | `{ activeFile, onNewNote, onCloseNote }` | Active note tabs with close & add tab buttons (desktop) |
-| `ObsidianEditor` | `src/components/editor/obsidian-editor.tsx` | `{ activeFile, onSavingChange, onStatsChange, onNewNote }` | CodeMirror 6 markdown editor container with empty state & responsive padding |
-| `ObsidianMarkdownView` | `src/components/editor/obsidian-markdown-view.tsx` | `{ activeFile, onSavingChange, onStatsChange, onRenameFile, autoFocusTitle }` | Dedicated active note markdown view with inline title and CodeMirror instance |
-| `ObsidianInlineTitle` | `src/components/editor/obsidian-inline-title.tsx` | `{ title, onRename, onEnter, autoFocus }` | Obsidian inline note title with instant file renaming and editor jump |
+| `ObsidianTabBar` | `src/components/tabs/obsidian-tab-bar.tsx` | `{ activeFile, viewMode, onToggleViewMode, onNewNote, onCloseNote }` | Active note tabs with view mode switcher (📖/✏️) & add tab buttons |
+| `ObsidianEditor` | `src/components/editor/obsidian-editor.tsx` | `{ activeFile, viewMode, onSwitchToEdit, onSavingChange, ... }` | Master editor container switching between Live Edit & Reading Preview |
+| `ObsidianMarkdownView` | `src/components/editor/obsidian-markdown-view.tsx` | `{ fileId, fileName, initialContent, onDocChange, onStatsChange, ... }` | Distraction-free CodeMirror 6 live editor (no IDE line numbers, rich typography) |
+| `ObsidianMarkdownPreview` | `src/components/editor/obsidian-markdown-preview.tsx` | `{ title, content, onSwitchToEdit, onNavigateWikilink }` | Pure rendered Reading View without raw markdown syntax; interactive wikilinks |
+| `ObsidianInlineTitle` | `src/components/editor/obsidian-inline-title.tsx` | `{ title, onRename, onEnter, autoFocus }` | Organic borderless document title heading synchronized with note file name |
 | `ObsidianStatusBar` | `src/components/statusbar/obsidian-status-bar.tsx` | `{ stats, isSaving }` | Bottom bar: words, chars, cursor Ln/Col, save state |
-
 | `ObsidianVaultModal` | `src/components/vault/obsidian-vault-modal.tsx` | `{ isOpen, activeVaultId, vaults, onClose, ... }` | Obsidian-style modal for switching and managing vaults |
 
 ## Lego Rules

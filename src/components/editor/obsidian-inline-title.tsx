@@ -51,7 +51,7 @@ export default function ObsidianInlineTitle({
   };
 
   return (
-    <div className="max-w-[840px] mx-auto pt-6 px-4 md:px-12 pb-1 select-text">
+    <div className="max-w-[840px] mx-auto pt-8 px-4 md:px-12 select-text">
       <input
         ref={inputRef}
         type="text"
@@ -61,9 +61,8 @@ export default function ObsidianInlineTitle({
         onKeyDown={handleKeyDown}
         placeholder="제목 없는 노트"
         aria-label="Note title"
-        className="w-full bg-transparent text-2xl md:text-3xl font-extrabold text-zinc-100 tracking-tight outline-none border-b border-transparent hover:border-[#2e2e38] focus:border-violet-500/70 transition-colors pb-1 placeholder:text-zinc-600 rounded-none"
+        className="w-full bg-transparent text-3xl md:text-4xl font-extrabold text-white tracking-tight outline-none border-none placeholder:text-zinc-600 transition-opacity pb-2"
       />
-      <div className="mt-2 border-b border-[#282830]" />
     </div>
   );
 }

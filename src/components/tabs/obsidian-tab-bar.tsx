@@ -2,12 +2,16 @@ import type { FileNodeDto } from '../../core/domain/file-node.dto';
 
 interface ObsidianTabBarProps {
   activeFile: FileNodeDto | null;
+  viewMode?: 'edit' | 'preview';
+  onToggleViewMode?: () => void;
   onNewNote: () => void;
   onCloseNote: () => void;
 }
 
 export default function ObsidianTabBar({
   activeFile,
+  viewMode = 'edit',
+  onToggleViewMode,
   onNewNote,
   onCloseNote,
 }: ObsidianTabBarProps) {
@@ -45,9 +49,31 @@ export default function ObsidianTabBar({
         </button>
       </div>
 
-      <div className="flex items-center space-x-2 text-[11px] text-zinc-500 pr-2">
-        <span>Markdown</span>
-      </div>
+      {activeFile ? (
+        <div className="flex items-center space-x-1.5 pr-1">
+          <button
+            onClick={onToggleViewMode}
+            className={`flex items-center space-x-1 rounded px-2 py-0.5 text-xs transition cursor-pointer ${
+              viewMode === 'preview'
+                ? 'bg-violet-950/80 text-violet-300 border border-violet-700/50'
+                : 'text-zinc-400 hover:bg-[#202026] hover:text-zinc-200'
+            }`}
+            title={viewMode === 'preview' ? '클릭하여 편집 모드로 전환' : '클릭하여 읽기 모드로 전환'}
+          >
+            {viewMode === 'preview' ? (
+              <>
+                <span className="text-violet-400">📖</span>
+                <span className="font-semibold text-violet-300 text-[11px]">읽기 뷰</span>
+              </>
+            ) : (
+              <>
+                <span className="text-zinc-400">✏️</span>
+                <span className="text-zinc-400 text-[11px]">편집 뷰</span>
+              </>
+            )}
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

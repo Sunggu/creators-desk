@@ -2,10 +2,14 @@ import { useEffect, useState } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import type { EditorStats } from '../../hooks/use-codemirror';
 import { fileContentUseCase } from '../../infrastructure/di';
+import ObsidianMarkdownPreview from './obsidian-markdown-preview';
 import ObsidianMarkdownView from './obsidian-markdown-view';
 
 interface ObsidianEditorProps {
   activeFile: FileNodeDto | null;
+  viewMode?: 'edit' | 'preview';
+  onSwitchToEdit?: () => void;
+  onNavigateWikilink?: (target: string) => void;
   onSavingChange: (isSaving: boolean) => void;
   onStatsChange: (stats: EditorStats) => void;
   onNewNote: () => void;
@@ -15,6 +19,9 @@ interface ObsidianEditorProps {
 
 export default function ObsidianEditor({
   activeFile,
+  viewMode = 'edit',
+  onSwitchToEdit,
+  onNavigateWikilink,
   onSavingChange,
   onStatsChange,
   onNewNote,
@@ -94,6 +101,18 @@ export default function ObsidianEditor({
       <div className="flex h-full w-full items-center justify-center bg-[#1e1e22] text-xs text-zinc-500">
         노트를 불러오는 중...
       </div>
+    );
+  }
+
+  if (viewMode === 'preview') {
+    return (
+      <ObsidianMarkdownPreview
+        key={activeFile.id}
+        title={activeFile.name}
+        content={content}
+        onSwitchToEdit={onSwitchToEdit}
+        onNavigateWikilink={onNavigateWikilink}
+      />
     );
   }
 

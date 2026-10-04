@@ -4,6 +4,8 @@ import type { VaultDto } from '../../core/domain/vault.dto';
 interface ObsidianMobileHeaderProps {
   vault: VaultDto;
   activeFile: FileNodeDto | null;
+  viewMode?: 'edit' | 'preview';
+  onToggleViewMode?: () => void;
   onOpenSidebar: () => void;
   onOpenVaultModal: () => void;
   onNewNote: () => void;
@@ -12,6 +14,8 @@ interface ObsidianMobileHeaderProps {
 export default function ObsidianMobileHeader({
   vault,
   activeFile,
+  viewMode = 'edit',
+  onToggleViewMode,
   onOpenSidebar,
   onOpenVaultModal,
   onNewNote,
@@ -35,13 +39,23 @@ export default function ObsidianMobileHeader({
 
       {/* Center: Title */}
       <div className="flex items-center space-x-1.5 overflow-hidden px-2">
-        <span className="truncate text-xs font-semibold text-zinc-100 max-w-[180px]">
+        <span className="truncate text-xs font-semibold text-zinc-100 max-w-[160px]">
           {displayTitle}
         </span>
       </div>
 
-      {/* Right Actions: New Note & Vault Switcher */}
+      {/* Right Actions: Mode Toggle, New Note & Vault Switcher */}
       <div className="flex items-center space-x-1">
+        {activeFile && (
+          <button
+            onClick={onToggleViewMode}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-300 hover:bg-[#202026] active:bg-[#282830]"
+            title={viewMode === 'preview' ? '편집 모드로 전환' : '읽기 모드로 전환'}
+          >
+            <span className="text-sm">{viewMode === 'preview' ? '📖' : '✏️'}</span>
+          </button>
+        )}
+
         <button
           onClick={onNewNote}
           className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-300 hover:bg-[#202026] active:bg-[#282830]"

@@ -28,6 +28,7 @@ export default function ObsidianShell({
   const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isVaultModalOpen, setIsVaultModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
   const [isSaving, setIsSaving] = useState(false);
   const [stats, setStats] = useState<EditorStats>({
     words: 0,
@@ -39,7 +40,10 @@ export default function ObsidianShell({
   const touchStartXRef = useRef<number | null>(null);
   const workspace = useActiveWorkspace(vault.id);
 
+  const toggleViewMode = () => setViewMode((m) => (m === 'edit' ? 'preview' : 'edit'));
+
   const handleCreateNewNote = async () => {
+    setViewMode('edit');
     await workspace.createFile();
     setIsMobileSidebarOpen(false);
   };
@@ -69,6 +73,8 @@ export default function ObsidianShell({
       <ObsidianMobileHeader
         vault={vault}
         activeFile={workspace.activeFile}
+        viewMode={viewMode}
+        onToggleViewMode={toggleViewMode}
         onOpenSidebar={() => setIsMobileSidebarOpen(true)}
         onOpenVaultModal={() => setIsVaultModalOpen(true)}
         onNewNote={handleCreateNewNote}
@@ -143,6 +149,8 @@ export default function ObsidianShell({
           {/* Desktop Tab Bar */}
           <ObsidianTabBar
             activeFile={workspace.activeFile}
+            viewMode={viewMode}
+            onToggleViewMode={toggleViewMode}
             onNewNote={handleCreateNewNote}
             onCloseNote={() => workspace.selectFile(null)}
           />
@@ -150,6 +158,8 @@ export default function ObsidianShell({
           <div className="flex-1 overflow-hidden">
             <ObsidianEditor
               activeFile={workspace.activeFile}
+              viewMode={viewMode}
+              onSwitchToEdit={() => setViewMode('edit')}
               onSavingChange={setIsSaving}
               onStatsChange={setStats}
               onNewNote={handleCreateNewNote}
