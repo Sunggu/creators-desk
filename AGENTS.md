@@ -43,6 +43,17 @@ All modifications, implementations, and reviews MUST strictly satisfy these 7 co
 - Routing must map cleanly to discrete page directories (e.g., `routes/` or `pages/`).
 - Page files handle layout and route binding only; operational interfaces and domain assembly are delegated to underlying features.
 
+### Rule 8: Dual-Target Architecture (SaaS & Open-Source Self-Hosting)
+- **Frontend**: Vite React SPA (Zero-Hydration CodeMirror client). DO NOT introduce Next.js or heavy SSR frameworks.
+- **Backend API**: Hono (Universal Web-Standards framework running on Cloudflare Pages Functions, Node.js, Bun, Docker).
+- **Storage Portability**:
+  - Domain and Application layers MUST NOT depend on Cloudflare-specific (`env.DB`, `env.BUCKET`) or Node-specific (`fs`, `better-sqlite3`) APIs directly.
+  - Implement dual adapters via Ports:
+    - **SaaS (Cloudflare)**: D1 (SQLite) + R2 (Object Storage).
+    - **Self-Hosting**: Local SQLite + Local File System.
+- **Vault Identity Invariant**:
+  - Every Vault MUST have an **immutable unique `key`** (used in storage paths: `vaults/{key}/...`) and a **mutable display `alias`** (user-facing, easily renamed in DB with O(1) cost).
+
 ---
 
 ## 2. Documentation Map of Content (MOC)
@@ -51,7 +62,7 @@ When working on specific domains, agents must cross-reference and update the cor
 
 | Index Doc (MOC) | Scope & Coverage | Target Directory |
 |---|---|---|
-| `docs/moc/architecture.md` | Layer rules, dependency graph, interface contracts | `src/core/`, `src/modules/` |
+| `docs/moc/architecture.md` | Layer rules, dependency graph, interface contracts, dual targets | `src/core/`, `src/modules/`, `functions/` |
 | `docs/moc/domain-lore.md` | Lore engine specs, entity relations, data schemas | `src/modules/lore/` |
 | `docs/moc/domain-pipeline.md` | Multi-project tracking, status machines, workflows | `src/modules/pipeline/` |
 | `docs/moc/ui-components.md` | Component catalog, design tokens, Lego assembly rules | `src/components/`, `src/ui/` |

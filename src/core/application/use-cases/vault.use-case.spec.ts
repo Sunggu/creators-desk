@@ -7,6 +7,7 @@ import type { VaultRepository } from '../ports/vault.repository';
 import { CreateVaultUseCase } from './create-vault.use-case';
 import { DeleteVaultUseCase } from './delete-vault.use-case';
 import { ListVaultsUseCase } from './list-vaults.use-case';
+import { UpdateVaultUseCase } from './update-vault.use-case';
 
 class InMemoryVaultRepository implements VaultRepository {
   private vaults = new Map<string, VaultDto>();
@@ -17,9 +18,19 @@ class InMemoryVaultRepository implements VaultRepository {
   async findById(id: string): Promise<VaultDto | null> {
     return this.vaults.get(id) ?? null;
   }
+  async findByKey(key: string): Promise<VaultDto | null> {
+    return Array.from(this.vaults.values()).find((v) => v.key === key) ?? null;
+  }
   async create(vault: VaultDto): Promise<VaultDto> {
     this.vaults.set(vault.id, vault);
     return vault;
+  }
+  async update(id: string, updates: Partial<VaultDto>): Promise<VaultDto> {
+    const existing = this.vaults.get(id);
+    if (!existing) throw new Error('Not found');
+    const updated = { ...existing, ...updates };
+    this.vaults.set(id, updated);
+    return updated;
   }
   async delete(id: string): Promise<void> {
     this.vaults.delete(id);
@@ -75,19 +86,35 @@ class InMemorySessionRepository implements SessionRepository {
 }
 
 describe('Vault Use Cases', () => {
-  it('creates vault with trimmed name and a starter note', async () => {
+  it('creates vault with immutable key, alias, and starter note', async () => {
     const vaultRepo = new InMemoryVaultRepository();
     const fileRepo = new InMemoryFileRepository();
     const createVault = new CreateVaultUseCase(vaultRepo, fileRepo);
 
     const vault = await createVault.execute({ name: '  My Research  ' });
+    expect(vault.alias).toBe('My Research');
     expect(vault.name).toBe('My Research');
+    expect(vault.key).toMatch(/^vlt_/);
     expect(vault.id).toBeDefined();
 
     const files = await fileRepo.findByVaultId(vault.id);
     expect(files).toHaveLength(1);
     expect(files[0].name).toBe('Welcome.md');
     expect(files[0].content).toContain('Welcome to My Research');
+  });
+
+  it('updates vault alias while preserving immutable key', async () => {
+    const vaultRepo = new InMemoryVaultRepository();
+    const createVault = new CreateVaultUseCase(vaultRepo);
+    const updateVault = new UpdateVaultUseCase(vaultRepo);
+
+    const vault = await createVault.execute({ alias: 'Original Project' });
+    const originalKey = vault.key;
+
+    const renamed = await updateVault.execute(vault.id, { alias: 'Renamed Project' });
+    expect(renamed.alias).toBe('Renamed Project');
+    expect(renamed.name).toBe('Renamed Project');
+    expect(renamed.key).toBe(originalKey);
   });
 
   it('rejects empty vault name', async () => {
@@ -99,8 +126,8 @@ describe('Vault Use Cases', () => {
 
   it('lists vaults sorted by updatedAt descending', async () => {
     const vaultRepo = new InMemoryVaultRepository();
-    await vaultRepo.create({ id: '1', name: 'Old', createdAt: 100, updatedAt: 100 });
-    await vaultRepo.create({ id: '2', name: 'New', createdAt: 200, updatedAt: 300 });
+    await vaultRepo.create({ id: '1', key: 'vlt_1', alias: 'Old', name: 'Old', createdAt: 100, updatedAt: 100 });
+    await vaultRepo.create({ id: '2', key: 'vlt_2', alias: 'New', name: 'New', createdAt: 200, updatedAt: 300 });
 
     const listVaults = new ListVaultsUseCase(vaultRepo);
     const result = await listVaults.execute();
@@ -113,7 +140,7 @@ describe('Vault Use Cases', () => {
     const fileRepo = new InMemoryFileRepository();
     const sessionRepo = new InMemorySessionRepository();
 
-    await vaultRepo.create({ id: 'v1', name: 'To Delete', createdAt: 1, updatedAt: 1 });
+    await vaultRepo.create({ id: 'v1', key: 'vlt_v1', alias: 'To Delete', name: 'To Delete', createdAt: 1, updatedAt: 1 });
     await fileRepo.create({ id: 'f1', vaultId: 'v1', parentId: null, name: 'Note.md', type: 'file', createdAt: 1, updatedAt: 1 });
     sessionRepo.setLastActiveVaultId('v1');
 

@@ -1,3 +1,5 @@
 export interface CreateVaultDto {
-  name: string;
+  alias?: string;
+  name?: string;
+  key?: string;
 }
