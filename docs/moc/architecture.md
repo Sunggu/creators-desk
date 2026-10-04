@@ -58,7 +58,8 @@ Domain Layer (Pure DTOs, Entities, Invariants)
 |---|---|---|
 | Vault Management | `ManageVaultUseCase`, `ListVaultsUseCase` | `ObsidianShell`, `ObsidianVaultModal`, `HttpVaultRepository` |
 | Inline Title & Explorer | `ManageFileNodeUseCase` | `ObsidianInlineTitle`, `ObsidianSidebar`, `HttpFileRepository` |
-| Window & Panel Layout | `usePanelLayout` (Slot Engine) | `WorkspacePanelContainer`, `PanelWindowHeader`, `PanelContentRenderer` |
+| Primary Sidebar Panels | `SidebarPanelContainer` | `SearchPanel`, `OutlinePanel`, `PluginsPanel`, `ObsidianSidebar` |
+| Resizable Grid Editor | `useEditorGrid`, `useResizable` | `ResizableEditorGrid`, `EditorGroupView`, `GridSplitter`, `EditorDropZone` |
 | Settings & Open-Source | `SettingsModal`, `OpenSourceLicensesView` | `SettingsModal`, `open-source-licenses-data.ts` |
 | CodeMirror Markdown | `FileContentUseCase` | `ObsidianMarkdownView`, `ObsidianEditor`, `HttpFileRepository` |
 | Hono Universal API | `/api/vaults`, `/api/files`, `/api/search` | `src/server/app.ts`, `src/server/routes/*`, `functions/api/[[route]].ts` |

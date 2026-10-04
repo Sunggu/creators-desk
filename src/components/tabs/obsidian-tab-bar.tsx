@@ -8,6 +8,10 @@ interface ObsidianTabBarProps {
   onSelectTab: (fileId: string) => void;
   onCloseTab: (fileId: string) => void;
   onNewNote: () => void;
+  onSplitHorizontal?: () => void;
+  onSplitVertical?: () => void;
+  onCloseGroup?: () => void;
+  canCloseGroup?: boolean;
 }
 
 export default function ObsidianTabBar({
@@ -18,10 +22,14 @@ export default function ObsidianTabBar({
   onSelectTab,
   onCloseTab,
   onNewNote,
+  onSplitHorizontal,
+  onSplitVertical,
+  onCloseGroup,
+  canCloseGroup,
 }: ObsidianTabBarProps) {
   return (
     <div className="hidden md:flex h-9 w-full items-end justify-between border-b border-[#26262e] bg-[#141417] px-0 select-none relative">
-      {/* Tab List (No Left Margin, Scrollbar Hidden, Attached to Editor) */}
+      {/* Tab List */}
       <div className="flex items-end overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {openFiles.map((file) => {
           const isActive = file.id === activeFileId;
@@ -30,16 +38,22 @@ export default function ObsidianTabBar({
           return (
             <div
               key={file.id}
+              draggable={true}
+              onDragStart={(e) => {
+                e.dataTransfer.setData('text/plain', file.id);
+                e.dataTransfer.setData('application/creators-desk-tab', file.id);
+                e.dataTransfer.effectAllowed = 'move';
+              }}
               onClick={() => onSelectTab(file.id)}
               className={`group flex items-center space-x-2 text-xs font-medium transition-colors cursor-pointer select-none ${
                 isActive
                   ? 'relative z-10 -mb-[1px] h-9 px-3.5 bg-[#1e1e22] text-zinc-100 border-t-2 border-violet-500 border-x border-[#26262e] border-b-0'
                   : 'h-8 mb-[1px] px-3 bg-transparent text-zinc-400 hover:bg-[#1a1a1e] hover:text-zinc-200 border-r border-[#222228]'
               }`}
-              title={cleanTitle}
+              title={`${cleanTitle} (드래그하여 창 분할 가능)`}
             >
               {isActive && <span className="h-1.5 w-1.5 rounded-full bg-violet-400 shrink-0" />}
-              <span className="truncate max-w-44">{cleanTitle}</span>
+              <span className="truncate max-w-40">{cleanTitle}</span>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -56,7 +70,6 @@ export default function ObsidianTabBar({
           );
         })}
 
-        {/* Add Tab Button (+ 누르면 우측으로 편집 윈도우/탭이 늘어남) */}
         <button
           onClick={onNewNote}
           className="mb-1 ml-1 flex h-7 w-7 items-center justify-center rounded text-zinc-400 hover:bg-[#222228] hover:text-zinc-200 transition"
@@ -68,9 +81,33 @@ export default function ObsidianTabBar({
         </button>
       </div>
 
-      {/* Right Side: Mode Switcher (SVG Icons only, No Emojis, No '편집 뷰' Text) */}
-      {activeFileId && onToggleViewMode && (
-        <div className="mb-1.5 flex items-center pr-3">
+      {/* Right Side: Split View & Mode Switcher */}
+      <div className="mb-1.5 flex items-center space-x-1 pr-2">
+        {onSplitHorizontal && (
+          <button
+            onClick={onSplitHorizontal}
+            className="flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:bg-[#202026] hover:text-violet-300 transition cursor-pointer"
+            title="우측으로 창 분할 (좌/우 나란히 보기)"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 4H5a1 1 0 00-1 1v14a1 1 0 001 1h4V4zm2 0v16h8a1 1 0 001-1V5a1 1 0 00-1-1h-8z" />
+            </svg>
+          </button>
+        )}
+
+        {onSplitVertical && (
+          <button
+            onClick={onSplitVertical}
+            className="flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:bg-[#202026] hover:text-violet-300 transition cursor-pointer"
+            title="하단으로 창 분할 (상/하 나란히 보기)"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M4 9V5a1 1 0 011-1h14a1 1 0 011 1v4H4zm0 2h16v8a1 1 0 01-1 1H5a1 1 0 01-1-1v-8z" />
+            </svg>
+          </button>
+        )}
+
+        {activeFileId && onToggleViewMode && (
           <button
             onClick={onToggleViewMode}
             className={`flex items-center justify-center h-6 w-6 rounded text-xs transition cursor-pointer ${
@@ -90,8 +127,20 @@ export default function ObsidianTabBar({
               </svg>
             )}
           </button>
-        </div>
-      )}
+        )}
+
+        {canCloseGroup && onCloseGroup && (
+          <button
+            onClick={onCloseGroup}
+            className="flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:bg-rose-500/20 hover:text-rose-300 transition cursor-pointer"
+            title="분할 창 닫기"
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

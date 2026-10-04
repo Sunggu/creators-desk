@@ -1,16 +1,16 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { SidebarMenuId } from '../../core/domain/sidebar-panel.dto';
 import type { VaultDto } from '../../core/domain/vault.dto';
 import { useActiveWorkspace } from '../../hooks/use-active-workspace';
 import type { EditorStats } from '../../hooks/use-codemirror';
-import { usePanelLayout } from '../../hooks/use-panel-layout';
+import { useEditorGrid } from '../../hooks/use-editor-grid';
+import ResizableEditorGrid from '../editor/resizable-editor-grid';
 import ObsidianMobileHeader from '../mobile/obsidian-mobile-header';
 import ObsidianRibbon from '../ribbon/obsidian-ribbon';
 import SettingsModal from '../settings/settings-modal';
-import ObsidianSidebar from '../sidebar/obsidian-sidebar';
+import SidebarPanelContainer from '../sidebar/sidebar-panel-container';
 import ObsidianStatusBar from '../statusbar/obsidian-status-bar';
 import ObsidianVaultModal from '../vault/obsidian-vault-modal';
-import PanelContentRenderer from './panel-content-renderer';
-import WorkspacePanelContainer from './workspace-panel-container';
 
 interface ObsidianShellProps {
   vault: VaultDto;
@@ -27,6 +27,7 @@ export default function ObsidianShell({
   onCreateVault,
   onDeleteVault,
 }: ObsidianShellProps) {
+  const [activeSideMenu, setActiveSideMenu] = useState<SidebarMenuId | null>('explorer');
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isVaultModalOpen, setIsVaultModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -41,13 +42,25 @@ export default function ObsidianShell({
 
   const touchStartXRef = useRef<number | null>(null);
   const workspace = useActiveWorkspace(vault.id);
-  const layout = usePanelLayout();
+  const editorGrid = useEditorGrid();
+
+  // Sync workspace open files to initial grid
+  useEffect(() => {
+    if (workspace.activeFileId) {
+      editorGrid.openFile(workspace.activeFileId);
+    }
+  }, [workspace.activeFileId]);
 
   const toggleViewMode = () => setViewMode((m) => (m === 'edit' ? 'preview' : 'edit'));
 
+  const handleSelectSideMenu = (menu: SidebarMenuId) => {
+    setActiveSideMenu((prev) => (prev === menu ? null : menu));
+  };
+
   const handleCreateNewNote = async () => {
     setViewMode('edit');
-    await workspace.createFile();
+    const created = await workspace.createFile();
+    if (created) editorGrid.openFile(created.id);
     setIsMobileSidebarOpen(false);
   };
 
@@ -78,92 +91,53 @@ export default function ObsidianShell({
 
       <div className="flex flex-1 overflow-hidden relative">
         <ObsidianRibbon
-          isSidebarOpen={layout.isExplorerOpen}
-          isSplitPreviewOpen={layout.isSplitPreviewOpen}
-          onToggleSidebar={layout.toggleExplorer}
-          onToggleSplitPreview={() => layout.toggleSplitPreview(workspace.activeFileId)}
+          activeMenu={activeSideMenu}
+          onSelectMenu={handleSelectSideMenu}
           onOpenVaultModal={() => setIsVaultModalOpen(true)}
           onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
         />
 
-        {/* Flexible Desktop Workspace Panels */}
-        <div className="hidden md:flex flex-1 h-full overflow-hidden">
-          <WorkspacePanelContainer
-            panels={layout.panels}
-            onMovePanel={layout.movePanel}
-            onClosePanel={layout.closePanel}
-            onToggleSplitPreview={() => layout.toggleSplitPreview(workspace.activeFileId)}
-            renderPanelContent={(panel) => (
-              <PanelContentRenderer
-                panel={panel}
-                vault={vault}
-                vaults={vaults}
-                workspace={workspace}
-                viewMode={viewMode}
-                onToggleViewMode={toggleViewMode}
-                onSwitchToEdit={() => setViewMode('edit')}
-                onNewNote={handleCreateNewNote}
-                onOpenVaultModal={() => setIsVaultModalOpen(true)}
-                onSelectVault={onSelectVault}
-                onSavingChange={setIsSaving}
-                onStatsChange={setStats}
-              />
-            )}
-          />
-        </div>
+        {/* Resizable Primary Side Panel */}
+        <SidebarPanelContainer
+          activeMenu={activeSideMenu}
+          onClose={() => setActiveSideMenu(null)}
+          vault={vault}
+          vaults={vaults}
+          nodes={workspace.nodes}
+          activeFile={workspace.activeFile}
+          activeFileId={workspace.activeFileId}
+          onSelectVault={onSelectVault}
+          onOpenVaultModal={() => setIsVaultModalOpen(true)}
+          onSelectFile={(id) => {
+            workspace.selectFile(id);
+            editorGrid.openFile(id);
+          }}
+          onCreateFile={workspace.createFile}
+          onCreateFolder={workspace.createFolder}
+          onRenameNode={workspace.renameNode}
+          onDeleteNode={workspace.deleteNode}
+          onDeleteNodes={workspace.deleteNodes}
+          onMoveNode={workspace.moveNode}
+          onRefresh={workspace.refreshNodes}
+        />
 
-        {/* Mobile Fullscreen Main Area */}
-        <div className="flex md:hidden flex-1 h-full overflow-hidden">
-          <PanelContentRenderer
-            panel={{ id: 'mobile-editor', type: 'editor', slot: 'center', title: '에디터' }}
-            vault={vault}
-            vaults={vaults}
-            workspace={workspace}
+        {/* Central Resizable Grid Editor Area */}
+        <main className="flex flex-1 flex-col overflow-hidden bg-[#1e1e22]">
+          <ResizableEditorGrid
+            layout={editorGrid.layout}
+            nodes={workspace.nodes}
             viewMode={viewMode}
             onToggleViewMode={toggleViewMode}
-            onSwitchToEdit={() => setViewMode('edit')}
+            onSelectTab={editorGrid.selectFile}
+            onCloseTab={editorGrid.closeFile}
             onNewNote={handleCreateNewNote}
-            onOpenVaultModal={() => setIsVaultModalOpen(true)}
-            onSelectVault={onSelectVault}
+            onSplit={editorGrid.split}
+            onCloseGroup={editorGrid.closeGroup}
             onSavingChange={setIsSaving}
             onStatsChange={setStats}
+            onRenameFile={workspace.renameNode}
           />
-        </div>
-
-        {/* Mobile Sidebar Off-canvas Drawer */}
-        <div
-          onClick={() => setIsMobileSidebarOpen(false)}
-          className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity duration-200 md:hidden ${
-            isMobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-          }`}
-        />
-        <div
-          className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] flex flex-col md:hidden bg-[#18181b] shadow-2xl transition-transform duration-200 ease-out ${
-            isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
-        >
-          <ObsidianSidebar
-            vault={vault}
-            vaults={vaults}
-            nodes={workspace.nodes}
-            activeFileId={workspace.activeFileId}
-            onOpenVaultModal={() => { setIsMobileSidebarOpen(false); setIsVaultModalOpen(true); }}
-            onSelectVault={(id) => { onSelectVault(id); setIsMobileSidebarOpen(false); }}
-            onSelectFile={(id) => { workspace.selectFile(id); setIsMobileSidebarOpen(false); }}
-            onCreateFile={async (name, pid) => {
-              const created = await workspace.createFile(name, pid);
-              setIsMobileSidebarOpen(false);
-              return created;
-            }}
-            onCreateFolder={workspace.createFolder}
-            onRenameNode={workspace.renameNode}
-            onDeleteNode={workspace.deleteNode}
-            onDeleteNodes={workspace.deleteNodes}
-            onMoveNode={workspace.moveNode}
-            onRefresh={workspace.refreshNodes}
-            onCloseMobile={() => setIsMobileSidebarOpen(false)}
-          />
-        </div>
+        </main>
       </div>
 
       <ObsidianStatusBar stats={stats} isSaving={isSaving} />

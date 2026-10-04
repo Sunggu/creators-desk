@@ -21,10 +21,14 @@
 | `ObsidianMarkdownView` | `src/components/editor/obsidian-markdown-view.tsx` | `{ fileId, fileName, initialContent, onDocChange, onStatsChange, ... }` | Distraction-free live editor centered with max-w-[840px] and consistent padding metrics |
 | `ObsidianMarkdownPreview` | `src/components/editor/obsidian-markdown-preview.tsx` | `{ title, content, onSwitchToEdit, onNavigateWikilink }` | Reading View aligned with editor metrics (max-w-[840px] centered) |
 | `ObsidianInlineTitle` | `src/components/editor/obsidian-inline-title.tsx` | `{ title, onRename, onEnter, autoFocus }` | Organic borderless document title heading synchronized with note file name |
-| `ObsidianVaultModal` | `src/components/vault/obsidian-vault-modal.tsx` | `{ isOpen, activeVaultId, vaults, onClose, ... }` | Obsidian-style modal for switching and managing vaults |
-| `WorkspacePanelContainer` | `src/components/layout/workspace-panel-container.tsx` | `{ panels, onMovePanel, onClosePanel, onToggleSplitPreview, ... }` | Flexible 3-slot (left, center, right) split-window layout engine |
-| `PanelWindowHeader` | `src/components/layout/panel-window-header.tsx` | `{ panel, onMoveLeft, onMoveRight, onToggleSplit, onClose }` | Window pane header with dynamic slot repositioning, split view & close actions |
-| `PanelContentRenderer` | `src/components/layout/panel-content-renderer.tsx` | `{ panel, vault, vaults, workspace, ... }` | Content resolver delegating to explorer, editor, or preview based on panel type |
+| `SidebarPanelContainer` | `src/components/sidebar/sidebar-panel-container.tsx` | `{ activeMenu, onClose, vault, nodes, ... }` | Swappable primary side panel (explorer, search, outline, plugins) with drag-resizable width |
+| `SearchPanel` | `src/components/sidebar/search-panel.tsx` | `{ nodes, onSelectFile }` | Fast live query filter searching file names and markdown contents |
+| `OutlinePanel` | `src/components/sidebar/outline-panel.tsx` | `{ activeFile }` | Live markdown document outline parsing H1-H6 heading hierarchy |
+| `PluginsPanel` | `src/components/sidebar/plugins-panel.tsx` | `{}` | Extensible plugin architecture and supported file formats status |
+| `ResizableEditorGrid` | `src/components/editor/resizable-editor-grid.tsx` | `{ layout, nodes, viewMode, onSplit, onSelectTab, ... }` | 1 or 2 group grid editor with interactive splitter resizing |
+| `EditorGroupView` | `src/components/editor/editor-group-view.tsx` | `{ group, nodes, viewMode, onSplit, ... }` | Editor group container hosting tab bar, editor instance, and drop zones |
+| `GridSplitter` | `src/components/editor/grid-splitter.tsx` | `{ direction, onMouseDown, isResizing }` | Interactive horizontal/vertical divider handle for resizing editor groups |
+| `EditorDropZone` | `src/components/editor/editor-drop-zone.tsx` | `{ onSplitDrop }` | Tab drag-and-drop overlay detecting right and bottom split zones |
 | `SettingsModal` | `src/components/settings/settings-modal.tsx` | `{ isOpen, activeVault, onClose, onRenameVault }` | Project settings, editor preferences, and commercial MIT open-source license modal |
 | `OpenSourceLicensesView` | `src/components/settings/open-source-licenses-view.tsx` | `{}` | 100% Permissive MIT/Apache-2.0 commercial allowance badges and OSS package catalog |
 
