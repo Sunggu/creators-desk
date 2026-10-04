@@ -146,6 +146,8 @@ export default function ObsidianShell({
               onSavingChange={setIsSaving}
               onStatsChange={setStats}
               onNewNote={handleCreateNewNote}
+              onRenameFile={workspace.renameNode}
+              autoFocusTitle={workspace.isNewFile}
             />
           </div>
         </main>

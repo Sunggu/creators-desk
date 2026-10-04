@@ -9,6 +9,8 @@ interface ObsidianEditorProps {
   onSavingChange: (isSaving: boolean) => void;
   onStatsChange: (stats: EditorStats) => void;
   onNewNote: () => void;
+  onRenameFile?: (id: string, newName: string) => Promise<unknown> | void;
+  autoFocusTitle?: boolean;
 }
 
 export default function ObsidianEditor({
@@ -16,6 +18,8 @@ export default function ObsidianEditor({
   onSavingChange,
   onStatsChange,
   onNewNote,
+  onRenameFile,
+  autoFocusTitle = false,
 }: ObsidianEditorProps) {
   const [content, setContent] = useState<string | null>(null);
   const [loadedFileId, setLoadedFileId] = useState<string | null>(null);
@@ -101,6 +105,8 @@ export default function ObsidianEditor({
       initialContent={content}
       onDocChange={handleDocChange}
       onStatsChange={onStatsChange}
+      onRenameFile={onRenameFile}
+      autoFocusTitle={autoFocusTitle}
     />
   );
 }

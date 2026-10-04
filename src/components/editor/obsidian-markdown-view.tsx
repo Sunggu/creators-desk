@@ -5,6 +5,7 @@ import { EditorState } from '@codemirror/state';
 import { EditorView, keymap, lineNumbers } from '@codemirror/view';
 import { useEffect, useRef } from 'react';
 import type { EditorStats } from '../../hooks/use-codemirror';
+import ObsidianInlineTitle from './obsidian-inline-title';
 
 const obsidianTheme = EditorView.theme(
   {
@@ -62,6 +63,8 @@ interface ObsidianMarkdownViewProps {
   initialContent: string;
   onDocChange: (doc: string) => void;
   onStatsChange: (stats: EditorStats) => void;
+  onRenameFile?: (id: string, newName: string) => Promise<unknown> | void;
+  autoFocusTitle?: boolean;
 }
 
 export default function ObsidianMarkdownView({
@@ -70,8 +73,11 @@ export default function ObsidianMarkdownView({
   initialContent,
   onDocChange,
   onStatsChange,
+  onRenameFile,
+  autoFocusTitle = false,
 }: ObsidianMarkdownViewProps) {
   const editorRootRef = useRef<HTMLDivElement | null>(null);
+  const viewRef = useRef<EditorView | null>(null);
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onDocChangeRef = useRef(onDocChange);
   onDocChangeRef.current = onDocChange;
@@ -127,12 +133,14 @@ export default function ObsidianMarkdownView({
       state: startState,
       parent: editorRootRef.current,
     });
+    viewRef.current = view;
 
     computeStats(startState);
 
     return () => {
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
       view.destroy();
+      viewRef.current = null;
     };
   }, [fileId]);
 
@@ -140,13 +148,13 @@ export default function ObsidianMarkdownView({
 
   return (
     <div className="h-full w-full overflow-y-auto bg-[#1e1e22]">
-      {/* Obsidian Note Title Header */}
-      <div className="max-w-[840px] mx-auto pt-6 px-4 md:px-12 pb-2 select-text">
-        <h1 className="text-2xl md:text-3xl font-extrabold text-zinc-100 tracking-tight">
-          {cleanTitle}
-        </h1>
-        <div className="mt-3 border-b border-[#282830]" />
-      </div>
+      {/* Obsidian Editable Inline Title */}
+      <ObsidianInlineTitle
+        title={cleanTitle}
+        onRename={(newTitle) => onRenameFile?.(fileId, `${newTitle}.md`)}
+        onEnter={() => viewRef.current?.focus()}
+        autoFocus={autoFocusTitle}
+      />
 
       {/* CodeMirror Mounting Target */}
       <div ref={editorRootRef} className="w-full" />

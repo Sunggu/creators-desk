@@ -4,10 +4,15 @@ import {
   manageFileNodeUseCase,
   manageSessionUseCase,
 } from '../infrastructure/di';
+import {
+  getUniqueFileName,
+  getUniqueFolderName,
+} from '../utils/name-generator';
 
 export function useActiveWorkspace(activeVaultId: string | null) {
   const [nodes, setNodes] = useState<FileNodeDto[]>([]);
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
+  const [newlyCreatedFileId, setNewlyCreatedFileId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const refreshNodes = useCallback(async () => {
@@ -80,29 +85,18 @@ export function useActiveWorkspace(activeVaultId: string | null) {
     async (customName?: string, parentId: string | null = null) => {
       if (!activeVaultId) return null;
 
-      let name = customName?.trim();
-      if (!name) {
-        const existingNames = new Set(nodes.map((n) => n.name.toLowerCase()));
-        if (!existingNames.has('untitled.md')) {
-          name = 'Untitled.md';
-        } else {
-          let i = 1;
-          while (existingNames.has(`untitled ${i}.md`)) {
-            i++;
-          }
-          name = `Untitled ${i}.md`;
-        }
-      }
+      const name =
+        customName?.trim() || getUniqueFileName(nodes.map((n) => n.name));
 
-      const cleanTitle = name.replace(/\.md$/i, '');
       const created = await manageFileNodeUseCase.createFile({
         vaultId: activeVaultId,
         parentId,
         name,
         type: 'file',
-        content: `# ${cleanTitle}\n\n`,
+        content: '',
       });
       await refreshNodes();
+      setNewlyCreatedFileId(created.id);
       selectFile(created.id);
       return created;
     },
@@ -112,19 +106,8 @@ export function useActiveWorkspace(activeVaultId: string | null) {
   const createFolder = useCallback(
     async (customName?: string, parentId: string | null = null) => {
       if (!activeVaultId) return null;
-      let name = customName?.trim();
-      if (!name) {
-        const existingNames = new Set(nodes.map((n) => n.name.toLowerCase()));
-        if (!existingNames.has('새 폴더')) {
-          name = '새 폴더';
-        } else {
-          let i = 1;
-          while (existingNames.has(`새 폴더 ${i}`)) {
-            i++;
-          }
-          name = `새 폴더 ${i}`;
-        }
-      }
+      const name =
+        customName?.trim() || getUniqueFolderName(nodes.map((n) => n.name));
 
       const created = await manageFileNodeUseCase.createFile({
         vaultId: activeVaultId,
@@ -141,6 +124,7 @@ export function useActiveWorkspace(activeVaultId: string | null) {
   const renameNode = useCallback(
     async (id: string, newName: string) => {
       const updated = await manageFileNodeUseCase.rename(id, newName);
+      setNewlyCreatedFileId((prev) => (prev === id ? null : prev));
       await refreshNodes();
       return updated;
     },
@@ -153,17 +137,20 @@ export function useActiveWorkspace(activeVaultId: string | null) {
       if (activeFileId === id) {
         selectFile(null);
       }
+      setNewlyCreatedFileId((prev) => (prev === id ? null : prev));
       await refreshNodes();
     },
     [activeFileId, refreshNodes, selectFile],
   );
 
   const activeFile = nodes.find((n) => n.id === activeFileId && n.type === 'file') ?? null;
+  const isNewFile = Boolean(activeFileId && activeFileId === newlyCreatedFileId);
 
   return {
     nodes,
     activeFile,
     activeFileId,
+    isNewFile,
     isLoading,
     createFile,
     createFolder,
