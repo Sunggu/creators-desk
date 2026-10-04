@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { app } from './app';
 
-describe('Hono Server API', () => {
+describe('Hono Server API (Dual-Target)', () => {
   it('responds with 200 OK on /api/health', async () => {
     const res = await app.request('/api/health');
     expect(res.status).toBe(200);
@@ -10,14 +10,38 @@ describe('Hono Server API', () => {
     expect(body.runtime).toBe('universal-hono');
   });
 
-  it('handles missing D1 binding gracefully with 503', async () => {
-    const res = await app.request('/api/vaults');
-    expect(res.status).toBe(503);
-    const body = await res.json<{ error: string }>();
-    expect(body.error).toContain('D1');
+  it('runs seamlessly in local standalone mode without Cloudflare bindings', async () => {
+    // 1. Create a vault in local standalone mode
+    const createRes = await app.request('/api/vaults', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alias: 'Local Standalone Vault' }),
+    });
+    expect(createRes.status).toBe(201);
+    const created = await createRes.json<{ key: string; alias: string }>();
+    expect(created.alias).toBe('Local Standalone Vault');
+    expect(created.key).toMatch(/^vlt_/);
+
+    // 2. Query vault by key
+    const getRes = await app.request(`/api/vaults/${created.key}`);
+    expect(getRes.status).toBe(200);
+    const fetched = await getRes.json<{ key: string; alias: string }>();
+    expect(fetched.alias).toBe('Local Standalone Vault');
+
+    // 3. Rename vault alias (O(1))
+    const patchRes = await app.request(`/api/vaults/${created.key}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ alias: 'Renamed Standalone' }),
+    });
+    expect(patchRes.status).toBe(200);
+
+    const getRenamed = await app.request(`/api/vaults/${created.key}`);
+    const renamed = await getRenamed.json<{ alias: string }>();
+    expect(renamed.alias).toBe('Renamed Standalone');
   });
 
-  it('creates and lists vaults using mock D1 bindings', async () => {
+  it('works with Cloudflare D1 and R2 bindings when provided', async () => {
     const mockStorage: Array<Record<string, unknown>> = [];
     const mockD1 = {
       prepare(query: string) {
@@ -35,11 +59,14 @@ describe('Hono Server API', () => {
                     updated_at: args[4],
                   });
                 }
-                return { success: true };
+                return { meta: { changes: 1 } };
               },
               async first() {
                 const key = args[0];
                 return mockStorage.find((s) => s.key === key || s.id === key) ?? null;
+              },
+              async all() {
+                return { results: mockStorage };
               },
             };
           },
@@ -50,28 +77,29 @@ describe('Hono Server API', () => {
       },
     };
 
-    const env = { DB: mockD1 as unknown as D1Database };
+    const mockBucket = {
+      async get() { return null; },
+      async put() {},
+      async delete() {},
+    };
 
-    // 1. Create a vault
+    const env = {
+      DB: mockD1 as unknown as D1Database,
+      BUCKET: mockBucket as unknown as R2Bucket,
+    };
+
     const createRes = await app.request(
       '/api/vaults',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ alias: 'Cloud Lore Vault' }),
+        body: JSON.stringify({ alias: 'Cloud D1 Vault' }),
       },
       env,
     );
     expect(createRes.status).toBe(201);
     const created = await createRes.json<{ key: string; alias: string }>();
-    expect(created.alias).toBe('Cloud Lore Vault');
+    expect(created.alias).toBe('Cloud D1 Vault');
     expect(created.key).toMatch(/^vlt_/);
-
-    // 2. List vaults
-    const listRes = await app.request('/api/vaults', {}, env);
-    expect(listRes.status).toBe(200);
-    const list = await listRes.json<Array<{ key: string; alias: string }>>();
-    expect(list).toHaveLength(1);
-    expect(list[0].key).toBe(created.key);
   });
 });

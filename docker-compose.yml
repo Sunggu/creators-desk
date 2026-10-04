@@ -1,0 +1,27 @@
+services:
+  # Creators Desk Standalone PKM & Content Generation Server
+  creators-desk:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: creators-desk:latest
+    container_name: creators-desk
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - HOST=0.0.0.0
+      - DATA_DIR=/data
+    volumes:
+      - ./data:/data
+
+  # (선택 사항) Cloudflare Tunnel (cloudflared): 공인 IP/포트포워딩 없이 도메인 무료 연결
+  # 사용 시 주석 해제 후 토큰을 입력하세요:
+  # tunnel:
+  #   image: cloudflare/cloudflared:latest
+  #   container_name: creators-desk-tunnel
+  #   restart: unless-stopped
+  #   command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+  #   depends_on:
+  #     - creators-desk

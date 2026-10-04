@@ -1,17 +1,13 @@
 import { Hono } from 'hono';
 import type { AppContext } from '../bindings';
+import { getContextStorage } from '../storage/get-context-storage';
 
 export const vaultsRouter = new Hono<AppContext>();
 
 vaultsRouter.get('/', async (c) => {
-  const db = c.env?.DB;
-  if (!db) {
-    return c.json({ error: 'D1 Database binding not found' }, 503);
-  }
-
-  const query = 'SELECT id, key, alias, created_at, updated_at FROM vaults ORDER BY updated_at DESC';
-  const { results } = await db.prepare(query).all();
-  const list = (results || []).map((row: Record<string, unknown>) => ({
+  const { db } = getContextStorage(c);
+  const results = await db.all('SELECT id, key, alias, created_at, updated_at FROM vaults ORDER BY updated_at DESC');
+  const list = results.map((row) => ({
     id: row.id as string,
     key: (row.key || row.id) as string,
     alias: (row.alias || row.name || 'Untitled') as string,
@@ -24,11 +20,7 @@ vaultsRouter.get('/', async (c) => {
 });
 
 vaultsRouter.post('/', async (c) => {
-  const db = c.env?.DB;
-  if (!db) {
-    return c.json({ error: 'D1 Database binding not found' }, 503);
-  }
-
+  const { db } = getContextStorage(c);
   const body = await c.req.json<{ alias?: string; name?: string; key?: string }>();
   const rawAlias = (body.alias || body.name || '').trim();
   if (!rawAlias) {
@@ -42,10 +34,10 @@ vaultsRouter.post('/', async (c) => {
 
   const key = body.key?.trim() || `vlt_${id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 10)}`;
 
-  await db
-    .prepare('INSERT INTO vaults (id, key, alias, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
-    .bind(id, key, rawAlias, now, now)
-    .run();
+  await db.run(
+    'INSERT INTO vaults (id, key, alias, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+    [id, key, rawAlias, now, now],
+  );
 
   const vault = {
     id,
@@ -60,16 +52,12 @@ vaultsRouter.post('/', async (c) => {
 });
 
 vaultsRouter.get('/:key', async (c) => {
-  const db = c.env?.DB;
-  if (!db) {
-    return c.json({ error: 'D1 Database binding not found' }, 503);
-  }
-
+  const { db } = getContextStorage(c);
   const keyParam = c.req.param('key');
-  const row = await db
-    .prepare('SELECT id, key, alias, created_at, updated_at FROM vaults WHERE key = ? OR id = ? LIMIT 1')
-    .bind(keyParam, keyParam)
-    .first();
+  const row = await db.first(
+    'SELECT id, key, alias, created_at, updated_at FROM vaults WHERE key = ? OR id = ? LIMIT 1',
+    [keyParam, keyParam],
+  );
 
   if (!row) {
     return c.json({ error: 'Vault not found' }, 404);
@@ -86,11 +74,7 @@ vaultsRouter.get('/:key', async (c) => {
 });
 
 vaultsRouter.patch('/:key', async (c) => {
-  const db = c.env?.DB;
-  if (!db) {
-    return c.json({ error: 'D1 Database binding not found' }, 503);
-  }
-
+  const { db } = getContextStorage(c);
   const keyParam = c.req.param('key');
   const body = await c.req.json<{ alias?: string; name?: string }>();
   const newAlias = (body.alias || body.name || '').trim();
@@ -99,25 +83,21 @@ vaultsRouter.patch('/:key', async (c) => {
   }
 
   const now = Date.now();
-  await db
-    .prepare('UPDATE vaults SET alias = ?, updated_at = ? WHERE key = ? OR id = ?')
-    .bind(newAlias, now, keyParam, keyParam)
-    .run();
+  await db.run(
+    'UPDATE vaults SET alias = ?, updated_at = ? WHERE key = ? OR id = ?',
+    [newAlias, now, keyParam, keyParam],
+  );
 
   return c.json({ key: keyParam, alias: newAlias, updatedAt: now });
 });
 
 vaultsRouter.delete('/:key', async (c) => {
-  const db = c.env?.DB;
-  if (!db) {
-    return c.json({ error: 'D1 Database binding not found' }, 503);
-  }
-
+  const { db } = getContextStorage(c);
   const keyParam = c.req.param('key');
-  await db
-    .prepare('DELETE FROM vaults WHERE key = ? OR id = ?')
-    .bind(keyParam, keyParam)
-    .run();
+  await db.run(
+    'DELETE FROM vaults WHERE key = ? OR id = ?',
+    [keyParam, keyParam],
+  );
 
   return c.json({ success: true, key: keyParam });
 });

@@ -1,12 +1,11 @@
 import { Hono } from 'hono';
 import type { AppContext } from '../bindings';
+import { getContextStorage } from '../storage/get-context-storage';
 
 export const searchRouter = new Hono<AppContext>();
 
 searchRouter.get('/:key/search', async (c) => {
-  const db = c.env?.DB;
-  if (!db) return c.json({ error: 'DB binding missing' }, 503);
-
+  const { db } = getContextStorage(c);
   const vaultKey = c.req.param('key');
   const query = c.req.query('q')?.trim();
   if (!query) {
@@ -14,7 +13,6 @@ searchRouter.get('/:key/search', async (c) => {
   }
 
   try {
-    // D1 SQLite FTS5 search
     const ftsQuery = `
       SELECT file_id, snippet(notes_fts, 3, '<b>', '</b>', '...', 16) AS match_snippet
       FROM notes_fts
@@ -23,7 +21,7 @@ searchRouter.get('/:key/search', async (c) => {
       LIMIT 30
     `;
 
-    const { results } = await db.prepare(ftsQuery).bind(vaultKey, `"${query}"*`).all();
+    const results = await db.all(ftsQuery, [vaultKey, `"${query}"*`]);
     return c.json(results || []);
   } catch (err) {
     console.error('FTS5 search error:', err);

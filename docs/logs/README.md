@@ -13,6 +13,7 @@
 | 2026-10-04 | [2026-10-04-obsidian-mobile-and-editor-fix.md](file:///home/horuru/Documents/projects/creators-desk/docs/logs/2026-10-04-obsidian-mobile-and-editor-fix.md) | 모바일 반응형 드로워 및 마크다운 에디터 렌더링 정상화 | Approved |
 | 2026-10-04 | [2026-10-04-obsidian-inline-title-rename.md](file:///home/horuru/Documents/projects/creators-desk/docs/logs/2026-10-04-obsidian-inline-title-rename.md) | 옵시디언 인라인 타이틀(Inline Title) 기반 파일명 변경 및 생성 흐름 일치 | Approved |
 | 2026-10-04 | [2026-10-04-architecture-hono-cloudflare-and-selfhost.md](file:///home/horuru/Documents/projects/creators-desk/docs/logs/2026-10-04-architecture-hono-cloudflare-and-selfhost.md) | Vite + Hono 기반 오픈소스 셀프호스팅 및 Cloudflare SaaS 듀얼 아키텍처 채택 | Approved |
+| 2026-10-04 | [2026-10-04-standalone-docker-and-local-storage-adapters.md](file:///home/horuru/Documents/projects/creators-desk/docs/logs/2026-10-04-standalone-docker-and-local-storage-adapters.md) | 로컬 SQLite/FS 스토리지 어댑터 및 독립형 도커(Docker) 셀프호스팅 환경 구현 | Approved |
 
 
 
