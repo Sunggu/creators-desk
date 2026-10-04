@@ -1,33 +1,39 @@
+import type { Clock } from '../ports/clock.port';
 import type { CreateFileNodeDto } from '../../domain/create-file-node.dto';
 import type { FileNodeDto } from '../../domain/file-node.dto';
+import { AppError } from '../../domain/errors/app-error';
+import { generateId } from '../../domain/generate-id';
 import type { FileRepository } from '../ports/file.repository';
 
 export class ManageFileNodeUseCase {
   private readonly fileRepo: FileRepository;
+  private readonly clock: Clock;
 
-  constructor(fileRepo: FileRepository) {
+  constructor(fileRepo: FileRepository, clock?: Clock) {
     this.fileRepo = fileRepo;
+    this.clock = clock ?? { now: () => Date.now() as any };
   }
 
   async createFile(dto: CreateFileNodeDto): Promise<FileNodeDto> {
     const trimmed = dto.name.trim();
     if (!trimmed) {
-      throw new Error('Name cannot be empty');
+      throw new AppError('file.nameRequired');
     }
 
     const finalName = dto.type === 'file' && !trimmed.endsWith('.md')
       ? `${trimmed}.md`
       : trimmed;
 
+    const now = this.clock.now();
     const node: FileNodeDto = {
-      id: crypto.randomUUID(),
+      id: generateId('node'),
       vaultId: dto.vaultId,
       parentId: dto.parentId ?? null,
       name: finalName,
       type: dto.type,
       content: dto.content ?? '',
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
+      createdAt: now,
+      updatedAt: now,
     };
 
     return this.fileRepo.create(node);
@@ -36,12 +42,12 @@ export class ManageFileNodeUseCase {
   async rename(id: string, newName: string): Promise<FileNodeDto> {
     const trimmed = newName.trim();
     if (!trimmed) {
-      throw new Error('Name cannot be empty');
+      throw new AppError('file.nameRequired');
     }
 
     const existing = await this.fileRepo.findById(id);
     if (!existing) {
-      throw new Error('File not found');
+      throw new AppError('file.notFound', { fileId: id });
     }
 
     const finalName = existing.type === 'file' && !trimmed.endsWith('.md')
@@ -50,27 +56,27 @@ export class ManageFileNodeUseCase {
 
     return this.fileRepo.update(id, {
       name: finalName,
-      updatedAt: Date.now(),
+      updatedAt: this.clock.now(),
     });
   }
 
   async move(id: string, newParentId: string | null): Promise<FileNodeDto> {
     const target = await this.fileRepo.findById(id);
-    if (!target) throw new Error('File not found');
+    if (!target) throw new AppError('file.notFound', { fileId: id });
     if (target.parentId === newParentId) return target;
-    if (newParentId === id) throw new Error('Cannot move a node into itself');
+    if (newParentId === id) throw new AppError('file.moveIntoSelf', { fileId: id });
 
     if (target.type === 'folder' && newParentId) {
       const allNodes = await this.fileRepo.findByVaultId(target.vaultId);
       const descendants = this.collectDescendantIds(id, allNodes);
       if (descendants.includes(newParentId)) {
-        throw new Error('Cannot move a folder into its own descendant');
+        throw new AppError('file.moveIntoDescendant', { fileId: id });
       }
     }
 
     return this.fileRepo.update(id, {
       parentId: newParentId,
-      updatedAt: Date.now(),
+      updatedAt: this.clock.now(),
     });
   }
 

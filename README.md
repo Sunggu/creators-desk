@@ -44,7 +44,7 @@ flowchart TD
 
 | 구분 | 오픈소스 셀프호스팅 (Community) | 유료 관리형 SaaS (`creator.binarygap.com`) |
 |---|---|---|
-| **라이선스 & 비용** | 완전 무료 오픈소스 (Apache-2.0 / MIT) | 월/연 구독형 관리 서비스 |
+| **라이선스 & 비용** | 완전 무료 오픈소스 (AGPL-3.0) | 월/연 구독형 관리 서비스 |
 | **타깃 사용자** | 개발자, 자체 NAS/서버/라즈베리파이 사용자 | 작가, 기획자, 즉시 사용을 원하는 크리에이터 |
 | **스토리지** | 로컬 디스크 디렉토리 + SQLite | **Cloudflare R2 (파일)** + **D1 (메타데이터/FTS5)** |
 | **배포 방식** | `docker compose up` 단일 컨테이너 (~30MB RAM) | 가입 즉시 글로벌 엣지(Edge) 무설정 사용 |
@@ -106,11 +106,14 @@ pnpm install
 # 2. 로컬 개발 서버 실행
 pnpm dev
 
-# 3. 단위 테스트 실행 (20/20 Vitest Suite)
+# 3. 단위 테스트 실행 (Vitest)
 pnpm test
 
-# 4. 프로덕션 빌드
+# 4. 프로덕션 빌드 (고지서 최신 상태 자동 검증 포함)
 pnpm build
+
+# 5. 의존성을 추가/삭제한 뒤에는 오픈소스 고지서를 재생성
+pnpm run notices
 ```
 
 ---
@@ -127,7 +130,36 @@ docker compose up -d
 
 ---
 
-## 5. License
+## 5. License / 고지
 
-Apache-2.0 / MIT Dual License.
+본 저장소는 **AGPL-3.0** 로 라이선스됩니다. 전문은 [`LICENSE`](./LICENSE) 에 있습니다.
+
+AGPL-3.0 은 네트워크를 통해 제공되는 프로그램에도 소스 코드 공개 의무를 부과합니다.
+앱 안의 **오픈소스 고지** 탭과 배포물에 포함된 고지서 모두에 원본 소스 코드 경로가 명시되어 있습니다.
+
+### 5.1 오픈소스 고지서 (Open Source Notice)
+
+| 산출물 | 위치 | 제공 형태 |
+|---|---|---|
+| 고지 페이지 | `public/notice.html` → 배포 후 `/notice.html` | 웹 페이지 (검색·목록·라이선스 전문·인쇄 지원) |
+| 평문 고지서 | `THIRD-PARTY-NOTICES.txt` | 컨테이너 이미지 및 저장소에 동봉 |
+| 앱 내 진입점 | 하단 상태바의 `오픈소스 고지` 링크, 환경설정(`📜 오픈소스 고지`) | 앱 내 이동 |
+
+고지 대상은 **브라우저·서버 번들과 프로덕션 이미지(`node_modules`)에 함께 배포되는 패키지**로,
+빌드 도구(Vite, TypeScript, ESLint 등)는 포함하지 않습니다.
+단, 배포물 CSS 에 코드가 반영되는 Tailwind CSS 는 별도 절로 구분해 기재합니다.
+
+### 5.2 고지서 갱신
+
+고지서는 수동으로 관리하지 않고 자동 생성됩니다.
+
+```bash
+pnpm run notices         # notices/catalog.json + node_modules 트리 -> 고지서 2종 생성
+pnpm run notices:check   # 최신 상태만 검증 (빌드 시 자동 실행)
+```
+
+- 버전·저장소 URL·저작권 문구는 설치된 `node_modules` 의 `package.json` 과 `LICENSE` 원문에서 추출합니다.
+- `notices/catalog.json` 은 자동 수집되지 않는 메타데이터(한국어 설명, 그룹, 고지 범위)만 기재합니다.
+- `pnpm test` 와 `pnpm run build` 가 생성물의 최신 상태를 검증하므로, 라이브러리를 추가하고
+  고지서를 갱신하지 않으면 빌드가 실패합니다.
 

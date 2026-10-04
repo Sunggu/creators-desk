@@ -13,6 +13,7 @@ interface ResizableEditorGridProps {
   onToggleViewMode: () => void;
   onSelectTab: (groupId: string, fileId: string) => void;
   onCloseTab: (groupId: string, fileId: string) => void;
+  onCloseOtherTabs?: (groupId: string, fileId: string) => void;
   onNewNote: () => void;
   onSplit: (sourceGroupId: string, fileId: string, direction: SplitDirection) => void;
   onCloseGroup: (groupId: string) => void;
@@ -28,6 +29,7 @@ export default function ResizableEditorGrid({
   onToggleViewMode,
   onSelectTab,
   onCloseTab,
+  onCloseOtherTabs,
   onNewNote,
   onSplit,
   onCloseGroup,
@@ -58,6 +60,7 @@ export default function ResizableEditorGrid({
           onToggleViewMode={onToggleViewMode}
           onSelectTab={(fileId) => onSelectTab(groups[0].id, fileId)}
           onCloseTab={(fileId) => onCloseTab(groups[0].id, fileId)}
+          onCloseOtherTabs={(fileId) => onCloseOtherTabs?.(groups[0].id, fileId)}
           onNewNote={onNewNote}
           onSplit={(fileId, dir) => onSplit(groups[0].id, fileId, dir)}
           onCloseGroup={() => {}}
@@ -100,6 +103,7 @@ export default function ResizableEditorGrid({
           onToggleViewMode={onToggleViewMode}
           onSelectTab={(fileId) => onSelectTab(groups[0].id, fileId)}
           onCloseTab={(fileId) => onCloseTab(groups[0].id, fileId)}
+          onCloseOtherTabs={(fileId) => onCloseOtherTabs?.(groups[0].id, fileId)}
           onNewNote={onNewNote}
           onSplit={(fileId, dir) => onSplit(groups[0].id, fileId, dir)}
           onCloseGroup={() => onCloseGroup(groups[0].id)}
@@ -124,6 +128,7 @@ export default function ResizableEditorGrid({
           onToggleViewMode={onToggleViewMode}
           onSelectTab={(fileId) => onSelectTab(groups[1].id, fileId)}
           onCloseTab={(fileId) => onCloseTab(groups[1].id, fileId)}
+          onCloseOtherTabs={(fileId) => onCloseOtherTabs?.(groups[1].id, fileId)}
           onNewNote={onNewNote}
           onSplit={(fileId, dir) => onSplit(groups[1].id, fileId, dir)}
           onCloseGroup={() => onCloseGroup(groups[1].id)}

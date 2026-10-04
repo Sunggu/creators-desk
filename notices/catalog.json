@@ -1,0 +1,107 @@
+{
+  "description": "Creators Desk 고지서 카탈로그. 자동 수집되지 않는 메타데이터(한국어 설명, 그룹, 고지 범위, 저작권/라이선스 보정)만 기재합니다. 이름은 package.json의 이름과 정확히 일치해야 합니다.",
+  "defaultScope": "bundled",
+  "packages": {
+    "react": {
+      "group": "React",
+      "description": "사용자 인터페이스 구축을 위한 선언적 컴포넌트 라이브러리"
+    },
+    "react-dom": {
+      "group": "React",
+      "description": "React 컴포넌트를 브라우저 DOM에 렌더링하는 런타임"
+    },
+    "scheduler": {
+      "group": "React",
+      "description": "React 동시 렌더링 작업을 스케줄링하는 내부 런타임"
+    },
+    "@codemirror/state": {
+      "group": "CodeMirror 6",
+      "description": "에디터 상태 및 문서 모델 관리 계층"
+    },
+    "@codemirror/view": {
+      "group": "CodeMirror 6",
+      "description": "에디터 화면 구성과 키보드/마우스 입력 처리 계층"
+    },
+    "@codemirror/commands": {
+      "group": "CodeMirror 6",
+      "description": "실행 취소, 검색, 들여쓰기 등 편집 명령 모음"
+    },
+    "@codemirror/language": {
+      "group": "CodeMirror 6",
+      "description": "언어 지원 인프라스트럭처와 파서 연결 계층"
+    },
+    "@codemirror/lang-markdown": {
+      "group": "CodeMirror 6",
+      "description": "마크다운 문법 지원 언어 모드"
+    },
+    "@codemirror/autocomplete": {
+      "group": "CodeMirror 6",
+      "description": "코드 에디터 자동 완성 기능"
+    },
+    "@codemirror/lint": {
+      "group": "CodeMirror 6",
+      "description": "정적 검사 문제를 에디터에 표시하는 기능"
+    },
+    "@lezer/common": {
+      "group": "Lezer 파서",
+      "description": "구문 트리 자료구조와 파서 공통 인터페이스"
+    },
+    "@lezer/highlight": {
+      "group": "Lezer 파서",
+      "description": "구문 트리 기반 구문 강조 시스템"
+    },
+    "@lezer/lr": {
+      "group": "Lezer 파서",
+      "description": "증분 LR 파서 엔진"
+    },
+    "@lezer/markdown": {
+      "group": "Lezer 파서",
+      "description": "마크다운 증분 파서"
+    },
+    "@lezer/css": {
+      "group": "Lezer 파서",
+      "description": "lezer 기반 CSS 문법 정의"
+    },
+    "@lezer/html": {
+      "group": "Lezer 파서",
+      "description": "lezer 기반 HTML 문법 정의"
+    },
+    "@lezer/javascript": {
+      "group": "Lezer 파서",
+      "description": "lezer 기반 JavaScript 문법 정의"
+    },
+    "hono": {
+      "group": "Hono",
+      "description": "웹 표준만으로 동작하는 초경량 웹 프레임워크"
+    },
+    "@hono/node-server": {
+      "group": "Hono",
+      "description": "Hono 애플리케이션을 Node.js 서버에서 구동하는 어댑터"
+    },
+    "marked": {
+      "group": "마크다운 처리",
+      "description": "속도와 표준 준수를 중시한 마크다운 파서"
+    },
+    "crelt": {
+      "group": "유틸리티",
+      "description": "DOM 요소 생성용 경량 유틸리티"
+    },
+    "style-mod": {
+      "group": "유틸리티",
+      "description": "경량 CSS 모듈 셰임 구현"
+    },
+    "w3c-keyname": {
+      "group": "유틸리티",
+      "description": "KeyboardEvent 키 값을 표준 문자열로 변환하는 유틸리티"
+    },
+    "@marijn/find-cluster-break": {
+      "group": "유틸리티",
+      "description": "문자열의 그래핌 클러스터 경계를 탐색하는 유틸리티"
+    },
+    "tailwindcss": {
+      "group": "배포물 CSS 생성",
+      "scope": "build-output",
+      "description": "유틸리티 우선 CSS 프레임워크. 빌드 단계에서 배포물 CSS에 스타일이 반영됩니다."
+    }
+  }
+}

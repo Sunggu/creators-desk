@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>오픈소스 소프트웨어 고지서 · Creators Desk</title>
+    <style>
+:root {
+  --bg: #121215;
+  --surface: #18181b;
+  --surface-2: #1e1e24;
+  --border: #2a2a32;
+  --text: #d4d4d8;
+  --text-strong: #fafafa;
+  --muted: #a1a1aa;
+  --accent: #a78bfa;
+  --ok: #6ee7b7;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.wrap { max-width: 60rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+header.hero {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: linear-gradient(160deg, #1c1b22, var(--surface));
+  padding: 1.75rem;
+}
+h1 { margin: 0 0 .35rem; font-size: 1.5rem; color: var(--text-strong); letter-spacing: -.01em; }
+.subtitle { margin: 0; color: var(--muted); font-size: .82rem; }
+.badges { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+.badge {
+  border-radius: 6px; padding: .15rem .5rem; font-size: .72rem; font-weight: 600;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.badge-license { background: rgba(167,139,250,.16); color: #c4b5fd; border: 1px solid rgba(167,139,250,.3); }
+.badge-version { background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }
+section { margin-top: 2.25rem; }
+h2 { margin: 0 0 .5rem; font-size: 1.1rem; color: var(--text-strong); }
+h3 { margin: 1.5rem 0 .6rem; font-size: .92rem; color: var(--text-strong); }
+p { margin: .5rem 0; }
+.lead { color: var(--muted); font-size: .82rem; }
+.card { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); padding: 1.25rem; }
+.card + .card { margin-top: .75rem; }
+a { color: var(--accent); }
+a:hover { color: #c4b5fd; }
+dl.meta { display: grid; grid-template-columns: 8.5rem 1fr; gap: .4rem 1rem; margin: 0; font-size: .82rem; }
+dl.meta dt { color: var(--muted); }
+dl.meta dd { margin: 0; color: var(--text); word-break: break-all; }
+.notice-box { border-left: 3px solid var(--ok); background: rgba(110,231,183,.07); padding: .85rem 1rem; border-radius: 0 8px 8px 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: 1.25rem 0 .5rem; }
+.toolbar input {
+  flex: 1 1 16rem; padding: .5rem .75rem; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--surface-2); color: var(--text); font-size: .85rem; outline: none;
+}
+.toolbar input:focus { border-color: var(--accent); }
+.count { color: var(--muted); font-size: .78rem; }
+ol.toc { list-style: none; padding: 0; margin: .5rem 0 0; }
+ol.toc li { border-bottom: 1px solid var(--border); }
+ol.toc li:last-child { border-bottom: 0; }
+ol.toc a { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline; padding: .5rem .25rem; text-decoration: none; font-size: .84rem; }
+ol.toc a:hover { background: var(--surface); }
+.num { color: var(--muted); font-family: ui-monospace, monospace; font-size: .75rem; min-width: 1.6rem; }
+.lic { margin-left: auto; font-size: .68rem; font-family: ui-monospace, monospace; padding: .05rem .4rem; border-radius: 4px; background: rgba(167,139,250,.14); color: #c4b5fd; }
+.entry { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); padding: 1.1rem; scroll-margin-top: 1rem; }
+.entry + .entry { margin-top: .6rem; }
+.entry-head { display: flex; flex-wrap: wrap; gap: .5rem; align-items: baseline; }
+.entry-name { color: var(--text-strong); font-weight: 600; font-size: .95rem; }
+.entry-version { color: var(--muted); font-family: ui-monospace, monospace; font-size: .78rem; }
+.entry-desc { margin: .4rem 0 0; color: var(--muted); font-size: .82rem; }
+.copyright { margin: .55rem 0 0; padding: .5rem .7rem; border-radius: 6px; background: #101013; border: 1px solid #23232b; font-family: ui-monospace, monospace; font-size: .74rem; white-space: pre-wrap; word-break: break-word; color: #c9c9d1; }
+.entry-links { margin-top: .55rem; font-size: .78rem; }
+.entry-links a { margin-right: .9rem; }
+details.license-text { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); padding: .85rem 1.1rem; }
+details.license-text + details.license-text { margin-top: .6rem; }
+details.license-text summary { cursor: pointer; color: var(--text-strong); font-weight: 600; font-size: .88rem; }
+details.license-text pre { margin: .85rem 0 0; padding: .9rem; border-radius: 8px; background: #0d0d10; border: 1px solid #23232b; overflow-x: auto; font-size: .72rem; line-height: 1.5; white-space: pre-wrap; word-break: break-word; color: #b9b9c2; }
+.hidden { display: none !important; }
+footer.page-foot { margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--border); color: var(--muted); font-size: .76rem; }
+@media print {
+  body { background: #fff; color: #000; }
+  .toolbar { display: none; }
+  .card, .entry, details.license-text, header.hero { border-color: #ccc; background: #fff; }
+  details.license-text[open] pre, pre { color: #000; background: #fafafa; border-color: #ddd; }
+  a { color: #000; }
+}
+</style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="hero">
+        <h1>오픈소스 소프트웨어 고지서 (Open Source Notice)</h1>
+        <p class="subtitle">Creators Desk v0.0.0 에 포함된 오픈소스 소프트웨어의 저작권 및 라이선스 정보입니다.</p>
+        <div class="badges">
+          <span class="badge badge-license">본 제품 라이선스: AGPL-3.0</span>
+          <span class="badge badge-version">고지 대상 28개 · 라이선스 1종</span>
+        </div>
+      </header>
+
+      <section>
+        <h2>1. 본 제품에 대하여</h2>
+        <div class="card">
+          <dl class="meta">
+            <dt>제품명</dt><dd>Creators Desk</dd>
+            <dt>버전</dt><dd>0.0.0</dd>
+            <dt>라이선스</dt><dd>AGPL-3.0</dd>
+            <dt>저작권</dt><dd>Copyright (C) 2026 Creators Desk Contributors</dd>
+            <dt>원본 소스</dt><dd><a href="https://github.com/Sunggu/creators-desk" target="_blank" rel="noreferrer noopener">https://github.com/Sunggu/creators-desk</a></dd>
+            <dt>문의처</dt><dd><a href="mailto:colin@binarygap.com">colin@binarygap.com</a></dd>
+          </dl>
+        </div>
+        <div class="notice-box">
+          <p><strong>소스 코드 공개 안내 (AGPL-3.0 제13조).</strong></p>
+          <p>Creators Desk는 네트워크를 통해 제공되는 소프트웨어입니다. 본 제품에 접속하여 이를 수정·실행하는 경우에도 원본 소스 코드를 아래 경로에서 받아 사용할 수 있습니다.</p>
+          <p><a href="https://github.com/Sunggu/creators-desk" target="_blank" rel="noreferrer noopener">https://github.com/Sunggu/creators-desk</a></p>
+          <p class="lead">전체 소스 코드를 통째로 제공받아 COPYING 파일(라이선스 전문)을 함께 보존하여 자유롭게 이용하실 수도 있습니다.</p>
+        </div>
+      </section>
+
+      <section>
+        <h2>2. 고지 대상 목록 (Table of Contents)</h2>
+        <div class="toolbar">
+          <input id="notice-search" type="search" placeholder="패키지명, 설명, 저작권자 검색" aria-label="패키지 검색" />
+          <span class="count" id="notice-count"></span>
+        </div>
+    <ol class="toc">
+      <li><a href="#pkg-marked" data-toc="pkg-marked">
+        <span class="num">1.</span>
+        <span>marked</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-marijn-find-cluster-break" data-toc="pkg-marijn-find-cluster-break">
+        <span class="num">2.</span>
+        <span>@marijn/find-cluster-break</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-crelt" data-toc="pkg-crelt">
+        <span class="num">3.</span>
+        <span>crelt</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-style-mod" data-toc="pkg-style-mod">
+        <span class="num">4.</span>
+        <span>style-mod</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-w3c-keyname" data-toc="pkg-w3c-keyname">
+        <span class="num">5.</span>
+        <span>w3c-keyname</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-codemirror-autocomplete" data-toc="pkg-codemirror-autocomplete">
+        <span class="num">6.</span>
+        <span>@codemirror/autocomplete</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-codemirror-commands" data-toc="pkg-codemirror-commands">
+        <span class="num">7.</span>
+        <span>@codemirror/commands</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-codemirror-lang-markdown" data-toc="pkg-codemirror-lang-markdown">
+        <span class="num">8.</span>
+        <span>@codemirror/lang-markdown</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-codemirror-language" data-toc="pkg-codemirror-language">
+        <span class="num">9.</span>
+        <span>@codemirror/language</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-codemirror-lint" data-toc="pkg-codemirror-lint">
+        <span class="num">10.</span>
+        <span>@codemirror/lint</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-codemirror-state" data-toc="pkg-codemirror-state">
+        <span class="num">11.</span>
+        <span>@codemirror/state</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-codemirror-view" data-toc="pkg-codemirror-view">
+        <span class="num">12.</span>
+        <span>@codemirror/view</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-hono-node-server" data-toc="pkg-hono-node-server">
+        <span class="num">13.</span>
+        <span>@hono/node-server</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-hono" data-toc="pkg-hono">
+        <span class="num">14.</span>
+        <span>hono</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-lezer-common" data-toc="pkg-lezer-common">
+        <span class="num">15.</span>
+        <span>@lezer/common</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-lezer-css" data-toc="pkg-lezer-css">
+        <span class="num">16.</span>
+        <span>@lezer/css</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-lezer-highlight" data-toc="pkg-lezer-highlight">
+        <span class="num">17.</span>
+        <span>@lezer/highlight</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-lezer-html" data-toc="pkg-lezer-html">
+        <span class="num">18.</span>
+        <span>@lezer/html</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-lezer-javascript" data-toc="pkg-lezer-javascript">
+        <span class="num">19.</span>
+        <span>@lezer/javascript</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-lezer-lr" data-toc="pkg-lezer-lr">
+        <span class="num">20.</span>
+        <span>@lezer/lr</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-lezer-markdown" data-toc="pkg-lezer-markdown">
+        <span class="num">21.</span>
+        <span>@lezer/markdown</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-react" data-toc="pkg-react">
+        <span class="num">22.</span>
+        <span>react</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-react-dom" data-toc="pkg-react-dom">
+        <span class="num">23.</span>
+        <span>react-dom</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-scheduler" data-toc="pkg-scheduler">
+        <span class="num">24.</span>
+        <span>scheduler</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-codemirror-lang-css" data-toc="pkg-codemirror-lang-css">
+        <span class="num">25.</span>
+        <span>@codemirror/lang-css</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-codemirror-lang-html" data-toc="pkg-codemirror-lang-html">
+        <span class="num">26.</span>
+        <span>@codemirror/lang-html</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-codemirror-lang-javascript" data-toc="pkg-codemirror-lang-javascript">
+        <span class="num">27.</span>
+        <span>@codemirror/lang-javascript</span>
+        <span class="lic">MIT</span>
+      </a></li>
+      <li><a href="#pkg-tailwindcss" data-toc="pkg-tailwindcss">
+        <span class="num">28.</span>
+        <span>tailwindcss</span>
+        <span class="lic">MIT</span>
+      </a></li>
+    </ol>
+      </section>
+
+    <section id="scope-bundled">
+      <h2>1. 배포물에 포함된 오픈소스 소프트웨어</h2>
+      <p class="lead">브라우저 번들, 서버 번들, 프로덕션 이미지(node_modules)에 함께 배포되는 패키지입니다.</p>
+      <h3>마크다운 처리</h3>
+      <article class="entry" id="pkg-marked" data-search="marked 속도와 표준 준수를 중시한 마크다운 파서 mit copyright (c) 2018+, markedjs (https://github.com/markedjs/)
+copyright (c) 2011-2018, christopher jeffrey (https://github.com/chjj/)
+copyright © 2004, john gruber">
+        <div class="entry-head">
+          <span class="num">1.</span>
+          <span class="entry-name">marked</span>
+          <span class="entry-version">v18.0.14</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">속도와 표준 준수를 중시한 마크다운 파서</p>
+        <pre class="copyright">Copyright (c) 2018+, MarkedJS (https://github.com/markedjs/)
+Copyright (c) 2011-2018, Christopher Jeffrey (https://github.com/chjj/)
+Copyright © 2004, John Gruber</pre>
+        <div class="entry-links">
+        <a href="https://github.com/markedjs/marked" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <h3>유틸리티</h3>
+      <article class="entry" id="pkg-marijn-find-cluster-break" data-search="@marijn/find-cluster-break 문자열의 그래핌 클러스터 경계를 탐색하는 유틸리티 mit copyright (c) 2024 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt;">
+        <div class="entry-head">
+          <span class="num">2.</span>
+          <span class="entry-name">@marijn/find-cluster-break</span>
+          <span class="entry-version">v1.0.4</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">문자열의 그래핌 클러스터 경계를 탐색하는 유틸리티</p>
+        <pre class="copyright">Copyright (C) 2024 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt;</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/marijn/find-cluster-break" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-crelt" data-search="crelt dom 요소 생성용 경량 유틸리티 mit copyright (c) 2020 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt;">
+        <div class="entry-head">
+          <span class="num">3.</span>
+          <span class="entry-name">crelt</span>
+          <span class="entry-version">v1.0.7</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">DOM 요소 생성용 경량 유틸리티</p>
+        <pre class="copyright">Copyright (C) 2020 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt;</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/marijn/crelt" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-style-mod" data-search="style-mod 경량 css 모듈 셰임 구현 mit copyright (c) 2018 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">4.</span>
+          <span class="entry-name">style-mod</span>
+          <span class="entry-version">v4.1.4</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">경량 CSS 모듈 셰임 구현</p>
+        <pre class="copyright">Copyright (C) 2018 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/marijn/style-mod" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-w3c-keyname" data-search="w3c-keyname keyboardevent 키 값을 표준 문자열로 변환하는 유틸리티 mit copyright (c) 2016 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">5.</span>
+          <span class="entry-name">w3c-keyname</span>
+          <span class="entry-version">v2.2.8</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">KeyboardEvent 키 값을 표준 문자열로 변환하는 유틸리티</p>
+        <pre class="copyright">Copyright (C) 2016 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://github.com/marijnh/w3c-keyname" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <h3>CodeMirror 6</h3>
+      <article class="entry" id="pkg-codemirror-autocomplete" data-search="@codemirror/autocomplete 코드 에디터 자동 완성 기능 mit copyright (c) 2018-2021 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">6.</span>
+          <span class="entry-name">@codemirror/autocomplete</span>
+          <span class="entry-version">v6.20.3</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">코드 에디터 자동 완성 기능</p>
+        <pre class="copyright">Copyright (C) 2018-2021 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/codemirror/autocomplete" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-codemirror-commands" data-search="@codemirror/commands 실행 취소, 검색, 들여쓰기 등 편집 명령 모음 mit copyright (c) 2018-2021 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">7.</span>
+          <span class="entry-name">@codemirror/commands</span>
+          <span class="entry-version">v6.11.1</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">실행 취소, 검색, 들여쓰기 등 편집 명령 모음</p>
+        <pre class="copyright">Copyright (C) 2018-2021 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/codemirror/commands" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-codemirror-lang-markdown" data-search="@codemirror/lang-markdown 마크다운 문법 지원 언어 모드 mit copyright (c) 2018-2021 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">8.</span>
+          <span class="entry-name">@codemirror/lang-markdown</span>
+          <span class="entry-version">v6.5.2</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">마크다운 문법 지원 언어 모드</p>
+        <pre class="copyright">Copyright (C) 2018-2021 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/codemirror/lang-markdown" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-codemirror-language" data-search="@codemirror/language 언어 지원 인프라스트럭처와 파서 연결 계층 mit copyright (c) 2018-2021 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">9.</span>
+          <span class="entry-name">@codemirror/language</span>
+          <span class="entry-version">v6.12.4</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">언어 지원 인프라스트럭처와 파서 연결 계층</p>
+        <pre class="copyright">Copyright (C) 2018-2021 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/codemirror/language" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-codemirror-lint" data-search="@codemirror/lint 정적 검사 문제를 에디터에 표시하는 기능 mit copyright (c) 2018-2021 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">10.</span>
+          <span class="entry-name">@codemirror/lint</span>
+          <span class="entry-version">v6.9.7</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">정적 검사 문제를 에디터에 표시하는 기능</p>
+        <pre class="copyright">Copyright (C) 2018-2021 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/codemirror/lint" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-codemirror-state" data-search="@codemirror/state 에디터 상태 및 문서 모델 관리 계층 mit copyright (c) 2018-2021 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">11.</span>
+          <span class="entry-name">@codemirror/state</span>
+          <span class="entry-version">v6.7.6</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">에디터 상태 및 문서 모델 관리 계층</p>
+        <pre class="copyright">Copyright (C) 2018-2021 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/codemirror/state" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-codemirror-view" data-search="@codemirror/view 에디터 화면 구성과 키보드/마우스 입력 처리 계층 mit copyright (c) 2018-2021 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">12.</span>
+          <span class="entry-name">@codemirror/view</span>
+          <span class="entry-version">v6.43.13</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">에디터 화면 구성과 키보드/마우스 입력 처리 계층</p>
+        <pre class="copyright">Copyright (C) 2018-2021 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/codemirror/view" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <h3>Hono</h3>
+      <article class="entry" id="pkg-hono-node-server" data-search="@hono/node-server hono 애플리케이션을 node.js 서버에서 구동하는 어댑터 mit copyright (c) 2022 - present, yusuke wada and hono contributors">
+        <div class="entry-head">
+          <span class="num">13.</span>
+          <span class="entry-name">@hono/node-server</span>
+          <span class="entry-version">v2.1.3</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">Hono 애플리케이션을 Node.js 서버에서 구동하는 어댑터</p>
+        <pre class="copyright">Copyright (c) 2022 - present, Yusuke Wada and Hono contributors</pre>
+        <div class="entry-links">
+        <a href="https://github.com/honojs/node-server" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-hono" data-search="hono 웹 표준만으로 동작하는 초경량 웹 프레임워크 mit copyright (c) 2021 - present, yusuke wada and hono contributors">
+        <div class="entry-head">
+          <span class="num">14.</span>
+          <span class="entry-name">hono</span>
+          <span class="entry-version">v4.13.12</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">웹 표준만으로 동작하는 초경량 웹 프레임워크</p>
+        <pre class="copyright">Copyright (c) 2021 - present, Yusuke Wada and Hono contributors</pre>
+        <div class="entry-links">
+        <a href="https://github.com/honojs/hono" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <h3>Lezer 파서</h3>
+      <article class="entry" id="pkg-lezer-common" data-search="@lezer/common 구문 트리 자료구조와 파서 공통 인터페이스 mit copyright (c) 2018 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">15.</span>
+          <span class="entry-name">@lezer/common</span>
+          <span class="entry-version">v1.5.3</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">구문 트리 자료구조와 파서 공통 인터페이스</p>
+        <pre class="copyright">Copyright (C) 2018 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/lezer/common" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-lezer-css" data-search="@lezer/css lezer 기반 css 문법 정의 mit copyright (c) 2018 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">16.</span>
+          <span class="entry-name">@lezer/css</span>
+          <span class="entry-version">v1.3.8</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">lezer 기반 CSS 문법 정의</p>
+        <pre class="copyright">Copyright (C) 2018 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/lezer/css" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-lezer-highlight" data-search="@lezer/highlight 구문 트리 기반 구문 강조 시스템 mit copyright (c) 2018 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">17.</span>
+          <span class="entry-name">@lezer/highlight</span>
+          <span class="entry-version">v1.2.5</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">구문 트리 기반 구문 강조 시스템</p>
+        <pre class="copyright">Copyright (C) 2018 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/lezer/highlight" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-lezer-html" data-search="@lezer/html lezer 기반 html 문법 정의 mit copyright (c) 2018 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">18.</span>
+          <span class="entry-name">@lezer/html</span>
+          <span class="entry-version">v1.3.13</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">lezer 기반 HTML 문법 정의</p>
+        <pre class="copyright">Copyright (C) 2018 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://github.com/lezer-parser/html" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-lezer-javascript" data-search="@lezer/javascript lezer 기반 javascript 문법 정의 mit copyright (c) 2018 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">19.</span>
+          <span class="entry-name">@lezer/javascript</span>
+          <span class="entry-version">v1.5.6</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">lezer 기반 JavaScript 문법 정의</p>
+        <pre class="copyright">Copyright (C) 2018 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/lezer/javascript" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-lezer-lr" data-search="@lezer/lr 증분 lr 파서 엔진 mit copyright (c) 2018 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">20.</span>
+          <span class="entry-name">@lezer/lr</span>
+          <span class="entry-version">v1.4.10</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">증분 LR 파서 엔진</p>
+        <pre class="copyright">Copyright (C) 2018 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/lezer/lr" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-lezer-markdown" data-search="@lezer/markdown 마크다운 증분 파서 mit copyright (c) 2020 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">21.</span>
+          <span class="entry-name">@lezer/markdown</span>
+          <span class="entry-version">v1.7.2</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">마크다운 증분 파서</p>
+        <pre class="copyright">Copyright (C) 2020 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/lezer/markdown" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <h3>React</h3>
+      <article class="entry" id="pkg-react" data-search="react 사용자 인터페이스 구축을 위한 선언적 컴포넌트 라이브러리 mit copyright (c) meta platforms, inc. and affiliates.">
+        <div class="entry-head">
+          <span class="num">22.</span>
+          <span class="entry-name">react</span>
+          <span class="entry-version">v19.3.0</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">사용자 인터페이스 구축을 위한 선언적 컴포넌트 라이브러리</p>
+        <pre class="copyright">Copyright (c) Meta Platforms, Inc. and affiliates.</pre>
+        <div class="entry-links">
+        <a href="https://github.com/react/react" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-react-dom" data-search="react-dom react 컴포넌트를 브라우저 dom에 렌더링하는 런타임 mit copyright (c) meta platforms, inc. and affiliates.">
+        <div class="entry-head">
+          <span class="num">23.</span>
+          <span class="entry-name">react-dom</span>
+          <span class="entry-version">v19.3.0</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">React 컴포넌트를 브라우저 DOM에 렌더링하는 런타임</p>
+        <pre class="copyright">Copyright (c) Meta Platforms, Inc. and affiliates.</pre>
+        <div class="entry-links">
+        <a href="https://github.com/react/react" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-scheduler" data-search="scheduler react 동시 렌더링 작업을 스케줄링하는 내부 런타임 mit copyright (c) meta platforms, inc. and affiliates.">
+        <div class="entry-head">
+          <span class="num">24.</span>
+          <span class="entry-name">scheduler</span>
+          <span class="entry-version">v0.28.0</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">React 동시 렌더링 작업을 스케줄링하는 내부 런타임</p>
+        <pre class="copyright">Copyright (c) Meta Platforms, Inc. and affiliates.</pre>
+        <div class="entry-links">
+        <a href="https://github.com/react/react" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <h3>기타 오픈소스</h3>
+      <article class="entry" id="pkg-codemirror-lang-css" data-search="@codemirror/lang-css css language support for the codemirror code editor mit copyright (c) 2018-2021 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">25.</span>
+          <span class="entry-name">@codemirror/lang-css</span>
+          <span class="entry-version">v6.3.1</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">CSS language support for the CodeMirror code editor</p>
+        <pre class="copyright">Copyright (C) 2018-2021 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://github.com/codemirror/lang-css" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-codemirror-lang-html" data-search="@codemirror/lang-html html language support for the codemirror code editor mit copyright (c) 2018-2021 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">26.</span>
+          <span class="entry-name">@codemirror/lang-html</span>
+          <span class="entry-version">v6.4.12</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">HTML language support for the CodeMirror code editor</p>
+        <pre class="copyright">Copyright (C) 2018-2021 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://code.haverbeke.berlin/codemirror/lang-html" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+      <article class="entry" id="pkg-codemirror-lang-javascript" data-search="@codemirror/lang-javascript javascript language support for the codemirror code editor mit copyright (c) 2018-2021 by marijn haverbeke &lt;marijn@haverbeke.berlin&gt; and others">
+        <div class="entry-head">
+          <span class="num">27.</span>
+          <span class="entry-name">@codemirror/lang-javascript</span>
+          <span class="entry-version">v6.2.5</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">JavaScript language support for the CodeMirror code editor</p>
+        <pre class="copyright">Copyright (C) 2018-2021 by Marijn Haverbeke &lt;marijn@haverbeke.berlin&gt; and others</pre>
+        <div class="entry-links">
+        <a href="https://github.com/codemirror/lang-javascript" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+    </section>
+    <section id="scope-build-output">
+      <h2>2. 배포물 생성에 반영된 빌드 단계 라이브러리</h2>
+      <p class="lead">빌드 단계에서 배포물(CSS 등)에 코드가 반영되는 패키지입니다.</p>
+      <h3>배포물 CSS 생성</h3>
+      <article class="entry" id="pkg-tailwindcss" data-search="tailwindcss 유틸리티 우선 css 프레임워크. 빌드 단계에서 배포물 css에 스타일이 반영됩니다. mit copyright (c) tailwind labs, inc.">
+        <div class="entry-head">
+          <span class="num">28.</span>
+          <span class="entry-name">tailwindcss</span>
+          <span class="entry-version">v4.3.3</span>
+          <span class="lic">MIT</span>
+        </div>
+        <p class="entry-desc">유틸리티 우선 CSS 프레임워크. 빌드 단계에서 배포물 CSS에 스타일이 반영됩니다.</p>
+        <pre class="copyright">Copyright (c) Tailwind Labs, Inc.</pre>
+        <div class="entry-links">
+        <a href="https://github.com/tailwindlabs/tailwindcss" target="_blank" rel="noreferrer noopener">저장소</a>
+        <a href="#license-mit">라이선스 전문</a>
+        <span class="entry-links" style="margin:0;color:var(--muted)">원본 파일: LICENSE</span>
+        </div>
+      </article>
+    </section>
+
+      <section>
+        <h2>4. 라이선스 전문</h2>
+        <p class="lead">아래 전문은 각 패키지 배포물에 포함되는 라이선스 원문과 동일합니다.</p>
+    <details class="license-text" id="license-mit" open>
+      <summary>MIT License</summary>
+      <pre>MIT License
+
+Copyright (c) &lt;year&gt; &lt;copyright holders&gt;
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the &quot;Software&quot;), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</pre>
+    </details>
+      </section>
+
+      <footer class="page-foot">
+        <p>본 고지서는 <code>package.json</code>의 프로덕션 의존성과 설치된 <code>node_modules</code> 트리에서 자동으로 생성되었습니다.</p>
+        <p>라이브러리 추가·삭제 시 <code>pnpm run notices</code>로 본 문서를 다시 생성하십시오. 문의: <a href="mailto:colin@binarygap.com">colin@binarygap.com</a></p>
+      </footer>
+    </div>
+    <script>
+(function () {
+  var input = document.getElementById('notice-search');
+  var count = document.getElementById('notice-count');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('[data-search]'));
+  var tocLinks = Array.prototype.slice.call(document.querySelectorAll('[data-toc]'));
+  function apply() {
+    var query = input.value.trim().toLowerCase();
+    var visible = 0;
+    cards.forEach(function (card) {
+      var hit = !query || card.dataset.search.toLowerCase().indexOf(query) !== -1;
+      card.classList.toggle('hidden', !hit);
+      if (hit) visible += 1;
+    });
+    tocLinks.forEach(function (link) {
+      link.classList.toggle('hidden', query !== '' && document.getElementById(link.dataset.toc).classList.contains('hidden'));
+    });
+    count.textContent = query
+      ? visible + ' / ' + cards.length + ' 개 표시'
+      : '총 ' + cards.length + '개 패키지';
+  }
+  input.addEventListener('input', apply);
+  apply();
+})();
+</script>
+  </body>
+</html>

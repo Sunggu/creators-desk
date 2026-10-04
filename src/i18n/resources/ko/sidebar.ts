@@ -1,0 +1,23 @@
+/** BASELINE BUNDLE - Korean. See `./common.ts` for the baseline contract. */
+export const sidebarKo = {
+  heading: '탐색기',
+  newNote: '새 노트',
+  newFolder: '새 폴더',
+  createNote: '+ 새 노트 만들기',
+  rename: '이름 바꾸기',
+  copyName: '이름 복사',
+  remove: '삭제',
+  newNoteShortcut: '새 노트 (+)',
+  newFolderTitle: '새 폴더',
+  refreshTitle: '새로고침',
+  closeMobile: '닫기',
+  selectedCount: '{{count}}개 선택됨',
+  deleteSelected: '선택된 항목 일괄 삭제',
+  clearSelection: '취소',
+  empty: '노트가 없습니다.',
+  renamePrompt: '새 이름:',
+  deleteConfirm: "'{{name}}'을(를) 삭제하시겠습니까?",
+  bulkDeleteConfirm: '선택한 {{count}}개 항목을 모두 삭제하시겠습니까?',
+  createNotePrompt: '새 노트 이름:',
+  createFolderPrompt: '새 폴더 이름:',
+};

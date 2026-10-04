@@ -1,4 +1,5 @@
 import type { EditorStats } from '../../hooks/use-codemirror';
+import { NOTICE_PAGE_URL } from '../../core/project-license';
 
 interface ObsidianStatusBarProps {
   stats: EditorStats;
@@ -14,6 +15,15 @@ export default function ObsidianStatusBar({
       {/* Left side */}
       <div className="flex items-center space-x-3">
         <span className="hidden sm:inline">0개의 백링크</span>
+        <a
+          href={NOTICE_PAGE_URL}
+          target="_blank"
+          rel="noreferrer noopener"
+          title="본 제품에 포함된 오픈소스 소프트웨어의 저작권 및 라이선스 정보"
+          className="rounded px-1 py-0.5 transition hover:bg-[#1e1e24] hover:text-zinc-300"
+        >
+          오픈소스 고지
+        </a>
       </div>
 
       {/* Right side */}

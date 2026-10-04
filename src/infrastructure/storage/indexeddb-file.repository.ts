@@ -1,13 +1,19 @@
 import type { FileRepository } from '../../core/application/ports/file.repository';
+import type { Clock } from '../../core/application/ports/clock.port';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
+import { AppError } from '../../core/domain/errors/app-error';
 import { idbDatabase, type IdbDatabase, STORES } from './idb-database';
+import { systemClock } from './system-clock';
+import { applyUpdate } from './timestamps';
 
 export class IndexedDbFileRepository implements FileRepository {
   private readonly db: IdbDatabase;
+  private readonly clock: Clock;
   private readonly memoryCache = new Map<string, FileNodeDto>();
 
-  constructor(db: IdbDatabase = idbDatabase) {
+  constructor(db: IdbDatabase = idbDatabase, clock: Clock = systemClock) {
     this.db = db;
+    this.clock = clock;
   }
 
   async findByVaultId(vaultId: string): Promise<FileNodeDto[]> {
@@ -68,14 +74,10 @@ export class IndexedDbFileRepository implements FileRepository {
   async update(id: string, updates: Partial<FileNodeDto>): Promise<FileNodeDto> {
     const existing = await this.findById(id);
     if (!existing) {
-      throw new Error(`FileNode ${id} not found`);
+      throw new AppError('file.notFound', { fileId: id });
     }
 
-    const updated: FileNodeDto = {
-      ...existing,
-      ...updates,
-      updatedAt: Date.now(),
-    };
+    const updated = applyUpdate(existing, updates, this.clock.now());
     this.memoryCache.set(id, updated);
 
     try {

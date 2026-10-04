@@ -11,10 +11,13 @@ export function isSystemTimeZone(timeZone: TimeZoneSetting): boolean {
  * Validates an IANA identifier by round-tripping it through `Intl`.
  * `Intl` is part of ECMA-402 and therefore available in every runtime this
  * project targets (browsers, Cloudflare Workers, Node, Bun, Docker).
+ *
+ * NOTE: rejects the sentinel on purpose - `Intl` throws on `'system'`. Use
+ * {@link isValidTimeZoneSetting} when validating a *stored preference*.
  */
 export function isValidTimeZone(timeZone: unknown): timeZone is TimeZoneSetting {
   if (typeof timeZone !== 'string' || timeZone.length === 0) return false;
-  if (isSystemTimeZone(timeZone)) return true;
+  if (isSystemTimeZone(timeZone)) return false;
 
   try {
     new Intl.DateTimeFormat(UTC_TIME_ZONE, { timeZone });
@@ -22,6 +25,14 @@ export function isValidTimeZone(timeZone: unknown): timeZone is TimeZoneSetting 
   } catch {
     return false;
   }
+}
+
+/**
+ * Validates a *stored* preference: either a real IANA zone or the
+ * follow-the-runtime sentinel.
+ */
+export function isValidTimeZoneSetting(value: unknown): value is TimeZoneSetting {
+  return isSystemTimeZone(value as TimeZoneSetting) || isValidTimeZone(value);
 }
 
 /** The runtime's own zone, normalized to `UTC` when the host cannot report one. */
@@ -35,14 +46,19 @@ export function getSystemTimeZone(): TimeZoneSetting {
 }
 
 /**
- * Collapses a stored preference into a concrete zone usable by `Intl`.
- * Invalid or missing values degrade to `fallback` (the runtime zone), never throw.
+ * Collapses a stored preference into a **concrete** zone that `Intl` accepts.
+ * The sentinel expands to the runtime zone; invalid or missing values degrade
+ * to `fallback`, then to the runtime zone. Never throws.
+ *
+ * This is the single gate every formatter passes through, which is what makes
+ * "stored value" and "Intl argument" impossible to mix up.
  */
-export function resolveTimeZone(
+export function toIntlTimeZone(
   timeZone: TimeZoneSetting | null | undefined,
   fallback: TimeZoneSetting = SYSTEM_TIME_ZONE,
 ): TimeZoneSetting {
-  if (isValidTimeZone(timeZone)) return timeZone as TimeZoneSetting;
+  if (timeZone === SYSTEM_TIME_ZONE) return getSystemTimeZone();
+  if (isValidTimeZone(timeZone)) return timeZone;
   if (isValidTimeZone(fallback)) return fallback;
   return getSystemTimeZone();
 }
@@ -53,10 +69,10 @@ export function resolveTimeZone(
  */
 export function getUtcOffsetMinutes(
   millis: EpochMillis,
-  timeZone: TimeZoneSetting = getSystemTimeZone(),
+  timeZone: TimeZoneSetting = SYSTEM_TIME_ZONE,
 ): number {
   const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: resolveTimeZone(timeZone),
+    timeZone: toIntlTimeZone(timeZone),
     hourCycle: 'h23',
     year: 'numeric',
     month: '2-digit',
@@ -67,7 +83,7 @@ export function getUtcOffsetMinutes(
   }).formatToParts(new Date(millis));
 
   const read = (type: Intl.DateTimeFormatPartTypes): number =>
-    Number(parts.find((part) => part.type === type)?.value ?? NaN);
+    Number(parts.find((part) => part.type === type)?.value ?? Number.NaN);
 
   const asUtc = Date.UTC(
     read('year'),

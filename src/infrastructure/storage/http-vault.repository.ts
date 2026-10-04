@@ -1,7 +1,14 @@
 import type { VaultRepository } from '../../core/application/ports/vault.repository';
+import type { Clock } from '../../core/application/ports/clock.port';
 import type { VaultDto } from '../../core/domain/vault.dto';
+import type { EpochMillis } from '../../core/domain/time/epoch-millis.dto';
+import { systemClock } from './system-clock';
+import { applyUpdate } from './timestamps';
 
-function normalizeVault(v: Partial<VaultDto> & { alias?: string; name?: string; key?: string; id: string }): VaultDto {
+function normalizeVault(
+  v: Partial<VaultDto> & { alias?: string; name?: string; key?: string; id: string },
+  fallbackMillis: EpochMillis,
+): VaultDto {
   const alias = v.alias || v.name || 'Untitled Vault';
   const key = v.key || v.id;
   return {
@@ -9,8 +16,8 @@ function normalizeVault(v: Partial<VaultDto> & { alias?: string; name?: string; 
     key,
     alias,
     name: alias,
-    createdAt: v.createdAt || Date.now(),
-    updatedAt: v.updatedAt || Date.now(),
+    createdAt: v.createdAt ?? fallbackMillis,
+    updatedAt: v.updatedAt ?? fallbackMillis,
   };
 }
 
@@ -18,10 +25,16 @@ export class HttpVaultRepository implements VaultRepository {
   private readonly baseUrl: string;
   private readonly cache = new Map<string, VaultDto>();
   private readonly fallback?: VaultRepository;
+  private readonly clock: Clock;
 
-  constructor(baseUrl: string = '/api/vaults', fallback?: VaultRepository) {
+  constructor(
+    baseUrl: string = '/api/vaults',
+    fallback?: VaultRepository,
+    clock: Clock = systemClock,
+  ) {
     this.baseUrl = baseUrl;
     this.fallback = fallback;
+    this.clock = clock;
   }
 
   async findAll(): Promise<VaultDto[]> {
@@ -29,7 +42,7 @@ export class HttpVaultRepository implements VaultRepository {
       const res = await fetch(this.baseUrl);
       if (!res.ok) throw new Error(`Failed to fetch vaults: ${res.statusText}`);
       const data = await res.json();
-      const list = (data as Array<Partial<VaultDto> & { id: string }>).map(normalizeVault);
+      const list = (data as Array<Partial<VaultDto> & { id: string }>).map((v) => normalizeVault(v, this.clock.now()));
       this.cache.clear();
       for (const v of list) {
         this.cache.set(v.id, v);
@@ -52,7 +65,7 @@ export class HttpVaultRepository implements VaultRepository {
       if (!res.ok) throw new Error(`Failed to find vault by id: ${id}`);
 
       const data = (await res.json()) as Partial<VaultDto> & { id: string };
-      const vault = normalizeVault(data);
+      const vault = normalizeVault(data, this.clock.now());
       this.cache.set(vault.id, vault);
       this.cache.set(vault.key, vault);
       return vault;
@@ -80,7 +93,7 @@ export class HttpVaultRepository implements VaultRepository {
       if (!res.ok) throw new Error(`Failed to create vault: ${res.statusText}`);
 
       const data = (await res.json()) as Partial<VaultDto> & { id: string };
-      const created = normalizeVault(data);
+      const created = normalizeVault(data, this.clock.now());
       this.cache.set(created.id, created);
       this.cache.set(created.key, created);
       return created;
@@ -103,12 +116,11 @@ export class HttpVaultRepository implements VaultRepository {
       if (!res.ok) throw new Error(`Failed to update vault: ${res.statusText}`);
 
       const existing = await this.findById(id);
-      const updated = normalizeVault({
-        ...(existing || {}),
-        id,
-        ...updates,
-        updatedAt: Date.now(),
-      });
+      const base = existing ?? { id, key: id, alias: '', name: '', createdAt: 0, updatedAt: 0 };
+      const updated = normalizeVault(
+        applyUpdate(base, updates, this.clock.now()),
+        this.clock.now(),
+      );
       this.cache.set(updated.id, updated);
       this.cache.set(updated.key, updated);
       return updated;

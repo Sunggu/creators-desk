@@ -60,7 +60,7 @@ Domain Layer (Pure DTOs, Entities, Invariants)
 | Inline Title & Explorer | `ManageFileNodeUseCase` | `ObsidianInlineTitle`, `ObsidianSidebar`, `HttpFileRepository` |
 | Primary Sidebar Panels | `SidebarPanelContainer` | `SearchPanel`, `OutlinePanel`, `PluginsPanel`, `ObsidianSidebar` |
 | Resizable Grid Editor | `useEditorGrid`, `useResizable` | `ResizableEditorGrid`, `EditorGroupView`, `GridSplitter`, `EditorDropZone` |
-| Settings & Open-Source | `SettingsModal`, `OpenSourceLicensesView` | `SettingsModal`, `open-source-licenses-data.ts` |
+| Settings & Open-Source Notice | `scripts/generate-notices.mjs` (build-time) | `SettingsModal`, `OpenSourceLicensesView`, `LicenseNoticeCard`, `SourceCodeOffer`, `public/notice.html` |
 | CodeMirror Markdown | `FileContentUseCase` | `ObsidianMarkdownView`, `ObsidianEditor`, `HttpFileRepository` |
 | Hono Universal API | `/api/vaults`, `/api/files`, `/api/search` | `src/server/app.ts`, `src/server/routes/*`, `functions/api/[[route]].ts` |
 

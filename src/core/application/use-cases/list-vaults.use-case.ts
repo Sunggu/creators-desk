@@ -1,4 +1,5 @@
 import type { VaultDto } from '../../domain/vault.dto';
+import { byUpdatedAtDesc } from '../../domain/time/epoch-millis';
 import type { VaultRepository } from '../ports/vault.repository';
 
 export class ListVaultsUseCase {
@@ -10,6 +11,8 @@ export class ListVaultsUseCase {
 
   async execute(): Promise<VaultDto[]> {
     const vaults = await this.vaultRepo.findAll();
-    return [...vaults].sort((a, b) => b.updatedAt - a.updatedAt);
+    // Ordered by raw epoch milliseconds: the sequence must not depend on the
+    // viewer's locale or time zone.
+    return [...vaults].sort(byUpdatedAtDesc);
   }
 }

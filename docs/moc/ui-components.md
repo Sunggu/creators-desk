@@ -17,6 +17,7 @@
 | `FileTreeActions` | `src/components/sidebar/file-tree-actions.tsx` | `{ isFolder, onNewFile, onNewFolder, onRename, onDelete }` | Hover action buttons Lego block for quick file/folder addition and deletion |
 | `ExplorerContextMenu` | `src/components/sidebar/explorer-context-menu.tsx` | `{ x, y, targetNode, onClose, onNewFile, onNewFolder, onRename, onDelete }` | VS Code/Code Server style right-click context menu with keyboard shortcuts |
 | `ObsidianTabBar` | `src/components/tabs/obsidian-tab-bar.tsx` | `{ openFiles, activeFileId, viewMode, onToggleViewMode, onSelectTab, onCloseTab, onNewNote }` | Zero-margin multi-tab bar connected to editor with invisible active border, hidden scrollbars |
+| `TabContextMenu` | `src/components/tabs/tab-context-menu.tsx` | `{ x, y, fileId, onClose, onSplitRight, onSplitDown, onCloseTab, onCloseOtherTabs }` | Right-click context menu for editor tabs providing split horizontal/vertical and tab closing actions |
 | `ObsidianEditor` | `src/components/editor/obsidian-editor.tsx` | `{ activeFile, viewMode, onSwitchToEdit, onSavingChange, ... }` | Master editor container switching between Live Edit, Reading Preview, and Code Server empty state |
 | `ObsidianMarkdownView` | `src/components/editor/obsidian-markdown-view.tsx` | `{ fileId, fileName, initialContent, onDocChange, onStatsChange, ... }` | Distraction-free live editor centered with max-w-[840px] and consistent padding metrics |
 | `ObsidianMarkdownPreview` | `src/components/editor/obsidian-markdown-preview.tsx` | `{ title, content, onSwitchToEdit, onNavigateWikilink }` | Reading View aligned with editor metrics (max-w-[840px] centered) |
@@ -29,8 +30,11 @@
 | `EditorGroupView` | `src/components/editor/editor-group-view.tsx` | `{ group, nodes, viewMode, onSplit, ... }` | Editor group container hosting tab bar, editor instance, and drop zones |
 | `GridSplitter` | `src/components/editor/grid-splitter.tsx` | `{ direction, onMouseDown, isResizing }` | Interactive horizontal/vertical divider handle for resizing editor groups |
 | `EditorDropZone` | `src/components/editor/editor-drop-zone.tsx` | `{ onSplitDrop }` | Tab drag-and-drop overlay detecting right and bottom split zones |
-| `SettingsModal` | `src/components/settings/settings-modal.tsx` | `{ isOpen, activeVault, onClose, onRenameVault }` | Project settings, editor preferences, and commercial MIT open-source license modal |
-| `OpenSourceLicensesView` | `src/components/settings/open-source-licenses-view.tsx` | `{}` | 100% Permissive MIT/Apache-2.0 commercial allowance badges and OSS package catalog |
+| `SettingsModal` | `src/components/settings/settings-modal.tsx` | `{ isOpen, activeVault, onClose, onRenameVault }` | Project settings, editor preferences, and open-source notice modal |
+| `OpenSourceLicensesView` | `src/components/settings/open-source-licenses-view.tsx` | `{}` | AGPL-3.0 product licence summary, source-code offer, and entry point to the full generated notice |
+| `LicenseNoticeCard` | `src/components/settings/license-notice-card.tsx` | `{ className }` | Product name, version, licence badge and copyright row; also exports `NoticePageLink` |
+| `SourceCodeOffer` | `src/components/settings/source-code-offer.tsx` | `{ className }` | AGPL-3.0 section 13 source-code offer with the repository link |
+| (static) Open Source Notice | `public/notice.html` (generated) | — | Standalone self-contained notice page: search, table of contents, per-library copyright, full licence texts |
 
 ## Lego Rules
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { EditorGridLayoutDto } from '../core/domain/editor-grid.dto';
-import { closeFileInGroupHelper, splitGroupHelper } from './use-editor-grid';
+import { closeFileInGroupHelper, closeOtherFilesInGroupHelper, splitGroupHelper } from './use-editor-grid';
 
 describe('useEditorGrid pure helpers', () => {
   const initialLayout: EditorGridLayoutDto = {
@@ -30,5 +30,16 @@ describe('useEditorGrid pure helpers', () => {
     const afterClose = closeFileInGroupHelper(split, secondGroupId, 'file-2');
     expect(afterClose.groups).toHaveLength(1);
     expect(afterClose.groups[0].id).toBe('group-main');
+  });
+
+  it('closes all other files in group keeping target file', () => {
+    const threeFilesLayout: EditorGridLayoutDto = {
+      direction: 'horizontal',
+      groups: [{ id: 'group-main', fileIds: ['file-1', 'file-2', 'file-3'], activeFileId: 'file-1' }],
+      splitRatio: 0.5,
+    };
+    const result = closeOtherFilesInGroupHelper(threeFilesLayout, 'group-main', 'file-2');
+    expect(result.groups[0].fileIds).toEqual(['file-2']);
+    expect(result.groups[0].activeFileId).toBe('file-2');
   });
 });

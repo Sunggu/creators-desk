@@ -130,6 +130,7 @@ export default function ObsidianShell({
             onToggleViewMode={toggleViewMode}
             onSelectTab={editorGrid.selectFile}
             onCloseTab={editorGrid.closeFile}
+            onCloseOtherTabs={editorGrid.closeOtherFiles}
             onNewNote={handleCreateNewNote}
             onSplit={editorGrid.split}
             onCloseGroup={editorGrid.closeGroup}

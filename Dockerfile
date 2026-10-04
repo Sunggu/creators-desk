@@ -37,6 +37,10 @@ RUN npm install --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/dist-server ./dist-server
 
+# Licence texts: AGPL-3.0 for this product, attributions for bundled libraries.
+# The same documents are reachable in the running app at /notice.html
+COPY LICENSE THIRD-PARTY-NOTICES.txt ./
+
 # Volume for user notes and SQLite database
 VOLUME ["/data"]
 

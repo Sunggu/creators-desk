@@ -66,6 +66,24 @@ export function closeFileInGroupHelper(
   return { ...layout, groups: updatedGroups };
 }
 
+export function closeOtherFilesInGroupHelper(
+  layout: EditorGridLayoutDto,
+  groupId: string,
+  keepFileId: string
+): EditorGridLayoutDto {
+  return {
+    ...layout,
+    groups: layout.groups.map((group) => {
+      if (group.id !== groupId) return group;
+      return {
+        ...group,
+        fileIds: [keepFileId],
+        activeFileId: keepFileId,
+      };
+    }),
+  };
+}
+
 export function useEditorGrid(initialLayout: EditorGridLayoutDto = DEFAULT_GRID_LAYOUT) {
   const [layout, setLayout] = useState<EditorGridLayoutDto>(initialLayout);
 
@@ -98,6 +116,10 @@ export function useEditorGrid(initialLayout: EditorGridLayoutDto = DEFAULT_GRID_
     setLayout((prev) => splitGroupHelper(prev, sourceGroupId, fileId, direction));
   }, []);
 
+  const closeOtherFiles = useCallback((groupId: string, keepFileId: string) => {
+    setLayout((prev) => closeOtherFilesInGroupHelper(prev, groupId, keepFileId));
+  }, []);
+
   const closeGroup = useCallback((groupId: string) => {
     setLayout((prev) => {
       if (prev.groups.length <= 1) return prev;
@@ -113,6 +135,7 @@ export function useEditorGrid(initialLayout: EditorGridLayoutDto = DEFAULT_GRID_
     layout,
     openFile,
     closeFile,
+    closeOtherFiles,
     selectFile,
     split,
     closeGroup,

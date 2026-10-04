@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
+import TabContextMenu from './tab-context-menu';
 
 interface ObsidianTabBarProps {
   openFiles: FileNodeDto[];
@@ -7,9 +9,10 @@ interface ObsidianTabBarProps {
   onToggleViewMode?: () => void;
   onSelectTab: (fileId: string) => void;
   onCloseTab: (fileId: string) => void;
+  onCloseOtherTabs?: (fileId: string) => void;
   onNewNote: () => void;
-  onSplitHorizontal?: () => void;
-  onSplitVertical?: () => void;
+  onSplitHorizontal?: (fileId?: string) => void;
+  onSplitVertical?: (fileId?: string) => void;
   onCloseGroup?: () => void;
   canCloseGroup?: boolean;
 }
@@ -21,12 +24,21 @@ export default function ObsidianTabBar({
   onToggleViewMode,
   onSelectTab,
   onCloseTab,
+  onCloseOtherTabs,
   onNewNote,
   onSplitHorizontal,
   onSplitVertical,
   onCloseGroup,
   canCloseGroup,
 }: ObsidianTabBarProps) {
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; fileId: string } | null>(null);
+
+  const handleTabContextMenu = (e: React.MouseEvent, fileId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ x: e.clientX, y: e.clientY, fileId });
+  };
+
   return (
     <div className="hidden md:flex h-9 w-full items-end justify-between border-b border-[#26262e] bg-[#141417] px-0 select-none relative">
       {/* Tab List */}
@@ -45,12 +57,13 @@ export default function ObsidianTabBar({
                 e.dataTransfer.effectAllowed = 'move';
               }}
               onClick={() => onSelectTab(file.id)}
+              onContextMenu={(e) => handleTabContextMenu(e, file.id)}
               className={`group flex items-center space-x-2 text-xs font-medium transition-colors cursor-pointer select-none ${
                 isActive
                   ? 'relative z-10 -mb-[1px] h-9 px-3.5 bg-[#1e1e22] text-zinc-100 border-t-2 border-violet-500 border-x border-[#26262e] border-b-0'
                   : 'h-8 mb-[1px] px-3 bg-transparent text-zinc-400 hover:bg-[#1a1a1e] hover:text-zinc-200 border-r border-[#222228]'
               }`}
-              title={`${cleanTitle} (드래그하여 창 분할 가능)`}
+              title={`${cleanTitle} (우클릭하여 분할 화면)`}
             >
               {isActive && <span className="h-1.5 w-1.5 rounded-full bg-violet-400 shrink-0" />}
               <span className="truncate max-w-40">{cleanTitle}</span>
@@ -85,7 +98,7 @@ export default function ObsidianTabBar({
       <div className="mb-1.5 flex items-center space-x-1 pr-2">
         {onSplitHorizontal && (
           <button
-            onClick={onSplitHorizontal}
+            onClick={() => onSplitHorizontal()}
             className="flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:bg-[#202026] hover:text-violet-300 transition cursor-pointer"
             title="우측으로 창 분할 (좌/우 나란히 보기)"
           >
@@ -97,7 +110,7 @@ export default function ObsidianTabBar({
 
         {onSplitVertical && (
           <button
-            onClick={onSplitVertical}
+            onClick={() => onSplitVertical()}
             className="flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:bg-[#202026] hover:text-violet-300 transition cursor-pointer"
             title="하단으로 창 분할 (상/하 나란히 보기)"
           >
@@ -141,6 +154,20 @@ export default function ObsidianTabBar({
           </button>
         )}
       </div>
+
+      {/* Tab Context Menu */}
+      {contextMenu && (
+        <TabContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          fileId={contextMenu.fileId}
+          onClose={() => setContextMenu(null)}
+          onSplitHorizontal={(fId) => onSplitHorizontal?.(fId)}
+          onSplitVertical={(fId) => onSplitVertical?.(fId)}
+          onCloseTab={onCloseTab}
+          onCloseOtherTabs={onCloseOtherTabs}
+        />
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { APP_VERSION } from '../../core/app-version';
 import type { VaultDto } from '../../core/domain/vault.dto';
 import OpenSourceLicensesView from './open-source-licenses-view';
 
@@ -45,7 +46,7 @@ export default function SettingsModal({
           <div className="flex items-center space-x-2">
             <span className="text-sm font-semibold text-zinc-100">환경설정 & 라이선스</span>
             <span className="rounded bg-violet-500/20 px-1.5 py-0.5 text-[10px] font-medium text-violet-300">
-              v0.1
+              v{APP_VERSION}
             </span>
           </div>
           <button
@@ -71,7 +72,7 @@ export default function SettingsModal({
                   : 'text-zinc-400 hover:bg-[#1e1e24] hover:text-zinc-200'
               }`}
             >
-              <span>📜 오픈소스 라이선스</span>
+              <span>📜 오픈소스 고지</span>
             </button>
 
             <button

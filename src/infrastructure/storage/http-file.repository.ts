@@ -1,14 +1,24 @@
 import type { FileRepository } from '../../core/application/ports/file.repository';
+import type { Clock } from '../../core/application/ports/clock.port';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
+import { AppError } from '../../core/domain/errors/app-error';
+import { systemClock } from './system-clock';
+import { applyUpdate } from './timestamps';
 
 export class HttpFileRepository implements FileRepository {
   private readonly baseUrl: string;
   private readonly cache = new Map<string, FileNodeDto>();
   private readonly fallback?: FileRepository;
+  private readonly clock: Clock;
 
-  constructor(baseUrl: string = '/api/vaults', fallback?: FileRepository) {
+  constructor(
+    baseUrl: string = '/api/vaults',
+    fallback?: FileRepository,
+    clock: Clock = systemClock,
+  ) {
     this.baseUrl = baseUrl;
     this.fallback = fallback;
+    this.clock = clock;
   }
 
   async findByVaultId(vaultId: string): Promise<FileNodeDto[]> {
@@ -88,7 +98,7 @@ export class HttpFileRepository implements FileRepository {
     if (!existing && this.fallback) {
       return this.fallback.update(id, updates);
     }
-    if (!existing) throw new Error(`FileNode ${id} not found in client cache`);
+    if (!existing) throw new AppError('file.notFound', { fileId: id });
 
     try {
       if (updates.name !== undefined || updates.parentId !== undefined) {
@@ -109,7 +119,7 @@ export class HttpFileRepository implements FileRepository {
         if (!res.ok) throw new Error(`Failed to save file content for ${id}: ${res.statusText}`);
       }
 
-      const updated: FileNodeDto = { ...existing, ...updates, updatedAt: Date.now() };
+      const updated = applyUpdate(existing, updates, this.clock.now());
       this.cache.set(id, updated);
       return updated;
     } catch (err) {

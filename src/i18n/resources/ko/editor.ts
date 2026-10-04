@@ -1,0 +1,21 @@
+/** BASELINE BUNDLE - Korean. See `./common.ts` for the baseline contract. */
+export const editorKo = {
+  noNoteTitle: '열려있는 노트가 없습니다',
+  noNoteBody: '탐색기에서 노트를 클릭하여 열거나 드래그 앤 드롭으로 파일을 이동할 수 있습니다.',
+  createNote: '+ 새 노트 만들기',
+  loadingNote: '노트를 불러오는 중...',
+  noNoteSelected: '선택된 노트가 없습니다',
+  noNoteSelectedBody: '왼쪽 파일 탐색기에서 노트를 선택하거나 새로 생성하세요.',
+  dragDropHint: '드래그 앤 드롭',
+  dragDropLabel: '파일/폴더 이동',
+  shiftClickHint: 'Shift + 클릭',
+  shiftClickLabel: '연속 범위 다중 선택',
+  ctrlClickHint: 'Ctrl/Cmd + 클릭',
+  ctrlClickLabel: '개별 추가 다중 선택',
+  rightClickHint: '우클릭',
+  rightClickLabel: '컨텍스트 메뉴',
+  titlePlaceholder: '제목 없는 노트',
+  titleAriaLabel: '노트 제목',
+  invalidCharsTitle: '파일명에 \\ / : * ? " < > | 문자는 사용할 수 없습니다',
+  doubleClickToEdit: '더블클릭하여 편집 모드로 전환',
+};

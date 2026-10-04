@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:client": "tsc -b && vite build",
+    "notices": "node scripts/generate-notices.mjs",
+    "notices:check": "node scripts/generate-notices.mjs --check",
+    "build:client": "node scripts/generate-notices.mjs --check && tsc -b && vite build",
     "build:server": "vite build --ssr src/server/node-server.ts --outDir dist-server",
     "build": "npm run build:client && npm run build:server",
     "start": "node dist-server/node-server.js",

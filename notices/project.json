@@ -1,0 +1,10 @@
+{
+  "productName": "Creators Desk",
+  "licenseId": "AGPL-3.0",
+  "copyrightYear": "2026",
+  "copyrightHolder": "Creators Desk Contributors",
+  "sourceUrl": "https://github.com/Sunggu/creators-desk",
+  "contactEmail": "colin@binarygap.com",
+  "noticePagePath": "public/notice.html",
+  "textNoticePath": "THIRD-PARTY-NOTICES.txt"
+}

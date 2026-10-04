@@ -4,6 +4,8 @@ import type { VaultDto } from '../../domain/vault.dto';
 import type { FileRepository } from '../ports/file.repository';
 import type { SessionRepository } from '../ports/session.repository';
 import type { VaultRepository } from '../ports/vault.repository';
+import { FixedClock } from '../../../infrastructure/storage/system-clock';
+import { AppError } from '../../domain/errors/app-error';
 import { CreateVaultUseCase } from './create-vault.use-case';
 import { DeleteVaultUseCase } from './delete-vault.use-case';
 import { ListVaultsUseCase } from './list-vaults.use-case';
@@ -85,13 +87,19 @@ class InMemorySessionRepository implements SessionRepository {
   }
 }
 
+/** Pinned instant so timestamp assertions stay deterministic. */
+const T0 = 1_700_000_000_000;
+
 describe('Vault Use Cases', () => {
   it('creates vault with immutable key, alias, and starter note', async () => {
     const vaultRepo = new InMemoryVaultRepository();
     const fileRepo = new InMemoryFileRepository();
-    const createVault = new CreateVaultUseCase(vaultRepo, fileRepo);
+    const createVault = new CreateVaultUseCase(vaultRepo, new FixedClock(T0), fileRepo);
 
-    const vault = await createVault.execute({ name: '  My Research  ' });
+    const vault = await createVault.execute({
+      name: '  My Research  ',
+      starterContent: '# Welcome to My Research\n\nLocalized body.',
+    });
     expect(vault.alias).toBe('My Research');
     expect(vault.name).toBe('My Research');
     expect(vault.key).toMatch(/^vlt_/);
@@ -100,13 +108,56 @@ describe('Vault Use Cases', () => {
     const files = await fileRepo.findByVaultId(vault.id);
     expect(files).toHaveLength(1);
     expect(files[0].name).toBe('Welcome.md');
-    expect(files[0].content).toContain('Welcome to My Research');
+    expect(files[0].content).toContain('# Welcome to My Research');
+  });
+
+  it('seeds the welcome note with caller-supplied localized copy', async () => {
+    const vaultRepo = new InMemoryVaultRepository();
+    const fileRepo = new InMemoryFileRepository();
+    const createVault = new CreateVaultUseCase(vaultRepo, new FixedClock(T0), fileRepo);
+
+    const vault = await createVault.execute({
+      name: 'Korean Vault',
+      starterContent: '# 환영합니다',
+    });
+
+    const [note] = await fileRepo.findByVaultId(vault.id);
+    expect(note.content).toBe('# 환영합니다');
+  });
+
+  it('writes epoch-millisecond timestamps taken from the clock', async () => {
+    const vaultRepo = new InMemoryVaultRepository();
+    const clock = new FixedClock(T0);
+    const createVault = new CreateVaultUseCase(vaultRepo, clock);
+
+    const vault = await createVault.execute({ name: 'Timed' });
+    expect(vault.createdAt).toBe(T0);
+    expect(vault.updatedAt).toBe(T0);
+
+    clock.advance(30_000);
+    const renamed = await new UpdateVaultUseCase(vaultRepo, clock).execute(vault.id, {
+      alias: 'Later',
+    });
+    expect(renamed.updatedAt).toBe(T0 + 30_000);
+    expect(renamed.createdAt).toBe(T0);
+  });
+
+  it('never rewrites the immutable key on rename', async () => {
+    const vaultRepo = new InMemoryVaultRepository();
+    const createVault = new CreateVaultUseCase(vaultRepo, new FixedClock(T0));
+    const vault = await createVault.execute({ name: 'Key Holder' });
+
+    const renamed = await new UpdateVaultUseCase(vaultRepo, new FixedClock(T0)).execute(vault.id, {
+      alias: 'Renamed',
+    });
+
+    expect(renamed.key).toBe(vault.key);
   });
 
   it('updates vault alias while preserving immutable key', async () => {
     const vaultRepo = new InMemoryVaultRepository();
-    const createVault = new CreateVaultUseCase(vaultRepo);
-    const updateVault = new UpdateVaultUseCase(vaultRepo);
+    const createVault = new CreateVaultUseCase(vaultRepo, new FixedClock(T0));
+    const updateVault = new UpdateVaultUseCase(vaultRepo, new FixedClock(T0));
 
     const vault = await createVault.execute({ alias: 'Original Project' });
     const originalKey = vault.key;
@@ -119,9 +170,12 @@ describe('Vault Use Cases', () => {
 
   it('rejects empty vault name', async () => {
     const vaultRepo = new InMemoryVaultRepository();
-    const createVault = new CreateVaultUseCase(vaultRepo);
+    const createVault = new CreateVaultUseCase(vaultRepo, new FixedClock(T0));
 
-    await expect(createVault.execute({ name: '   ' })).rejects.toThrow('empty');
+    await expect(createVault.execute({ name: '   ' })).rejects.toMatchObject({
+      code: 'vault.nameRequired',
+    });
+    await expect(createVault.execute({ name: '   ' })).rejects.toBeInstanceOf(AppError);
   });
 
   it('lists vaults sorted by updatedAt descending', async () => {

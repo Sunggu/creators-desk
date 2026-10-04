@@ -1,0 +1,362 @@
+======================================================================
+Open Source Software Notice
+======================================================================
+
+Creators Desk (version 0.0.0) 는 오픈소스 소프트웨어를 사용하고 있습니다.
+본 고지서는 배포물에 포함된 오픈소스 소프트웨어의 저작권 및 라이선스 정보를 기술합니다.
+
+문의처: colin@binarygap.com
+원본 소스: https://github.com/Sunggu/creators-desk
+
+----------------------------------------------------------------------
+본 제품 라이선스: AGPL-3.0
+저작권: Copyright (C) 2026 Creators Desk Contributors
+소스 코드 공개 (AGPL-3.0 제13조): 네트워크를 통해 제공되는 본 제품에 대해서도
+동일한 조건으로 원본 소스 코드를 제공합니다. https://github.com/Sunggu/creators-desk
+----------------------------------------------------------------------
+
+----------------------------------------------------------------------
+목록 (Table of Contents) - 총 28개 패키지 / 1종 라이선스
+----------------------------------------------------------------------
+
+ 1. marked (v18.0.14) - MIT
+ 2. @marijn/find-cluster-break (v1.0.4) - MIT
+ 3. crelt (v1.0.7) - MIT
+ 4. style-mod (v4.1.4) - MIT
+ 5. w3c-keyname (v2.2.8) - MIT
+ 6. @codemirror/autocomplete (v6.20.3) - MIT
+ 7. @codemirror/commands (v6.11.1) - MIT
+ 8. @codemirror/lang-markdown (v6.5.2) - MIT
+ 9. @codemirror/language (v6.12.4) - MIT
+10. @codemirror/lint (v6.9.7) - MIT
+11. @codemirror/state (v6.7.6) - MIT
+12. @codemirror/view (v6.43.13) - MIT
+13. @hono/node-server (v2.1.3) - MIT
+14. hono (v4.13.12) - MIT
+15. @lezer/common (v1.5.3) - MIT
+16. @lezer/css (v1.3.8) - MIT
+17. @lezer/highlight (v1.2.5) - MIT
+18. @lezer/html (v1.3.13) - MIT
+19. @lezer/javascript (v1.5.6) - MIT
+20. @lezer/lr (v1.4.10) - MIT
+21. @lezer/markdown (v1.7.2) - MIT
+22. react (v19.3.0) - MIT
+23. react-dom (v19.3.0) - MIT
+24. scheduler (v0.28.0) - MIT
+25. @codemirror/lang-css (v6.3.1) - MIT
+26. @codemirror/lang-html (v6.4.12) - MIT
+27. @codemirror/lang-javascript (v6.2.5) - MIT
+28. tailwindcss (v4.3.3) - MIT
+
+1. 배포물에 포함된 오픈소스 소프트웨어
+======================================================================
+
+브라우저 번들, 서버 번들, 프로덕션 이미지(node_modules)에 함께 배포되는 패키지입니다.
+
+[마크다운 처리]
+
+----------------------------------------------------------------------
+ 1. marked (v18.0.14) - MIT
+----------------------------------------------------------------------
+속도와 표준 준수를 중시한 마크다운 파서
+
+Copyright (c) 2018+, MarkedJS (https://github.com/markedjs/)
+Copyright (c) 2011-2018, Christopher Jeffrey (https://github.com/chjj/)
+Copyright © 2004, John Gruber
+Source: https://github.com/markedjs/marked
+License file: LICENSE
+
+[유틸리티]
+
+----------------------------------------------------------------------
+ 2. @marijn/find-cluster-break (v1.0.4) - MIT
+----------------------------------------------------------------------
+문자열의 그래핌 클러스터 경계를 탐색하는 유틸리티
+
+Copyright (C) 2024 by Marijn Haverbeke <marijn@haverbeke.berlin>
+Source: https://code.haverbeke.berlin/marijn/find-cluster-break
+License file: LICENSE
+
+----------------------------------------------------------------------
+ 3. crelt (v1.0.7) - MIT
+----------------------------------------------------------------------
+DOM 요소 생성용 경량 유틸리티
+
+Copyright (C) 2020 by Marijn Haverbeke <marijn@haverbeke.berlin>
+Source: https://code.haverbeke.berlin/marijn/crelt
+License file: LICENSE
+
+----------------------------------------------------------------------
+ 4. style-mod (v4.1.4) - MIT
+----------------------------------------------------------------------
+경량 CSS 모듈 셰임 구현
+
+Copyright (C) 2018 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/marijn/style-mod
+License file: LICENSE
+
+----------------------------------------------------------------------
+ 5. w3c-keyname (v2.2.8) - MIT
+----------------------------------------------------------------------
+KeyboardEvent 키 값을 표준 문자열로 변환하는 유틸리티
+
+Copyright (C) 2016 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://github.com/marijnh/w3c-keyname
+License file: LICENSE
+
+[CodeMirror 6]
+
+----------------------------------------------------------------------
+ 6. @codemirror/autocomplete (v6.20.3) - MIT
+----------------------------------------------------------------------
+코드 에디터 자동 완성 기능
+
+Copyright (C) 2018-2021 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/codemirror/autocomplete
+License file: LICENSE
+
+----------------------------------------------------------------------
+ 7. @codemirror/commands (v6.11.1) - MIT
+----------------------------------------------------------------------
+실행 취소, 검색, 들여쓰기 등 편집 명령 모음
+
+Copyright (C) 2018-2021 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/codemirror/commands
+License file: LICENSE
+
+----------------------------------------------------------------------
+ 8. @codemirror/lang-markdown (v6.5.2) - MIT
+----------------------------------------------------------------------
+마크다운 문법 지원 언어 모드
+
+Copyright (C) 2018-2021 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/codemirror/lang-markdown
+License file: LICENSE
+
+----------------------------------------------------------------------
+ 9. @codemirror/language (v6.12.4) - MIT
+----------------------------------------------------------------------
+언어 지원 인프라스트럭처와 파서 연결 계층
+
+Copyright (C) 2018-2021 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/codemirror/language
+License file: LICENSE
+
+----------------------------------------------------------------------
+10. @codemirror/lint (v6.9.7) - MIT
+----------------------------------------------------------------------
+정적 검사 문제를 에디터에 표시하는 기능
+
+Copyright (C) 2018-2021 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/codemirror/lint
+License file: LICENSE
+
+----------------------------------------------------------------------
+11. @codemirror/state (v6.7.6) - MIT
+----------------------------------------------------------------------
+에디터 상태 및 문서 모델 관리 계층
+
+Copyright (C) 2018-2021 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/codemirror/state
+License file: LICENSE
+
+----------------------------------------------------------------------
+12. @codemirror/view (v6.43.13) - MIT
+----------------------------------------------------------------------
+에디터 화면 구성과 키보드/마우스 입력 처리 계층
+
+Copyright (C) 2018-2021 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/codemirror/view
+License file: LICENSE
+
+[Hono]
+
+----------------------------------------------------------------------
+13. @hono/node-server (v2.1.3) - MIT
+----------------------------------------------------------------------
+Hono 애플리케이션을 Node.js 서버에서 구동하는 어댑터
+
+Copyright (c) 2022 - present, Yusuke Wada and Hono contributors
+Source: https://github.com/honojs/node-server
+License file: LICENSE
+
+----------------------------------------------------------------------
+14. hono (v4.13.12) - MIT
+----------------------------------------------------------------------
+웹 표준만으로 동작하는 초경량 웹 프레임워크
+
+Copyright (c) 2021 - present, Yusuke Wada and Hono contributors
+Source: https://github.com/honojs/hono
+License file: LICENSE
+
+[Lezer 파서]
+
+----------------------------------------------------------------------
+15. @lezer/common (v1.5.3) - MIT
+----------------------------------------------------------------------
+구문 트리 자료구조와 파서 공통 인터페이스
+
+Copyright (C) 2018 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/lezer/common
+License file: LICENSE
+
+----------------------------------------------------------------------
+16. @lezer/css (v1.3.8) - MIT
+----------------------------------------------------------------------
+lezer 기반 CSS 문법 정의
+
+Copyright (C) 2018 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/lezer/css
+License file: LICENSE
+
+----------------------------------------------------------------------
+17. @lezer/highlight (v1.2.5) - MIT
+----------------------------------------------------------------------
+구문 트리 기반 구문 강조 시스템
+
+Copyright (C) 2018 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/lezer/highlight
+License file: LICENSE
+
+----------------------------------------------------------------------
+18. @lezer/html (v1.3.13) - MIT
+----------------------------------------------------------------------
+lezer 기반 HTML 문법 정의
+
+Copyright (C) 2018 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://github.com/lezer-parser/html
+License file: LICENSE
+
+----------------------------------------------------------------------
+19. @lezer/javascript (v1.5.6) - MIT
+----------------------------------------------------------------------
+lezer 기반 JavaScript 문법 정의
+
+Copyright (C) 2018 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/lezer/javascript
+License file: LICENSE
+
+----------------------------------------------------------------------
+20. @lezer/lr (v1.4.10) - MIT
+----------------------------------------------------------------------
+증분 LR 파서 엔진
+
+Copyright (C) 2018 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/lezer/lr
+License file: LICENSE
+
+----------------------------------------------------------------------
+21. @lezer/markdown (v1.7.2) - MIT
+----------------------------------------------------------------------
+마크다운 증분 파서
+
+Copyright (C) 2020 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/lezer/markdown
+License file: LICENSE
+
+[React]
+
+----------------------------------------------------------------------
+22. react (v19.3.0) - MIT
+----------------------------------------------------------------------
+사용자 인터페이스 구축을 위한 선언적 컴포넌트 라이브러리
+
+Copyright (c) Meta Platforms, Inc. and affiliates.
+Source: https://github.com/react/react
+License file: LICENSE
+
+----------------------------------------------------------------------
+23. react-dom (v19.3.0) - MIT
+----------------------------------------------------------------------
+React 컴포넌트를 브라우저 DOM에 렌더링하는 런타임
+
+Copyright (c) Meta Platforms, Inc. and affiliates.
+Source: https://github.com/react/react
+License file: LICENSE
+
+----------------------------------------------------------------------
+24. scheduler (v0.28.0) - MIT
+----------------------------------------------------------------------
+React 동시 렌더링 작업을 스케줄링하는 내부 런타임
+
+Copyright (c) Meta Platforms, Inc. and affiliates.
+Source: https://github.com/react/react
+License file: LICENSE
+
+[기타 오픈소스]
+
+----------------------------------------------------------------------
+25. @codemirror/lang-css (v6.3.1) - MIT
+----------------------------------------------------------------------
+CSS language support for the CodeMirror code editor
+
+Copyright (C) 2018-2021 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://github.com/codemirror/lang-css
+License file: LICENSE
+
+----------------------------------------------------------------------
+26. @codemirror/lang-html (v6.4.12) - MIT
+----------------------------------------------------------------------
+HTML language support for the CodeMirror code editor
+
+Copyright (C) 2018-2021 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://code.haverbeke.berlin/codemirror/lang-html
+License file: LICENSE
+
+----------------------------------------------------------------------
+27. @codemirror/lang-javascript (v6.2.5) - MIT
+----------------------------------------------------------------------
+JavaScript language support for the CodeMirror code editor
+
+Copyright (C) 2018-2021 by Marijn Haverbeke <marijn@haverbeke.berlin> and others
+Source: https://github.com/codemirror/lang-javascript
+License file: LICENSE
+
+
+
+2. 배포물 생성에 반영된 빌드 단계 라이브러리
+======================================================================
+
+빌드 단계에서 배포물(CSS 등)에 코드가 반영되는 패키지입니다.
+
+[배포물 CSS 생성]
+
+----------------------------------------------------------------------
+28. tailwindcss (v4.3.3) - MIT
+----------------------------------------------------------------------
+유틸리티 우선 CSS 프레임워크. 빌드 단계에서 배포물 CSS에 스타일이 반영됩니다.
+
+Copyright (c) Tailwind Labs, Inc.
+Source: https://github.com/tailwindlabs/tailwindcss
+License file: LICENSE
+
+
+----------------------------------------------------------------------
+MIT License
+----------------------------------------------------------------------
+
+MIT License
+
+Copyright (c) <year> <copyright holders>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+======================================================================
+생성 도구: scripts/generate-notices.mjs (package.json 프로덕션 의존성 기준 자동 생성)
+======================================================================

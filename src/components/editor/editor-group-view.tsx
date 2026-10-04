@@ -13,6 +13,7 @@ interface EditorGroupViewProps {
   onToggleViewMode: () => void;
   onSelectTab: (fileId: string) => void;
   onCloseTab: (fileId: string) => void;
+  onCloseOtherTabs?: (fileId: string) => void;
   onNewNote: () => void;
   onSplit: (fileId: string, direction: SplitDirection) => void;
   onCloseGroup: () => void;
@@ -29,6 +30,7 @@ export default function EditorGroupView({
   onToggleViewMode,
   onSelectTab,
   onCloseTab,
+  onCloseOtherTabs,
   onNewNote,
   onSplit,
   onCloseGroup,
@@ -51,12 +53,19 @@ export default function EditorGroupView({
         onToggleViewMode={onToggleViewMode}
         onSelectTab={onSelectTab}
         onCloseTab={onCloseTab}
+        onCloseOtherTabs={onCloseOtherTabs}
         onNewNote={onNewNote}
         onSplitHorizontal={
-          group.activeFileId ? () => onSplit(group.activeFileId!, 'horizontal') : undefined
+          (targetId?: string) => {
+            const id = targetId ?? group.activeFileId;
+            if (id) onSplit(id, 'horizontal');
+          }
         }
         onSplitVertical={
-          group.activeFileId ? () => onSplit(group.activeFileId!, 'vertical') : undefined
+          (targetId?: string) => {
+            const id = targetId ?? group.activeFileId;
+            if (id) onSplit(id, 'vertical');
+          }
         }
         onCloseGroup={onCloseGroup}
         canCloseGroup={canCloseGroup}
