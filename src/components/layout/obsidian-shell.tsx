@@ -98,6 +98,7 @@ export default function ObsidianShell({
               onCreateFolder={workspace.createFolder}
               onRenameNode={workspace.renameNode}
               onDeleteNode={workspace.deleteNode}
+              onDeleteNodes={workspace.deleteNodes}
               onRefresh={workspace.refreshNodes}
             />
           </div>
@@ -120,18 +121,9 @@ export default function ObsidianShell({
             vaults={vaults}
             nodes={workspace.nodes}
             activeFileId={workspace.activeFileId}
-            onOpenVaultModal={() => {
-              setIsMobileSidebarOpen(false);
-              setIsVaultModalOpen(true);
-            }}
-            onSelectVault={(id) => {
-              onSelectVault(id);
-              setIsMobileSidebarOpen(false);
-            }}
-            onSelectFile={(id) => {
-              workspace.selectFile(id);
-              setIsMobileSidebarOpen(false);
-            }}
+            onOpenVaultModal={() => { setIsMobileSidebarOpen(false); setIsVaultModalOpen(true); }}
+            onSelectVault={(id) => { onSelectVault(id); setIsMobileSidebarOpen(false); }}
+            onSelectFile={(id) => { workspace.selectFile(id); setIsMobileSidebarOpen(false); }}
             onCreateFile={async (name, parentId) => {
               const created = await workspace.createFile(name, parentId);
               setIsMobileSidebarOpen(false);
@@ -140,6 +132,7 @@ export default function ObsidianShell({
             onCreateFolder={workspace.createFolder}
             onRenameNode={workspace.renameNode}
             onDeleteNode={workspace.deleteNode}
+            onDeleteNodes={workspace.deleteNodes}
             onRefresh={workspace.refreshNodes}
             onCloseMobile={() => setIsMobileSidebarOpen(false)}
           />
@@ -147,13 +140,15 @@ export default function ObsidianShell({
 
         {/* Main Editor Pane with Tab Bar */}
         <main className="flex flex-1 flex-col overflow-hidden bg-[#1e1e22] w-full">
-          {/* Desktop Tab Bar */}
+          {/* Desktop Multi-tab Bar */}
           <ObsidianTabBar
-            activeFile={workspace.activeFile}
+            openFiles={workspace.openFiles}
+            activeFileId={workspace.activeFileId}
             viewMode={viewMode}
             onToggleViewMode={toggleViewMode}
+            onSelectTab={workspace.selectFile}
+            onCloseTab={workspace.closeFile}
             onNewNote={handleCreateNewNote}
-            onCloseNote={() => workspace.selectFile(null)}
           />
 
           <div className="flex-1 overflow-hidden">
