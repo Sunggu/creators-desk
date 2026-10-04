@@ -69,30 +69,65 @@ flowchart TD
 
 ---
 
-## 4. Quick Start
+## 4. Getting Started & Setup
 
-### 로컬 개발 환경 실행
+### 4.1 Cloudflare 인프라 자동 설치 (1-Command Setup)
+
+Creators Desk는 복잡한 수동 웹 콘솔 작업 없이, **단 하나의 명령어로 Cloudflare D1(DB), R2(스토리지), FTS5 색인 스키마를 자동 프로비저닝**합니다.
+
+#### ① 계정 확인 및 로그인
+현재 로컬 머신에 연결된 Cloudflare 계정을 확인합니다:
+```bash
+npx wrangler whoami
+```
+> 다른 계정으로 연결하거나 새로 로그인하려면: `npx wrangler login`
+
+#### ② 원클릭 자동 인프라 구축
+다음 명령어를 실행하면 스크립트가 모든 인프라를 자동으로 생성하고 연결합니다:
+```bash
+pnpm run setup
+# or npm run setup
+```
+
+**자동 실행 내역:**
+1. **Cloudflare D1 생성**: `creators-desk-db` 서버리스 SQLite 데이터베이스 자동 생성
+2. **스키마 마이그레이션**: `d1/schema.sql` 원격(Remote) 및 로컬(Local) 자동 반영 (Vaults, Files, Links, FTS5)
+3. **Cloudflare R2 생성**: `creators-desk-vaults` 오브젝트 스토리지 버킷 자동 생성
+4. **설정 동기화**: 발급된 `database_id`를 `wrangler.toml` 파일에 자동 매핑
+
+---
+
+### 4.2 로컬 개발 환경 실행
 
 ```bash
-# 레포지토리 클론
-git clone https://github.com/Sunggu/creators-desk.git
-cd creators-desk
+# 1. 의존성 설치
+pnpm install
 
-# 의존성 설치
-pnpm install # or npm install
-
-# 개발 서버 실행
+# 2. 로컬 개발 서버 실행
 pnpm dev
 
-# 단위 테스트 실행 (Vitest)
+# 3. 단위 테스트 실행 (20/20 Vitest Suite)
 pnpm test
 
-# 프로덕션 빌드
+# 4. 프로덕션 빌드
 pnpm build
 ```
+
+---
+
+### 4.3 오픈소스 셀프호스팅 (Docker)
+
+자체 서버나 NAS, 로컬 머신에서 외부 클라우드 의존성 없이 독립적으로 실행할 때 사용합니다:
+
+```bash
+# Docker Compose 단일 컨테이너 실행 (~30MB RAM)
+docker compose up -d
+```
+- 데이터는 `./data/vaults` (로컬 파일 시스템) 및 `./data/sqlite.db`에 안전하게 영구 저장됩니다.
 
 ---
 
 ## 5. License
 
 Apache-2.0 / MIT Dual License.
+
