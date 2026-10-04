@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { VaultDto } from '../../core/domain/vault.dto';
 import { useActiveWorkspace } from '../../hooks/use-active-workspace';
 import type { EditorStats } from '../../hooks/use-codemirror';
@@ -36,17 +36,35 @@ export default function ObsidianShell({
     cursorCol: 1,
   });
 
+  const touchStartXRef = useRef<number | null>(null);
   const workspace = useActiveWorkspace(vault.id);
 
   const handleCreateNewNote = async () => {
-    const name = prompt('새 노트 이름:', 'Untitled');
-    if (name) {
-      await workspace.createFile(name, null);
+    await workspace.createFile();
+    setIsMobileSidebarOpen(false);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartXRef.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartXRef.current === null) return;
+    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+    if (touchStartXRef.current < 45 && deltaX > 50) {
+      setIsMobileSidebarOpen(true);
+    } else if (isMobileSidebarOpen && deltaX < -50) {
+      setIsMobileSidebarOpen(false);
     }
+    touchStartXRef.current = null;
   };
 
   return (
-    <div className="flex h-screen h-[100dvh] w-screen flex-col overflow-hidden bg-[#1e1e22] text-[#dcddde] font-sans antialiased">
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      className="flex h-screen h-[100dvh] w-screen flex-col overflow-hidden bg-[#1e1e22] text-[#dcddde] font-sans antialiased"
+    >
       {/* Mobile Top Header (Hidden on Desktop) */}
       <ObsidianMobileHeader
         vault={vault}
@@ -83,33 +101,35 @@ export default function ObsidianShell({
           </div>
         )}
 
-        {/* Mobile Sidebar Off-canvas Drawer */}
-        {isMobileSidebarOpen && (
-          <>
-            <div
-              onClick={() => setIsMobileSidebarOpen(false)}
-              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs md:hidden"
-            />
-            <div className="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] flex flex-col md:hidden bg-[#18181b] shadow-2xl">
-              <ObsidianSidebar
-                vault={vault}
-                nodes={workspace.nodes}
-                activeFileId={workspace.activeFileId}
-                onOpenVaultModal={() => {
-                  setIsMobileSidebarOpen(false);
-                  setIsVaultModalOpen(true);
-                }}
-                onSelectFile={workspace.selectFile}
-                onCreateFile={workspace.createFile}
-                onCreateFolder={workspace.createFolder}
-                onRenameNode={workspace.renameNode}
-                onDeleteNode={workspace.deleteNode}
-                onRefresh={workspace.refreshNodes}
-                onCloseMobile={() => setIsMobileSidebarOpen(false)}
-              />
-            </div>
-          </>
-        )}
+        {/* Mobile Sidebar Off-canvas Drawer with Backdrop */}
+        <div
+          onClick={() => setIsMobileSidebarOpen(false)}
+          className={`fixed inset-0 z-40 bg-black/60 backdrop-blur-xs transition-opacity duration-200 md:hidden ${
+            isMobileSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
+        />
+        <div
+          className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] flex flex-col md:hidden bg-[#18181b] shadow-2xl transition-transform duration-200 ease-out ${
+            isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+        >
+          <ObsidianSidebar
+            vault={vault}
+            nodes={workspace.nodes}
+            activeFileId={workspace.activeFileId}
+            onOpenVaultModal={() => {
+              setIsMobileSidebarOpen(false);
+              setIsVaultModalOpen(true);
+            }}
+            onSelectFile={workspace.selectFile}
+            onCreateFile={workspace.createFile}
+            onCreateFolder={workspace.createFolder}
+            onRenameNode={workspace.renameNode}
+            onDeleteNode={workspace.deleteNode}
+            onRefresh={workspace.refreshNodes}
+            onCloseMobile={() => setIsMobileSidebarOpen(false)}
+          />
+        </div>
 
         {/* Main Editor Pane with Tab Bar */}
         <main className="flex flex-1 flex-col overflow-hidden bg-[#1e1e22] w-full">

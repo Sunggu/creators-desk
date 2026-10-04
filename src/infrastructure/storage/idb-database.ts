@@ -16,52 +16,32 @@ export class IdbDatabase {
 
     if (!this.dbPromise) {
       this.dbPromise = new Promise((resolve, reject) => {
-        const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+        try {
+          const request = window.indexedDB.open(DB_NAME, DB_VERSION);
 
-        request.onupgradeneeded = (event) => {
-          const db = (event.target as IDBOpenDBRequest).result;
+          request.onupgradeneeded = (event) => {
+            const db = (event.target as IDBOpenDBRequest).result;
 
-          if (!db.objectStoreNames.contains(STORES.VAULTS)) {
-            db.createObjectStore(STORES.VAULTS, { keyPath: 'id' });
-          }
+            if (!db.objectStoreNames.contains(STORES.VAULTS)) {
+              db.createObjectStore(STORES.VAULTS, { keyPath: 'id' });
+            }
 
-          if (!db.objectStoreNames.contains(STORES.FILE_NODES)) {
-            const store = db.createObjectStore(STORES.FILE_NODES, { keyPath: 'id' });
-            store.createIndex('vaultId', 'vaultId', { unique: false });
-            store.createIndex('parentId', 'parentId', { unique: false });
-          }
-        };
+            if (!db.objectStoreNames.contains(STORES.FILE_NODES)) {
+              const store = db.createObjectStore(STORES.FILE_NODES, { keyPath: 'id' });
+              store.createIndex('vaultId', 'vaultId', { unique: false });
+              store.createIndex('parentId', 'parentId', { unique: false });
+            }
+          };
 
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
+          request.onsuccess = () => resolve(request.result);
+          request.onerror = () => reject(request.error);
+        } catch (err) {
+          reject(err);
+        }
       });
     }
 
     return this.dbPromise;
-  }
-
-  async runTransaction<T>(
-    storeName: string,
-    mode: IDBTransactionMode,
-    operation: (store: IDBObjectStore) => Promise<T> | T,
-  ): Promise<T> {
-    const db = await this.getDb();
-    return new Promise((resolve, reject) => {
-      const tx = db.transaction(storeName, mode);
-      const store = tx.objectStore(storeName);
-
-      let result: T;
-      Promise.resolve()
-        .then(() => operation(store))
-        .then((res) => {
-          result = res;
-        })
-        .catch(reject);
-
-      tx.oncomplete = () => resolve(result);
-      tx.onerror = () => reject(tx.error);
-      tx.onabort = () => reject(tx.error);
-    });
   }
 }
 

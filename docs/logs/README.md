@@ -10,3 +10,5 @@
 |---|---|---|---|
 | 2026-10-03 | [2026-10-03-decision-obsidian-web-editor.md](file:///home/horuru/Documents/projects/creators-desk/docs/logs/2026-10-03-decision-obsidian-web-editor.md) | 제품 방향성 단일화 및 웹 옵시디언 에디터 아키텍처 결정 | Approved |
 | 2026-10-03 | [2026-10-03-obsidian-ui-shell-overhaul.md](file:///home/horuru/Documents/projects/creators-desk/docs/logs/2026-10-03-obsidian-ui-shell-overhaul.md) | 옵시디언 웹 셸(Ribbon, Sidebar, Tab, StatusBar) 전면 개편 | Approved |
+| 2026-10-04 | [2026-10-04-obsidian-mobile-and-editor-fix.md](file:///home/horuru/Documents/projects/creators-desk/docs/logs/2026-10-04-obsidian-mobile-and-editor-fix.md) | 모바일 반응형 드로워 및 마크다운 에디터 렌더링 정상화 | Approved |
+

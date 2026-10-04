@@ -4,81 +4,128 @@ import { idbDatabase, type IdbDatabase, STORES } from './idb-database';
 
 export class IndexedDbFileRepository implements FileRepository {
   private readonly db: IdbDatabase;
+  private readonly memoryCache = new Map<string, FileNodeDto>();
 
   constructor(db: IdbDatabase = idbDatabase) {
     this.db = db;
   }
 
   async findByVaultId(vaultId: string): Promise<FileNodeDto[]> {
-    return this.db.runTransaction(STORES.FILE_NODES, 'readonly', (store) => {
+    try {
+      const db = await this.db.getDb();
       return new Promise<FileNodeDto[]>((resolve, reject) => {
+        const tx = db.transaction(STORES.FILE_NODES, 'readonly');
+        const store = tx.objectStore(STORES.FILE_NODES);
         const index = store.index('vaultId');
         const req = index.getAll(vaultId);
-        req.onsuccess = () => resolve(req.result as FileNodeDto[]);
+        req.onsuccess = () => {
+          const list = req.result as FileNodeDto[];
+          for (const item of list) this.memoryCache.set(item.id, item);
+          resolve(list);
+        };
         req.onerror = () => reject(req.error);
       });
-    });
+    } catch {
+      return Array.from(this.memoryCache.values()).filter((n) => n.vaultId === vaultId);
+    }
   }
 
   async findById(id: string): Promise<FileNodeDto | null> {
-    return this.db.runTransaction(STORES.FILE_NODES, 'readonly', (store) => {
+    try {
+      const db = await this.db.getDb();
       return new Promise<FileNodeDto | null>((resolve, reject) => {
+        const tx = db.transaction(STORES.FILE_NODES, 'readonly');
+        const store = tx.objectStore(STORES.FILE_NODES);
         const req = store.get(id);
-        req.onsuccess = () => resolve((req.result as FileNodeDto) || null);
+        req.onsuccess = () => {
+          const res = (req.result as FileNodeDto) || null;
+          if (res) this.memoryCache.set(res.id, res);
+          resolve(res);
+        };
         req.onerror = () => reject(req.error);
       });
-    });
+    } catch {
+      return this.memoryCache.get(id) ?? null;
+    }
   }
 
   async create(node: FileNodeDto): Promise<FileNodeDto> {
-    return this.db.runTransaction(STORES.FILE_NODES, 'readwrite', (store) => {
+    this.memoryCache.set(node.id, node);
+    try {
+      const db = await this.db.getDb();
       return new Promise<FileNodeDto>((resolve, reject) => {
+        const tx = db.transaction(STORES.FILE_NODES, 'readwrite');
+        const store = tx.objectStore(STORES.FILE_NODES);
         const req = store.put(node);
         req.onsuccess = () => resolve(node);
         req.onerror = () => reject(req.error);
       });
-    });
+    } catch {
+      return node;
+    }
   }
 
   async update(id: string, updates: Partial<FileNodeDto>): Promise<FileNodeDto> {
-    return this.db.runTransaction(STORES.FILE_NODES, 'readwrite', (store) => {
+    const existing = await this.findById(id);
+    if (!existing) {
+      throw new Error(`FileNode ${id} not found`);
+    }
+
+    const updated: FileNodeDto = {
+      ...existing,
+      ...updates,
+      updatedAt: Date.now(),
+    };
+    this.memoryCache.set(id, updated);
+
+    try {
+      const db = await this.db.getDb();
       return new Promise<FileNodeDto>((resolve, reject) => {
-        const getReq = store.get(id);
-        getReq.onerror = () => reject(getReq.error);
-        getReq.onsuccess = () => {
-          const current = getReq.result as FileNodeDto;
-          if (!current) {
-            reject(new Error(`FileNode ${id} not found`));
-            return;
-          }
-          const updated = { ...current, ...updates, updatedAt: Date.now() };
-          const putReq = store.put(updated);
-          putReq.onsuccess = () => resolve(updated);
-          putReq.onerror = () => reject(putReq.error);
-        };
+        const tx = db.transaction(STORES.FILE_NODES, 'readwrite');
+        const store = tx.objectStore(STORES.FILE_NODES);
+        const req = store.put(updated);
+        req.onsuccess = () => resolve(updated);
+        req.onerror = () => reject(req.error);
       });
-    });
+    } catch {
+      return updated;
+    }
   }
 
   async delete(id: string): Promise<void> {
-    return this.db.runTransaction(STORES.FILE_NODES, 'readwrite', (store) => {
+    this.memoryCache.delete(id);
+    try {
+      const db = await this.db.getDb();
       return new Promise<void>((resolve, reject) => {
+        const tx = db.transaction(STORES.FILE_NODES, 'readwrite');
+        const store = tx.objectStore(STORES.FILE_NODES);
         const req = store.delete(id);
         req.onsuccess = () => resolve();
         req.onerror = () => reject(req.error);
       });
-    });
+    } catch {
+      // Memory cache updated
+    }
   }
 
   async deleteByVaultId(vaultId: string): Promise<void> {
-    const nodes = await this.findByVaultId(vaultId);
-    return this.db.runTransaction(STORES.FILE_NODES, 'readwrite', (store) => {
-      return new Promise<void>((resolve) => {
+    for (const [id, node] of this.memoryCache.entries()) {
+      if (node.vaultId === vaultId) this.memoryCache.delete(id);
+    }
+    try {
+      const nodes = await this.findByVaultId(vaultId);
+      const db = await this.db.getDb();
+      return new Promise<void>((resolve, reject) => {
+        const tx = db.transaction(STORES.FILE_NODES, 'readwrite');
+        const store = tx.objectStore(STORES.FILE_NODES);
         for (const node of nodes) {
           store.delete(node.id);
         }
-        resolve();
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
       });
-    });
+    } catch {
+      // Memory cache updated
+    }
   }
 }
