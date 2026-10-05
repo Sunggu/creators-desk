@@ -78,6 +78,6 @@ Before reporting task completion, verify:
 - [ ] DTO structure: No shared monolithic type files created.
 - [ ] Layer verification: No reverse dependencies into inner layers.
 - [ ] Logic separation: Business calculations extracted from UI/Routes.
-- [ ] Tests added: Unit tests exist and pass (`npm run test`).
+- [ ] Tests added: Unit tests exist and pass (`pnpm run test`).
 - [ ] Component purity: Composable and isolated.
 - [ ] MOC updated: Synced state in the relevant `docs/moc/*.md` document.
