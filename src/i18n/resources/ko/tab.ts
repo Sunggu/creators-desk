@@ -4,7 +4,7 @@ export const tabKo = {
   addTab: '새 탭 열기 (+)',
   switchToEditMode: '편집 모드로 전환',
   switchToReadMode: '읽기 모드로 전환',
-  contextMenuHint: '{{title}} (우클릭하여 분할 화면)',
+  contextMenuHint: '{{title}} (드래그로 순서 변경, 우클릭하여 분할 화면)',
   splitRight: '우측으로 창 분할 (좌/우 나란히 보기)',
   splitDown: '하단으로 창 분할 (상/하 나란히 보기)',
   outlineOpen: '문서 목차 (우측 패널 열기)',

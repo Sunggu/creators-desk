@@ -16,7 +16,9 @@
 | `FileTreeItem` | `src/components/sidebar/file-tree-item.tsx` | `{ node, depth, isActive, isSelected, isExpanded, onMove, ... }` | Single file/folder row with DnD drag & drop move, tree guide lines, selection highlight, inline rename/delete |
 | `FileTreeActions` | `src/components/sidebar/file-tree-actions.tsx` | `{ isFolder, onNewFile, onNewFolder, onRename, onDelete }` | Hover action buttons Lego block for quick file/folder addition and deletion |
 | `ExplorerContextMenu` | `src/components/sidebar/explorer-context-menu.tsx` | `{ x, y, targetNode, onClose, onNewFile, onNewFolder, onRename, onDelete }` | VS Code/Code Server style right-click context menu with keyboard shortcuts |
-| `ObsidianTabBar` | `src/components/tabs/obsidian-tab-bar.tsx` | `{ openFiles, activeFileId, viewMode, onToggleViewMode, onSelectTab, onCloseTab, onNewNote }` | Zero-margin multi-tab bar connected to editor with invisible active border, hidden scrollbars |
+| `ObsidianTabBar` | `src/components/tabs/obsidian-tab-bar.tsx` | `{ openFiles, activeFileId, viewMode, onMoveTab, onSelectTab, onCloseTab, onNewNote, ... }` | Zero-margin multi-tab strip connected to editor with invisible active border, hidden scrollbars; maps open files to `TabItem` and owns `TabContextMenu` |
+| `TabItem` | `src/components/tabs/tab-item.tsx` | `{ fileId, title, isActive, canReorder, onSelect, onClose, onContextMenu, onMove }` | Single tab Lego block: drag source for pane splitting and drag target for in-strip reordering with a violet insertion caret |
+| `TabBarActions` | `src/components/tabs/tab-bar-actions.tsx` | `{ activeFileId, viewMode, canCloseGroup, onSplitHorizontal, onSplitVertical, onToggleViewMode, onToggleRightPanel, onCloseGroup }` | Right-hand tab bar action cluster (split right/down, view mode, outline, close split pane) |
 | `TabContextMenu` | `src/components/tabs/tab-context-menu.tsx` | `{ x, y, fileId, onClose, onSplitRight, onSplitDown, onCloseTab, onCloseOtherTabs }` | Right-click context menu for editor tabs providing split horizontal/vertical and tab closing actions |
 | `ObsidianEditor` | `src/components/editor/obsidian-editor.tsx` | `{ activeFile, viewMode, onSwitchToEdit, onSavingChange, ... }` | Master editor container switching between Live Edit, Reading Preview, and Code Server empty state |
 | `ObsidianMarkdownView` | `src/components/editor/obsidian-markdown-view.tsx` | `{ fileId, fileName, initialContent, onDocChange, onStatsChange, ... }` | Distraction-free live editor centered with max-w-[840px] and consistent padding metrics |
@@ -42,6 +44,9 @@
 - 컴포넌트는 **단일 props 객체** 또는 `children`만 받는다 (prop drilling 금지).
 - 컴포넌트 안에서 데이터를 직접 가져오지 않는다 — hook과 use case는 상위 계층에 둔다.
 - 순수 표시용 매핑은 컴포넌트 내부에 두고, 비즈니스 매핑은 use case에 둔다.
+- 드래그 앤 드롭 계약은 `src/core/domain/tab-drag.dto.ts`의 `TAB_DRAG_MIME` / `TabDropPosition`을 사용한다.
+  탭 드롭 위치 계산(`resolveTabDropPosition`)은 `src/utils/tab-drop-position.ts`의 순수 함수,
+  탭 순서 변경은 `useEditorGrid`의 `reorderTabsHelper`가 담당한다.
 
 ## Design Tokens (Obsidian Dark Theme)
 

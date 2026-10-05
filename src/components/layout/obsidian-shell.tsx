@@ -132,6 +132,7 @@ export default function ObsidianShell({
             onSelectTab={editorGrid.selectFile}
             onCloseTab={editorGrid.closeFile}
             onCloseOtherTabs={editorGrid.closeOtherFiles}
+            onMoveTab={editorGrid.moveTab}
             onNewNote={handleCreateNewNote}
             onSplit={editorGrid.split}
             onCloseGroup={editorGrid.closeGroup}

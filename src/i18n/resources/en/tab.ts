@@ -7,7 +7,7 @@ export const tabEn = {
   addTab: 'New tab (+)',
   switchToEditMode: 'Switch to edit mode',
   switchToReadMode: 'Switch to reading mode',
-  contextMenuHint: '{{title}} (right-click to split)',
+  contextMenuHint: '{{title}} (drag to reorder, right-click to split)',
   splitRight: 'Split pane to the right (side by side)',
   splitDown: 'Split pane to the bottom (stacked)',
   outlineOpen: 'Outline (open right panel)',

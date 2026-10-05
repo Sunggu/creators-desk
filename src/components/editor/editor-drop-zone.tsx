@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { SplitDirection } from '../../core/domain/editor-grid.dto';
+import { TAB_DRAG_MIME } from '../../core/domain/tab-drag.dto';
 
 interface EditorDropZoneProps {
   onSplitDrop: (fileId: string, direction: SplitDirection) => void;
@@ -29,7 +30,7 @@ export default function EditorDropZone({ onSplitDrop }: EditorDropZoneProps) {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    const fileId = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData('application/creators-desk-tab');
+    const fileId = e.dataTransfer.getData('text/plain') || e.dataTransfer.getData(TAB_DRAG_MIME);
     if (fileId && activeZone) {
       onSplitDrop(fileId, activeZone === 'right' ? 'horizontal' : 'vertical');
     }

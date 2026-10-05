@@ -1,5 +1,6 @@
 import { useRef } from 'react';
 import type { EditorGridLayoutDto, SplitDirection } from '../../core/domain/editor-grid.dto';
+import type { TabDropPosition } from '../../core/domain/tab-drag.dto';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import type { EditorStats } from '../../hooks/use-codemirror';
 import { useResizable } from '../../hooks/use-resizable';
@@ -14,6 +15,7 @@ interface ResizableEditorGridProps {
   onSelectTab: (groupId: string, fileId: string) => void;
   onCloseTab: (groupId: string, fileId: string) => void;
   onCloseOtherTabs?: (groupId: string, fileId: string) => void;
+  onMoveTab?: (groupId: string, sourceFileId: string, targetFileId: string, position: TabDropPosition) => void;
   onNewNote: () => void;
   onSplit: (sourceGroupId: string, fileId: string, direction: SplitDirection) => void;
   onCloseGroup: (groupId: string) => void;
@@ -32,6 +34,7 @@ export default function ResizableEditorGrid({
   onSelectTab,
   onCloseTab,
   onCloseOtherTabs,
+  onMoveTab,
   onNewNote,
   onSplit,
   onCloseGroup,
@@ -65,6 +68,7 @@ export default function ResizableEditorGrid({
           onSelectTab={(fileId) => onSelectTab(groups[0].id, fileId)}
           onCloseTab={(fileId) => onCloseTab(groups[0].id, fileId)}
           onCloseOtherTabs={(fileId) => onCloseOtherTabs?.(groups[0].id, fileId)}
+          onMoveTab={(sourceId, targetId, position) => onMoveTab?.(groups[0].id, sourceId, targetId, position)}
           onNewNote={onNewNote}
           onSplit={(fileId, dir) => onSplit(groups[0].id, fileId, dir)}
           onCloseGroup={() => {}}
@@ -110,6 +114,7 @@ export default function ResizableEditorGrid({
           onSelectTab={(fileId) => onSelectTab(groups[0].id, fileId)}
           onCloseTab={(fileId) => onCloseTab(groups[0].id, fileId)}
           onCloseOtherTabs={(fileId) => onCloseOtherTabs?.(groups[0].id, fileId)}
+          onMoveTab={(sourceId, targetId, position) => onMoveTab?.(groups[0].id, sourceId, targetId, position)}
           onNewNote={onNewNote}
           onSplit={(fileId, dir) => onSplit(groups[0].id, fileId, dir)}
           onCloseGroup={() => onCloseGroup(groups[0].id)}
@@ -137,6 +142,7 @@ export default function ResizableEditorGrid({
           onSelectTab={(fileId) => onSelectTab(groups[1].id, fileId)}
           onCloseTab={(fileId) => onCloseTab(groups[1].id, fileId)}
           onCloseOtherTabs={(fileId) => onCloseOtherTabs?.(groups[1].id, fileId)}
+          onMoveTab={(sourceId, targetId, position) => onMoveTab?.(groups[1].id, sourceId, targetId, position)}
           onNewNote={onNewNote}
           onSplit={(fileId, dir) => onSplit(groups[1].id, fileId, dir)}
           onCloseGroup={() => onCloseGroup(groups[1].id)}

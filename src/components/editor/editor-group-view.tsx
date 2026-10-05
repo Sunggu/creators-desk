@@ -1,4 +1,5 @@
 import type { EditorGroupDto, SplitDirection } from '../../core/domain/editor-grid.dto';
+import type { TabDropPosition } from '../../core/domain/tab-drag.dto';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import type { EditorStats } from '../../hooks/use-codemirror';
 import ObsidianTabBar from '../tabs/obsidian-tab-bar';
@@ -14,6 +15,7 @@ interface EditorGroupViewProps {
   onSelectTab: (fileId: string) => void;
   onCloseTab: (fileId: string) => void;
   onCloseOtherTabs?: (fileId: string) => void;
+  onMoveTab?: (sourceFileId: string, targetFileId: string, position: TabDropPosition) => void;
   onNewNote: () => void;
   onSplit: (fileId: string, direction: SplitDirection) => void;
   onCloseGroup: () => void;
@@ -33,6 +35,7 @@ export default function EditorGroupView({
   onSelectTab,
   onCloseTab,
   onCloseOtherTabs,
+  onMoveTab,
   onNewNote,
   onSplit,
   onCloseGroup,
@@ -58,6 +61,7 @@ export default function EditorGroupView({
         onSelectTab={onSelectTab}
         onCloseTab={onCloseTab}
         onCloseOtherTabs={onCloseOtherTabs}
+        onMoveTab={onMoveTab}
         onNewNote={onNewNote}
         isRightPanelOpen={isRightPanelOpen}
         onToggleRightPanel={onToggleRightPanel}

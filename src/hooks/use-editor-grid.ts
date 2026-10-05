@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import type { EditorGroupDto, EditorGridLayoutDto, SplitDirection } from '../core/domain/editor-grid.dto';
+import type { TabDropPosition } from '../core/domain/tab-drag.dto';
 
 const DEFAULT_GRID_LAYOUT: EditorGridLayoutDto = {
   direction: 'horizontal',
@@ -84,6 +85,30 @@ export function closeOtherFilesInGroupHelper(
   };
 }
 
+export function reorderTabsHelper(
+  layout: EditorGridLayoutDto,
+  groupId: string,
+  sourceFileId: string,
+  targetFileId: string,
+  position: TabDropPosition
+): EditorGridLayoutDto {
+  return {
+    ...layout,
+    groups: layout.groups.map((group) => {
+      if (group.id !== groupId) return group;
+      if (sourceFileId === targetFileId) return group;
+      const fromIndex = group.fileIds.indexOf(sourceFileId);
+      if (fromIndex === -1 || !group.fileIds.includes(targetFileId)) return group;
+
+      const fileIds = [...group.fileIds];
+      fileIds.splice(fromIndex, 1);
+      const anchorIndex = fileIds.indexOf(targetFileId);
+      fileIds.splice(position === 'before' ? anchorIndex : anchorIndex + 1, 0, sourceFileId);
+      return { ...group, fileIds };
+    }),
+  };
+}
+
 export function useEditorGrid(initialLayout: EditorGridLayoutDto = DEFAULT_GRID_LAYOUT) {
   const [layout, setLayout] = useState<EditorGridLayoutDto>(initialLayout);
 
@@ -112,6 +137,13 @@ export function useEditorGrid(initialLayout: EditorGridLayoutDto = DEFAULT_GRID_
     }));
   }, []);
 
+  const moveTab = useCallback(
+    (groupId: string, sourceFileId: string, targetFileId: string, position: TabDropPosition) => {
+      setLayout((prev) => reorderTabsHelper(prev, groupId, sourceFileId, targetFileId, position));
+    },
+    []
+  );
+
   const split = useCallback((sourceGroupId: string, fileId: string, direction: SplitDirection) => {
     setLayout((prev) => splitGroupHelper(prev, sourceGroupId, fileId, direction));
   }, []);
@@ -137,6 +169,7 @@ export function useEditorGrid(initialLayout: EditorGridLayoutDto = DEFAULT_GRID_
     closeFile,
     closeOtherFiles,
     selectFile,
+    moveTab,
     split,
     closeGroup,
     setSplitRatio,
