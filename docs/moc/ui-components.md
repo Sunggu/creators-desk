@@ -22,15 +22,16 @@
 | `ObsidianMarkdownView` | `src/components/editor/obsidian-markdown-view.tsx` | `{ fileId, fileName, initialContent, onDocChange, onStatsChange, ... }` | Distraction-free live editor centered with max-w-[840px] and consistent padding metrics |
 | `ObsidianMarkdownPreview` | `src/components/editor/obsidian-markdown-preview.tsx` | `{ title, content, onSwitchToEdit, onNavigateWikilink }` | Reading View aligned with editor metrics (max-w-[840px] centered) |
 | `ObsidianInlineTitle` | `src/components/editor/obsidian-inline-title.tsx` | `{ title, onRename, onEnter, autoFocus }` | Organic borderless document title heading synchronized with note file name |
-| `SidebarPanelContainer` | `src/components/sidebar/sidebar-panel-container.tsx` | `{ activeMenu, onClose, vault, nodes, ... }` | Swappable primary side panel (explorer, search, outline, plugins) with drag-resizable width |
+| `SidebarPanelContainer` | `src/components/sidebar/sidebar-panel-container.tsx` | `{ activeMenu, onClose, vault, nodes, ... }` | Swappable primary side panel (explorer, search) with drag-resizable width |
 | `SearchPanel` | `src/components/sidebar/search-panel.tsx` | `{ nodes, onSelectFile }` | Fast live query filter searching file names and markdown contents |
+| `RightSidebarPanel` | `src/components/sidebar/right-sidebar-panel.tsx` | `{ isOpen, onClose, activeFile }` | Right-anchored resizable secondary panel hosting live document outline |
 | `OutlinePanel` | `src/components/sidebar/outline-panel.tsx` | `{ activeFile }` | Live markdown document outline parsing H1-H6 heading hierarchy |
-| `PluginsPanel` | `src/components/sidebar/plugins-panel.tsx` | `{}` | Extensible plugin architecture and supported file formats status |
-| `ResizableEditorGrid` | `src/components/editor/resizable-editor-grid.tsx` | `{ layout, nodes, viewMode, onSplit, onSelectTab, ... }` | 1 or 2 group grid editor with interactive splitter resizing |
-| `EditorGroupView` | `src/components/editor/editor-group-view.tsx` | `{ group, nodes, viewMode, onSplit, ... }` | Editor group container hosting tab bar, editor instance, and drop zones |
+| `PluginsView` | `src/components/settings/plugins-view.tsx` | `{}` | Extensible plugin architecture and supported file formats status inside SettingsModal |
+| `ResizableEditorGrid` | `src/components/editor/resizable-editor-grid.tsx` | `{ layout, nodes, viewMode, onSplit, onSelectTab, isRightPanelOpen, onToggleRightPanel, ... }` | 1 or 2 group grid editor with interactive splitter resizing and outline toggle |
+| `EditorGroupView` | `src/components/editor/editor-group-view.tsx` | `{ group, nodes, viewMode, onSplit, isRightPanelOpen, onToggleRightPanel, ... }` | Editor group container hosting tab bar, editor instance, and drop zones |
 | `GridSplitter` | `src/components/editor/grid-splitter.tsx` | `{ direction, onMouseDown, isResizing }` | Interactive horizontal/vertical divider handle for resizing editor groups |
 | `EditorDropZone` | `src/components/editor/editor-drop-zone.tsx` | `{ onSplitDrop }` | Tab drag-and-drop overlay detecting right and bottom split zones |
-| `SettingsModal` | `src/components/settings/settings-modal.tsx` | `{ isOpen, activeVault, onClose, onRenameVault }` | Project settings, editor preferences, and open-source notice modal |
+| `SettingsModal` | `src/components/settings/settings-modal.tsx` | `{ isOpen, activeVault, onClose, onRenameVault }` | Project settings, editor preferences, extensible plugins, and open-source notice modal |
 | `OpenSourceLicensesView` | `src/components/settings/open-source-licenses-view.tsx` | `{}` | AGPL-3.0 product licence summary, source-code offer, and entry point to the full generated notice |
 | `LicenseNoticeCard` | `src/components/settings/license-notice-card.tsx` | `{ className }` | Product name, version, licence badge and copyright row; also exports `NoticePageLink` |
 | `SourceCodeOffer` | `src/components/settings/source-code-offer.tsx` | `{ className }` | AGPL-3.0 section 13 source-code offer with the repository link |

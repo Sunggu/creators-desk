@@ -8,6 +8,7 @@ import ResizableEditorGrid from '../editor/resizable-editor-grid';
 import ObsidianMobileHeader from '../mobile/obsidian-mobile-header';
 import ObsidianRibbon from '../ribbon/obsidian-ribbon';
 import SettingsModal from '../settings/settings-modal';
+import RightSidebarPanel from '../sidebar/right-sidebar-panel';
 import SidebarPanelContainer from '../sidebar/sidebar-panel-container';
 import ObsidianStatusBar from '../statusbar/obsidian-status-bar';
 import ObsidianVaultModal from '../vault/obsidian-vault-modal';
@@ -28,6 +29,7 @@ export default function ObsidianShell({
   onDeleteVault,
 }: ObsidianShellProps) {
   const [activeSideMenu, setActiveSideMenu] = useState<SidebarMenuId | null>('explorer');
+  const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isVaultModalOpen, setIsVaultModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -104,7 +106,6 @@ export default function ObsidianShell({
           vault={vault}
           vaults={vaults}
           nodes={workspace.nodes}
-          activeFile={workspace.activeFile}
           activeFileId={workspace.activeFileId}
           onSelectVault={onSelectVault}
           onOpenVaultModal={() => setIsVaultModalOpen(true)}
@@ -137,8 +138,17 @@ export default function ObsidianShell({
             onSavingChange={setIsSaving}
             onStatsChange={setStats}
             onRenameFile={workspace.renameNode}
+            isRightPanelOpen={isRightPanelOpen}
+            onToggleRightPanel={() => setIsRightPanelOpen((prev) => !prev)}
           />
         </main>
+
+        {/* Right Secondary Panel (문서 목차 Outline) */}
+        <RightSidebarPanel
+          isOpen={isRightPanelOpen}
+          onClose={() => setIsRightPanelOpen(false)}
+          activeFile={workspace.activeFile}
+        />
       </div>
 
       <ObsidianStatusBar stats={stats} isSaving={isSaving} />

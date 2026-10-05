@@ -20,6 +20,8 @@ interface EditorGroupViewProps {
   onSavingChange: (saving: boolean) => void;
   onStatsChange: (stats: EditorStats) => void;
   onRenameFile: (id: string, name: string) => Promise<unknown>;
+  isRightPanelOpen?: boolean;
+  onToggleRightPanel?: () => void;
 }
 
 export default function EditorGroupView({
@@ -37,6 +39,8 @@ export default function EditorGroupView({
   onSavingChange,
   onStatsChange,
   onRenameFile,
+  isRightPanelOpen,
+  onToggleRightPanel,
 }: EditorGroupViewProps) {
   const openFiles = group.fileIds
     .map((id) => nodes.find((n) => n.id === id && n.type === 'file'))
@@ -55,6 +59,8 @@ export default function EditorGroupView({
         onCloseTab={onCloseTab}
         onCloseOtherTabs={onCloseOtherTabs}
         onNewNote={onNewNote}
+        isRightPanelOpen={isRightPanelOpen}
+        onToggleRightPanel={onToggleRightPanel}
         onSplitHorizontal={
           (targetId?: string) => {
             const id = targetId ?? group.activeFileId;

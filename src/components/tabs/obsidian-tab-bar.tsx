@@ -15,6 +15,8 @@ interface ObsidianTabBarProps {
   onSplitVertical?: (fileId?: string) => void;
   onCloseGroup?: () => void;
   canCloseGroup?: boolean;
+  isRightPanelOpen?: boolean;
+  onToggleRightPanel?: () => void;
 }
 
 export default function ObsidianTabBar({
@@ -30,6 +32,8 @@ export default function ObsidianTabBar({
   onSplitVertical,
   onCloseGroup,
   canCloseGroup,
+  isRightPanelOpen,
+  onToggleRightPanel,
 }: ObsidianTabBarProps) {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; fileId: string } | null>(null);
 
@@ -139,6 +143,22 @@ export default function ObsidianTabBar({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
               </svg>
             )}
+          </button>
+        )}
+
+        {onToggleRightPanel && (
+          <button
+            onClick={onToggleRightPanel}
+            className={`flex items-center justify-center h-6 w-6 rounded text-xs transition cursor-pointer ${
+              isRightPanelOpen
+                ? 'bg-violet-950 text-violet-300 border border-violet-700/60'
+                : 'text-zinc-400 hover:bg-[#202026] hover:text-zinc-200'
+            }`}
+            title={isRightPanelOpen ? '문서 목차 패널 닫기' : '문서 목차 (우측 패널 열기)'}
+          >
+            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M4 6h16M4 12h10M4 18h14" />
+            </svg>
           </button>
         )}
 

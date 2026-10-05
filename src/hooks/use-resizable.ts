@@ -6,6 +6,29 @@ interface UseResizableOptions {
   max: number;
   direction?: 'horizontal' | 'vertical';
   isRatio?: boolean;
+  reverse?: boolean;
+}
+
+export function calculateNextSizeHelper(
+  currentPos: number,
+  startPos: number,
+  startSize: number,
+  options: {
+    min: number;
+    max: number;
+    isRatio?: boolean;
+    containerSize?: number;
+    reverse?: boolean;
+  }
+): number {
+  const rawDelta = currentPos - startPos;
+  const delta = options.reverse ? -rawDelta : rawDelta;
+
+  if (options.isRatio && options.containerSize && options.containerSize > 0) {
+    const deltaRatio = delta / options.containerSize;
+    return Math.max(options.min, Math.min(options.max, startSize + deltaRatio));
+  }
+  return Math.max(options.min, Math.min(options.max, startSize + delta));
 }
 
 export function useResizable({
@@ -14,6 +37,7 @@ export function useResizable({
   max,
   direction = 'horizontal',
   isRatio = false,
+  reverse = false,
 }: UseResizableOptions) {
   const [size, setSize] = useState(initial);
   const [isResizing, setIsResizing] = useState(false);
@@ -29,16 +53,14 @@ export function useResizable({
 
       const handleMouseMove = (moveEvent: MouseEvent) => {
         const currentPos = direction === 'horizontal' ? moveEvent.clientX : moveEvent.clientY;
-        const delta = currentPos - startPosRef.current;
-
-        if (isRatio && containerSize && containerSize > 0) {
-          const deltaRatio = delta / containerSize;
-          const next = Math.max(min, Math.min(max, startSizeRef.current + deltaRatio));
-          setSize(next);
-        } else {
-          const next = Math.max(min, Math.min(max, startSizeRef.current + delta));
-          setSize(next);
-        }
+        const next = calculateNextSizeHelper(currentPos, startPosRef.current, startSizeRef.current, {
+          min,
+          max,
+          isRatio,
+          containerSize,
+          reverse,
+        });
+        setSize(next);
       };
 
       const handleMouseUp = () => {

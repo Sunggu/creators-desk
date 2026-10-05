@@ -20,6 +20,8 @@ interface ResizableEditorGridProps {
   onSavingChange: (saving: boolean) => void;
   onStatsChange: (stats: EditorStats) => void;
   onRenameFile: (id: string, name: string) => Promise<unknown>;
+  isRightPanelOpen?: boolean;
+  onToggleRightPanel?: () => void;
 }
 
 export default function ResizableEditorGrid({
@@ -36,6 +38,8 @@ export default function ResizableEditorGrid({
   onSavingChange,
   onStatsChange,
   onRenameFile,
+  isRightPanelOpen,
+  onToggleRightPanel,
 }: ResizableEditorGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isHorizontal = layout.direction === 'horizontal';
@@ -67,6 +71,8 @@ export default function ResizableEditorGrid({
           onSavingChange={onSavingChange}
           onStatsChange={onStatsChange}
           onRenameFile={onRenameFile}
+          isRightPanelOpen={isRightPanelOpen}
+          onToggleRightPanel={onToggleRightPanel}
         />
       </div>
     );
@@ -110,6 +116,8 @@ export default function ResizableEditorGrid({
           onSavingChange={onSavingChange}
           onStatsChange={onStatsChange}
           onRenameFile={onRenameFile}
+          isRightPanelOpen={isRightPanelOpen}
+          onToggleRightPanel={onToggleRightPanel}
         />
       </div>
 
@@ -135,6 +143,8 @@ export default function ResizableEditorGrid({
           onSavingChange={onSavingChange}
           onStatsChange={onStatsChange}
           onRenameFile={onRenameFile}
+          isRightPanelOpen={isRightPanelOpen}
+          onToggleRightPanel={onToggleRightPanel}
         />
       </div>
     </div>

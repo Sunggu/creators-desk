@@ -1,4 +1,4 @@
-export type SidebarMenuId = 'explorer' | 'search' | 'outline' | 'plugins';
+export type SidebarMenuId = 'explorer' | 'search';
 
 export interface SidebarPanelConfig {
   id: SidebarMenuId;

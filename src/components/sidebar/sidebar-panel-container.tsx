@@ -3,8 +3,6 @@ import type { SidebarMenuId } from '../../core/domain/sidebar-panel.dto';
 import type { VaultDto } from '../../core/domain/vault.dto';
 import { useResizable } from '../../hooks/use-resizable';
 import ObsidianSidebar from './obsidian-sidebar';
-import OutlinePanel from './outline-panel';
-import PluginsPanel from './plugins-panel';
 import SearchPanel from './search-panel';
 
 interface SidebarPanelContainerProps {
@@ -13,7 +11,6 @@ interface SidebarPanelContainerProps {
   vault: VaultDto;
   vaults: VaultDto[];
   nodes: FileNodeDto[];
-  activeFile: FileNodeDto | null;
   activeFileId: string | null;
   onSelectVault: (id: string) => void;
   onOpenVaultModal: () => void;
@@ -30,8 +27,6 @@ interface SidebarPanelContainerProps {
 const MENU_TITLES: Record<SidebarMenuId, string> = {
   explorer: '파일 탐색기',
   search: '빠른 검색',
-  outline: '문서 목차',
-  plugins: '확장 플러그인',
 };
 
 export default function SidebarPanelContainer({
@@ -40,7 +35,6 @@ export default function SidebarPanelContainer({
   vault,
   vaults,
   nodes,
-  activeFile,
   activeFileId,
   onSelectVault,
   onOpenVaultModal,
@@ -104,8 +98,6 @@ export default function SidebarPanelContainer({
           />
         )}
         {activeMenu === 'search' && <SearchPanel nodes={nodes} onSelectFile={onSelectFile} />}
-        {activeMenu === 'outline' && <OutlinePanel activeFile={activeFile} />}
-        {activeMenu === 'plugins' && <PluginsPanel />}
       </div>
 
       {/* Right Drag Resize Handle */}

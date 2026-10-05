@@ -1,5 +1,5 @@
-import { floorToEpochSecond } from './epoch-millis';
 import type { EpochMillis } from './epoch-millis.dto';
+import { floorToEpochSecond } from './epoch-millis';
 import { SYSTEM_TIME_ZONE, UTC_TIME_ZONE, type TimeZoneSetting } from './time-zone.dto';
 
 /** True for the "follow the runtime" sentinel. */
@@ -63,16 +63,38 @@ export function toIntlTimeZone(
   return getSystemTimeZone();
 }
 
+/** Memoised offset per zone, so a full zone sweep costs one format per zone. */
+const offsetCache = new Map<string, { atSecond: EpochMillis; minutes: number }>();
+
 /**
  * Offset of `timeZone` from UTC at the given instant, in minutes.
- * DST-aware: the offset is computed for that specific instant.
+ *
+ * DST-aware: the offset is computed for that specific instant, so a zone is
+ * re-evaluated whenever the UTC second changes (offsets only shift on whole
+ * minutes, which is exactly when DST boundaries land).
+ *
+ * Cached because building the zone picker sweeps ~400 zones and each `formatToParts`
+ * call is comparatively expensive. The cache is keyed by zone and invalidated on
+ * the UTC second, so it can never serve a stale DST answer.
  */
 export function getUtcOffsetMinutes(
   millis: EpochMillis,
   timeZone: TimeZoneSetting = SYSTEM_TIME_ZONE,
 ): number {
+  const zone = toIntlTimeZone(timeZone);
+  const atSecond = floorToEpochSecond(millis);
+  const cached = offsetCache.get(zone);
+
+  if (cached && cached.atSecond === atSecond) return cached.minutes;
+
+  const minutes = computeUtcOffsetMinutes(millis, zone);
+  offsetCache.set(zone, { atSecond, minutes });
+  return minutes;
+}
+
+function computeUtcOffsetMinutes(millis: EpochMillis, zone: TimeZoneSetting): number {
   const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: toIntlTimeZone(timeZone),
+    timeZone: zone,
     hourCycle: 'h23',
     year: 'numeric',
     month: '2-digit',

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { APP_VERSION } from '../../core/app-version';
 import type { VaultDto } from '../../core/domain/vault.dto';
 import OpenSourceLicensesView from './open-source-licenses-view';
+import PluginsView from './plugins-view';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -10,7 +11,7 @@ interface SettingsModalProps {
   onRenameVault?: (id: string, newAlias: string) => void;
 }
 
-type SettingsTab = 'project' | 'preferences' | 'licenses';
+type SettingsTab = 'project' | 'preferences' | 'plugins' | 'licenses';
 
 export default function SettingsModal({
   isOpen,
@@ -96,11 +97,23 @@ export default function SettingsModal({
             >
               <span>⚙️ 에디터 환경설정</span>
             </button>
+
+            <button
+              onClick={() => setActiveTab('plugins')}
+              className={`flex w-full items-center space-x-2 rounded px-2.5 py-2 text-xs font-medium transition cursor-pointer ${
+                activeTab === 'plugins'
+                  ? 'bg-violet-600/20 text-violet-300 font-semibold'
+                  : 'text-zinc-400 hover:bg-[#1e1e24] hover:text-zinc-200'
+              }`}
+            >
+              <span>🧩 확장 플러그인</span>
+            </button>
           </div>
 
           {/* Right Tab Content */}
           <div className="flex-1 overflow-y-auto p-4 bg-[#18181b]">
             {activeTab === 'licenses' && <OpenSourceLicensesView />}
+            {activeTab === 'plugins' && <PluginsView />}
 
             {activeTab === 'project' && (
               <div className="space-y-4 text-xs text-zinc-300">

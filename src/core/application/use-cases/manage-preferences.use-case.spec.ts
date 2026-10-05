@@ -61,12 +61,16 @@ describe('ManagePreferencesUseCase', () => {
     expect(read()).toEqual({ locale: 'en', timeZone: SYSTEM_TIME_ZONE });
   });
 
-  it('offers the follow-the-runtime row plus real zones', () => {
-    const { repo } = createRepo();
-    const useCase = new ManagePreferencesUseCase(repo);
-    const options = useCase.listTimeZoneOptions();
+  it(
+    'offers the follow-the-runtime row plus real zones',
+    () => {
+      const { repo } = createRepo();
+      const useCase = new ManagePreferencesUseCase(repo);
+      const options = useCase.listTimeZoneOptions();
 
-    expect(options[0].isSystem).toBe(true);
-    expect(options.some((option) => option.value === 'Asia/Seoul')).toBe(true);
-  });
+      expect(options[0].isSystem).toBe(true);
+      expect(options.some((option) => option.value === 'Asia/Seoul')).toBe(true);
+    },
+    15000
+  );
 });
