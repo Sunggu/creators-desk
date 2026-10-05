@@ -1,30 +1,35 @@
 import type { LocaleBundleShape } from '../../locale-bundle-shape.dto';
-import { licensesKo } from '../ko/licenses';
+import type { licensesKo } from '../ko/licenses';
 
 /**
  * BASELINE BUNDLE - English. Must satisfy the Korean baseline key-for-key.
+ *
+ * See `ko/licenses.ts` for why this copy is legally constrained: AGPL-3.0 may
+ * not be presented as a commercial-use guarantee, and the corresponding-source
+ * obligation must be stated instead.
  */
 export const licensesEn = {
+  // Placeholder-free by design: see the Korean baseline.
   intro:
-    'uses the open source software listed below. The copyright notice and licence text for each library are listed in the open source notice, available identically from the built /notice.html page and from THIRD-PARTY-NOTICES.txt in the repository.',
-  productHeading: 'Product licence',
-  productLabel: 'Product',
-  licenseLabel: 'Licence',
-  copyrightLabel: 'Copyright',
+    'This software uses the open source libraries listed below. Copyright notices and full license texts for each library are recorded in the notices, and are also available from the built notices page and the Notices file in the repository.',
   copyright: '© {{year}} {{holder}}',
-  licenseFileLabel: 'Licence text',
-  licenseFileHint: 'the LICENSE file at the repository root',
-  sourceOfferHeading: 'Source code offer ({{license}} section 13)',
-  sourceOfferNetworkBody:
-    'This product is software offered over a network. Even when you modify and run it over a remote network, you can obtain the corresponding source code from the link below on the same terms.',
-  sourceOfferBundleBody:
-    'You are also free to obtain the complete source code as a whole, keeping the LICENSE file (the licence text) alongside it.',
-  aboutHeading: 'About this notice',
+  aboutHeading: 'About these notices',
   aboutScope:
-    'The notice covers the packages shipped together with the browser bundle, the server bundle and the production image.',
+    '· The packages listed here are shipped with the browser and server bundles as well as the production image.',
   aboutGenerated:
-    'The notice is generated automatically whenever a library is added or removed, so the list and the licence texts always agree.',
-  aboutContact: 'For licence changes or commercial use enquiries, please contact us below.',
-  contactLabel: 'Enquiries',
-  openNoticePage: '📜 View the full open source notice',
+    '· The notices are generated automatically whenever a library is added or removed, so the list and the full texts never diverge.',
+  aboutContact: '· For questions about license changes or related matters, please get in touch below.',
+  contactPrefix: 'Contact:',
+  productLicenseHeading: 'Product license',
+  productLabel: 'Product',
+  licenseLabel: 'License',
+  copyrightLabel: 'Copyright',
+  licenseFileLabel: 'Full license',
+  licenseFileValue: 'The LICENSE file at the repository root',
+  viewFull: 'View the full notices',
+  sourceOfferHeading: 'Source code availability ({{license}} §13)',
+  sourceOfferNetworkBody:
+    'This product is software provided over a network. If you modify and run the program over a remote network, you may obtain the corresponding source code at the URL below under the same terms.',
+  sourceOfferBundleBody:
+    'You may also download the complete source code together with the LICENSE file (the full license text) and use it freely.',
 } satisfies LocaleBundleShape<typeof licensesKo>;

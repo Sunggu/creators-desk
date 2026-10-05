@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { marked } from 'marked';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface ObsidianMarkdownPreviewProps {
   title: string;
@@ -29,6 +30,7 @@ export default function ObsidianMarkdownPreview({
   onSwitchToEdit,
   onNavigateWikilink,
 }: ObsidianMarkdownPreviewProps) {
+  const t = useTranslate();
   const cleanTitle = title.replace(/\.md$/i, '');
 
   const html = useMemo(() => {
@@ -52,7 +54,7 @@ export default function ObsidianMarkdownPreview({
       onDoubleClick={onSwitchToEdit}
       onClick={handleClick}
       className="h-full w-full overflow-y-auto bg-[#1e1e22] text-[#dcddde] select-text cursor-text"
-      title="더블클릭하여 편집 모드로 전환"
+      title={t('editor.doubleClickToEdit')}
     >
       <div className="w-full max-w-[840px] mx-auto px-4 md:px-12 pt-6 pb-32">
         {/* Document Title Header */}

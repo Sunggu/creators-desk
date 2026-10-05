@@ -66,13 +66,15 @@ describe('licence notice copy', () => {
     }
   });
 
-  it('resolves every placeholder in the licence copy', () => {
+  it('resolves the licence copy placeholders it declares', () => {
     for (const locale of SUPPORTED_LOCALES) {
       const translator = createResourceTranslator(locale);
       expect(translator.t('licenses.copyright', { year: '2026', holder: 'Example' })).not.toContain(
         '{{',
       );
-      expect(translator.t('licenses.intro')).not.toContain('{{');
+      expect(translator.t('licenses.sourceOfferHeading', { license: 'AGPL-3.0' })).not.toContain(
+        '{{',
+      );
     }
   });
 });

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { INVALID_FILE_NAME_CHARS_REGEX, sanitizeFileName } from '../../utils/name-generator';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface ObsidianInlineTitleProps {
   title: string;
@@ -14,6 +15,7 @@ export default function ObsidianInlineTitle({
   onEnter,
   autoFocus = false,
 }: ObsidianInlineTitleProps) {
+  const t = useTranslate();
   const [val, setVal] = useState(title);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -65,9 +67,9 @@ export default function ObsidianInlineTitle({
         onChange={handleChange}
         onBlur={commit}
         onKeyDown={handleKeyDown}
-        placeholder="제목 없는 노트"
-        aria-label="Note title"
-        title="파일명에 \ / : * ? &quot; < > | 문자는 사용할 수 없습니다"
+        placeholder={t('editor.titlePlaceholder')}
+        aria-label={t('editor.titleAriaLabel')}
+        title={t('editor.invalidCharsTitle')}
         className="w-full bg-transparent text-3xl md:text-4xl font-extrabold text-white tracking-tight outline-none border-none placeholder:text-zinc-600 transition-opacity pb-1"
       />
     </div>

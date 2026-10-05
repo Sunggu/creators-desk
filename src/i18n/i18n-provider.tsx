@@ -6,6 +6,7 @@ import type { TimeZoneOption } from '../core/domain/time/time-zone-option.dto';
 import type { EpochMillis } from '../core/domain/time/epoch-millis.dto';
 import { nowEpochMillis } from '../core/domain/time/epoch-millis';
 import { toIntlTimeZone } from '../core/domain/time/time-zone';
+import { SYSTEM_TIME_ZONE } from '../core/domain/time/time-zone.dto';
 import { managePreferencesUseCase } from '../infrastructure/di';
 import { I18nContext } from './i18n-context';
 import type { I18nContextValue } from './i18n-context.dto';
@@ -66,6 +67,7 @@ function createI18nValue(
     locale: preferences.locale,
     timeZone: preferences.timeZone,
     resolvedTimeZone: toIntlTimeZone(preferences.timeZone),
+    isSystemTimeZone: preferences.timeZone === SYSTEM_TIME_ZONE,
 
     updatePreferences,
     listTimeZoneOptions: () => {

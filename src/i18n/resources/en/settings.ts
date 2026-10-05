@@ -3,11 +3,12 @@ import type { settingsKo } from '../ko/settings';
 
 /** BASELINE BUNDLE - English. Must satisfy the Korean baseline key-for-key. */
 export const settingsEn = {
-  title: 'Settings & licenses',
+  title: 'Settings',
   closeTitle: 'Close (Esc)',
-  tabLicenses: '📜 Open source notice',
+  tabLicenses: '📜 Open source notices',
   tabProject: '📁 Project (Vault) settings',
   tabPreferences: '⚙️ Editor preferences',
+  tabPlugins: '🧩 Plugins',
   projectHeading: 'Active vault',
   aliasLabel: 'Project display name (alias)',
   immutableKey: 'Immutable storage key',
@@ -18,18 +19,18 @@ export const settingsEn = {
   darkThemeName: 'Dark theme (Obsidian Minimal)',
   darkThemeDescription: 'A fixed, pure dark palette for deep focus',
   autoSaveName: 'Automatic save (auto-save)',
-  autoSaveDescription: 'Saves automatically after you stop typing',
+  autoSaveDescription: 'Saves automatically once you stop typing',
   languageHeading: 'Language and time zone',
   languageName: 'Interface language',
   languageDescription: 'Choose the language used for interface text',
   timeZoneName: 'Time zone',
   timeZoneDescription: 'Stored timestamps (epoch milliseconds) are displayed in this zone',
-  timeZoneAuto: 'Automatic system time zone ({{zone}})',
   localeKorean: '한국어',
   localeEnglish: 'English',
   previewHeading: 'Date display preview',
   previewNow: 'Current time: {{value}}',
   previewEpoch: 'Stored value (epoch ms): {{value}}',
+  timeZoneAuto: 'Automatic (follow system, {{zone}})',
   previewNote:
-    'Stored values are time-zone independent epoch milliseconds and are only converted to the selected zone at render time.',
+    'Stored values are time-zone independent epoch milliseconds, converted to the selected zone only at render time.',
 } satisfies LocaleBundleShape<typeof settingsKo>;

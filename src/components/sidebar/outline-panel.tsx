@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface OutlineItem {
   level: number;
@@ -12,6 +13,7 @@ interface OutlinePanelProps {
 }
 
 export default function OutlinePanel({ activeFile }: OutlinePanelProps) {
+  const t = useTranslate();
   const headings = useMemo<OutlineItem[]>(() => {
     if (!activeFile || !activeFile.content) return [];
     const lines = activeFile.content.split('\n');
@@ -34,7 +36,7 @@ export default function OutlinePanel({ activeFile }: OutlinePanelProps) {
   if (!activeFile) {
     return (
       <div className="flex h-full items-center justify-center p-4 text-center text-xs text-zinc-500">
-        선택된 문서가 없습니다.
+        {t('sidebar.outlineEmpty')}
       </div>
     );
   }
@@ -42,12 +44,12 @@ export default function OutlinePanel({ activeFile }: OutlinePanelProps) {
   return (
     <div className="flex h-full flex-col p-3 text-xs text-zinc-300">
       <div className="mb-2 text-[11px] font-semibold text-zinc-400 truncate">
-        {activeFile.name.replace(/\.md$/i, '')} 의 목차
+        {t('sidebar.outlineHeadingOf', { title: activeFile.name.replace(/\.md$/i, '') })}
       </div>
       <div className="flex-1 overflow-y-auto space-y-1">
         {headings.length === 0 ? (
           <div className="py-8 text-center text-zinc-500">
-            문서에 작성된 헤딩(#, ##, ###)이 없습니다.
+            {t('sidebar.outlineNoHeadings')}
           </div>
         ) : (
           headings.map((item, idx) => (

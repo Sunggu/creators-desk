@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import TabContextMenu from './tab-context-menu';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface ObsidianTabBarProps {
   openFiles: FileNodeDto[];
@@ -35,6 +36,7 @@ export default function ObsidianTabBar({
   isRightPanelOpen,
   onToggleRightPanel,
 }: ObsidianTabBarProps) {
+  const t = useTranslate();
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; fileId: string } | null>(null);
 
   const handleTabContextMenu = (e: React.MouseEvent, fileId: string) => {
@@ -67,7 +69,7 @@ export default function ObsidianTabBar({
                   ? 'relative z-10 -mb-[1px] h-9 px-3.5 bg-[#1e1e22] text-zinc-100 border-t-2 border-violet-500 border-x border-[#26262e] border-b-0'
                   : 'h-8 mb-[1px] px-3 bg-transparent text-zinc-400 hover:bg-[#1a1a1e] hover:text-zinc-200 border-r border-[#222228]'
               }`}
-              title={`${cleanTitle} (우클릭하여 분할 화면)`}
+              title={t('tab.contextMenuHint', { title: cleanTitle })}
             >
               {isActive && <span className="h-1.5 w-1.5 rounded-full bg-violet-400 shrink-0" />}
               <span className="truncate max-w-40">{cleanTitle}</span>
@@ -77,7 +79,7 @@ export default function ObsidianTabBar({
                   onCloseTab(file.id);
                 }}
                 className="rounded p-0.5 text-zinc-400 opacity-60 hover:bg-[#2b2b32] hover:opacity-100 hover:text-zinc-100 transition"
-                title="탭 닫기"
+                title={t('tab.closeTab')}
               >
                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -90,7 +92,7 @@ export default function ObsidianTabBar({
         <button
           onClick={onNewNote}
           className="mb-1 ml-1 flex h-7 w-7 items-center justify-center rounded text-zinc-400 hover:bg-[#222228] hover:text-zinc-200 transition"
-          title="새 탭 열기 (+)"
+          title={t('tab.addTab')}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -104,7 +106,7 @@ export default function ObsidianTabBar({
           <button
             onClick={() => onSplitHorizontal()}
             className="flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:bg-[#202026] hover:text-violet-300 transition cursor-pointer"
-            title="우측으로 창 분할 (좌/우 나란히 보기)"
+            title={t('tab.splitRight')}
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 4H5a1 1 0 00-1 1v14a1 1 0 001 1h4V4zm2 0v16h8a1 1 0 001-1V5a1 1 0 00-1-1h-8z" />
@@ -116,7 +118,7 @@ export default function ObsidianTabBar({
           <button
             onClick={() => onSplitVertical()}
             className="flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:bg-[#202026] hover:text-violet-300 transition cursor-pointer"
-            title="하단으로 창 분할 (상/하 나란히 보기)"
+            title={t('tab.splitDown')}
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M4 9V5a1 1 0 011-1h14a1 1 0 011 1v4H4zm0 2h16v8a1 1 0 01-1 1H5a1 1 0 01-1-1v-8z" />
@@ -132,7 +134,11 @@ export default function ObsidianTabBar({
                 ? 'bg-violet-950 text-violet-300 border border-violet-700/60'
                 : 'text-zinc-400 hover:bg-[#202026] hover:text-zinc-200'
             }`}
-            title={viewMode === 'preview' ? '편집 모드로 전환' : '읽기 모드로 전환'}
+            title={
+              viewMode === 'preview'
+                ? t('tab.switchToEditMode')
+                : t('tab.switchToReadMode')
+            }
           >
             {viewMode === 'preview' ? (
               <svg className="h-3.5 w-3.5 text-violet-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -154,7 +160,7 @@ export default function ObsidianTabBar({
                 ? 'bg-violet-950 text-violet-300 border border-violet-700/60'
                 : 'text-zinc-400 hover:bg-[#202026] hover:text-zinc-200'
             }`}
-            title={isRightPanelOpen ? '문서 목차 패널 닫기' : '문서 목차 (우측 패널 열기)'}
+            title={isRightPanelOpen ? t('tab.outlineClose') : t('tab.outlineOpen')}
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M4 6h16M4 12h10M4 18h14" />
@@ -166,7 +172,7 @@ export default function ObsidianTabBar({
           <button
             onClick={onCloseGroup}
             className="flex h-6 w-6 items-center justify-center rounded text-zinc-400 hover:bg-rose-500/20 hover:text-rose-300 transition cursor-pointer"
-            title="분할 창 닫기"
+            title={t('tab.closeSplitGroup')}
           >
             <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

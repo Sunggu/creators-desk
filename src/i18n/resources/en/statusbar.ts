@@ -16,7 +16,7 @@ export const statusbarEn = {
   livePreview: 'Live Preview',
   clock: '{{time}} · {{zone}}',
   zoneFollowsSystem: 'System time zone',
-  openSourceNotice: 'Open source notice',
+  openSourceNotice: 'Open source notices',
   openSourceNoticeTitle:
-    'Copyright and licence information for the open source software included in this product',
+    'Copyright and license information for the open source software included in this product',
 } satisfies LocaleBundleShape<typeof statusbarKo>;

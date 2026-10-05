@@ -1,5 +1,6 @@
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import type { VaultDto } from '../../core/domain/vault.dto';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface ObsidianMobileHeaderProps {
   vault: VaultDto;
@@ -20,6 +21,7 @@ export default function ObsidianMobileHeader({
   onOpenVaultModal,
   onNewNote,
 }: ObsidianMobileHeaderProps) {
+  const t = useTranslate();
   const displayTitle = activeFile
     ? activeFile.name.replace(/\.md$/i, '')
     : vault.name;
@@ -30,7 +32,7 @@ export default function ObsidianMobileHeader({
       <button
         onClick={onOpenSidebar}
         className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-300 hover:bg-[#202026] active:bg-[#282830]"
-        title="탐색기 열기"
+        title={t('mobile.openExplorer')}
       >
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -50,7 +52,11 @@ export default function ObsidianMobileHeader({
           <button
             onClick={onToggleViewMode}
             className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-300 hover:bg-[#202026] active:bg-[#282830]"
-            title={viewMode === 'preview' ? '편집 모드로 전환' : '읽기 모드로 전환'}
+            title={
+            viewMode === 'preview'
+              ? t('mobile.switchToEditMode')
+              : t('mobile.switchToReadMode')
+          }
           >
             <span className="text-sm">{viewMode === 'preview' ? '📖' : '✏️'}</span>
           </button>
@@ -59,7 +65,7 @@ export default function ObsidianMobileHeader({
         <button
           onClick={onNewNote}
           className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-300 hover:bg-[#202026] active:bg-[#282830]"
-          title="새 노트"
+          title={t('mobile.newNote')}
         >
           <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -69,7 +75,7 @@ export default function ObsidianMobileHeader({
         <button
           onClick={onOpenVaultModal}
           className="flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-[#202026] active:bg-[#282830]"
-          title="Vault 전환"
+          title={t('mobile.switchVault')}
         >
           <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />

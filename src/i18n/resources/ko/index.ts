@@ -5,6 +5,7 @@ import { errorKo } from './error';
 import { licensesKo } from './licenses';
 import { mobileKo } from './mobile';
 import { panelKo } from './panel';
+import { pluginsKo } from './plugins';
 import { ribbonKo } from './ribbon';
 import { settingsKo } from './settings';
 import { sidebarKo } from './sidebar';
@@ -21,6 +22,7 @@ export {
   licensesKo,
   mobileKo,
   panelKo,
+  pluginsKo,
   ribbonKo,
   settingsKo,
   sidebarKo,
@@ -32,7 +34,8 @@ export {
 
 /**
  * The baseline bundle. Adding a namespace here forces every other locale to
- * supply it (each locale object is checked with `satisfies typeof koResources`).
+ * supply it (each locale object is checked with `satisfies LocaleBundleShape`),
+ * and the derived `ResourceKey` union immediately exposes it to every call site.
  *
  * Split across one file per namespace to respect the 200-line limit (Rule 1).
  */
@@ -44,6 +47,7 @@ export const koResources = {
   licenses: licensesKo,
   mobile: mobileKo,
   panel: panelKo,
+  plugins: pluginsKo,
   ribbon: ribbonKo,
   settings: settingsKo,
   sidebar: sidebarKo,

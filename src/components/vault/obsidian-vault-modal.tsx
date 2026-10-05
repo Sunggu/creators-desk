@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { VaultDto } from '../../core/domain/vault.dto';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface ObsidianVaultModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export default function ObsidianVaultModal({
   onCreateVault,
   onDeleteVault,
 }: ObsidianVaultModalProps) {
+  const t = useTranslate();
   const [newVaultName, setNewVaultName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
@@ -49,8 +51,8 @@ export default function ObsidianVaultModal({
       >
         <div className="flex items-center justify-between border-b border-[#292933] pb-3">
           <div>
-            <h2 className="text-base font-bold text-zinc-100">Vault 관리</h2>
-            <p className="text-xs text-zinc-400">작업 공간을 전환하거나 새로 생성합니다.</p>
+            <h2 className="text-base font-bold text-zinc-100">{t('vault.manageTitle')}</h2>
+            <p className="text-xs text-zinc-400">{t('vault.manageSubtitle')}</p>
           </div>
           <button
             onClick={onClose}
@@ -86,7 +88,7 @@ export default function ObsidianVaultModal({
                   <span>{vault.name}</span>
                   {isActive && (
                     <span className="rounded bg-violet-500/30 px-1.5 py-0.5 text-[10px] text-violet-300">
-                      현재 열림
+                      {t('vault.currentlyOpen')}
                     </span>
                   )}
                 </div>
@@ -94,12 +96,12 @@ export default function ObsidianVaultModal({
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (confirm(`'${vault.name}' Vault를 삭제하시겠습니까?`)) {
+                    if (confirm(t('vault.deleteConfirm', { name: vault.name }))) {
                       onDeleteVault(vault.id);
                     }
                   }}
                   className="opacity-0 group-hover:opacity-100 p-1 text-zinc-500 hover:text-rose-400 transition"
-                  title="Vault 삭제"
+                  title={t('vault.deleteTitle')}
                 >
                   <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -112,13 +114,13 @@ export default function ObsidianVaultModal({
 
         {/* Create Form */}
         <form onSubmit={handleCreate} className="mt-5 border-t border-[#292933] pt-4">
-          <label className="block text-xs font-medium text-zinc-400">새 Vault 생성</label>
+          <label className="block text-xs font-medium text-zinc-400">{t('vault.createLabel')}</label>
           <div className="mt-1.5 flex space-x-2">
             <input
               type="text"
               value={newVaultName}
               onChange={(e) => setNewVaultName(e.target.value)}
-              placeholder="Vault 이름 입력..."
+              placeholder={t('vault.namePlaceholder')}
               className="flex-1 rounded-lg border border-[#32323c] bg-[#121215] px-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 outline-hidden focus:border-violet-500"
             />
             <button
@@ -126,7 +128,7 @@ export default function ObsidianVaultModal({
               disabled={isCreating || !newVaultName.trim()}
               className="rounded-lg bg-violet-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-violet-500 disabled:opacity-50 transition"
             >
-              생성
+              {t('common.create')}
             </button>
           </div>
         </form>

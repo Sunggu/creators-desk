@@ -4,6 +4,7 @@ import type { VaultDto } from '../../core/domain/vault.dto';
 import { useResizable } from '../../hooks/use-resizable';
 import ObsidianSidebar from './obsidian-sidebar';
 import SearchPanel from './search-panel';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface SidebarPanelContainerProps {
   activeMenu: SidebarMenuId | null;
@@ -24,9 +25,10 @@ interface SidebarPanelContainerProps {
   onRefresh: () => void;
 }
 
-const MENU_TITLES: Record<SidebarMenuId, string> = {
-  explorer: '파일 탐색기',
-  search: '빠른 검색',
+/** Resource id of the header label for each swappable sidebar panel. */
+const MENU_TITLE_KEYS: Record<SidebarMenuId, 'ribbon.menuExplorer' | 'ribbon.menuSearch'> = {
+  explorer: 'ribbon.menuExplorer',
+  search: 'ribbon.menuSearch',
 };
 
 export default function SidebarPanelContainer({
@@ -47,6 +49,7 @@ export default function SidebarPanelContainer({
   onMoveNode,
   onRefresh,
 }: SidebarPanelContainerProps) {
+  const t = useTranslate();
   const { size: width, startResize, isResizing } = useResizable({
     initial: 260,
     min: 200,
@@ -64,12 +67,12 @@ export default function SidebarPanelContainer({
       {/* Panel Header */}
       <div className="flex h-9 items-center justify-between border-b border-[#24242a] px-3.5">
         <span className="text-xs font-bold tracking-tight text-zinc-200">
-          {MENU_TITLES[activeMenu]}
+          {t(MENU_TITLE_KEYS[activeMenu])}
         </span>
         <button
           onClick={onClose}
           className="rounded p-1 text-zinc-400 hover:bg-[#26262e] hover:text-zinc-100 transition cursor-pointer"
-          title="사이드바 접기"
+          title={t('sidebar.collapse')}
         >
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -106,7 +109,7 @@ export default function SidebarPanelContainer({
         className={`absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-violet-500/60 transition ${
           isResizing ? 'bg-violet-500 w-1.5' : ''
         }`}
-        title="드래그하여 사이드바 너비 조절"
+        title={t('sidebar.resize')}
       />
     </div>
   );

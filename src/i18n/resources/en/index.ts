@@ -5,6 +5,7 @@ import { errorEn } from './error';
 import { licensesEn } from './licenses';
 import { mobileEn } from './mobile';
 import { panelEn } from './panel';
+import { pluginsEn } from './plugins';
 import { ribbonEn } from './ribbon';
 import { settingsEn } from './settings';
 import { sidebarEn } from './sidebar';
@@ -29,6 +30,7 @@ export const enResources = {
   licenses: licensesEn,
   mobile: mobileEn,
   panel: panelEn,
+  plugins: pluginsEn,
   ribbon: ribbonEn,
   settings: settingsEn,
   sidebar: sidebarEn,

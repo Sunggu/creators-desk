@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface TabContextMenuProps {
   x: number;
@@ -21,6 +22,7 @@ export default function TabContextMenu({
   onCloseTab,
   onCloseOtherTabs,
 }: TabContextMenuProps) {
+  const t = useTranslate();
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -61,7 +63,7 @@ export default function TabContextMenu({
           <svg className="h-3.5 w-3.5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 4H5a1 1 0 00-1 1v14a1 1 0 001 1h4V4zm2 0v16h8a1 1 0 001-1V5a1 1 0 00-1-1h-8z" />
           </svg>
-          <span>오른쪽으로 분할</span>
+          <span>{t('tab.menuSplitRight')}</span>
         </span>
         <span className="text-[10px] text-zinc-500 font-mono">Split Right</span>
       </button>
@@ -77,7 +79,7 @@ export default function TabContextMenu({
           <svg className="h-3.5 w-3.5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M4 9V5a1 1 0 011-1h14a1 1 0 011 1v4H4zm0 2h16v8a1 1 0 01-1 1H5a1 1 0 01-1-1v-8z" />
           </svg>
-          <span>아래로 분할</span>
+          <span>{t('tab.menuSplitDown')}</span>
         </span>
         <span className="text-[10px] text-zinc-500 font-mono">Split Down</span>
       </button>
@@ -91,7 +93,7 @@ export default function TabContextMenu({
         }}
         className="w-full flex items-center justify-between rounded px-2.5 py-1.5 hover:bg-zinc-800 hover:text-zinc-100 transition cursor-pointer"
       >
-        <span>탭 닫기</span>
+        <span>{t('tab.menuCloseTab')}</span>
         <span className="text-[10px] text-zinc-500 font-mono">Ctrl+W</span>
       </button>
 
@@ -103,7 +105,7 @@ export default function TabContextMenu({
           }}
           className="w-full flex items-center justify-between rounded px-2.5 py-1.5 hover:bg-zinc-800 hover:text-zinc-100 transition cursor-pointer"
         >
-          <span>다른 탭 모두 닫기</span>
+          <span>{t('tab.menuCloseOtherTabs')}</span>
         </button>
       )}
     </div>

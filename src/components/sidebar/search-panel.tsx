@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface SearchPanelProps {
   nodes: FileNodeDto[];
@@ -7,6 +8,7 @@ interface SearchPanelProps {
 }
 
 export default function SearchPanel({ nodes, onSelectFile }: SearchPanelProps) {
+  const t = useTranslate();
   const [query, setQuery] = useState('');
 
   const files = nodes.filter((n) => n.type === 'file');
@@ -25,7 +27,7 @@ export default function SearchPanel({ nodes, onSelectFile }: SearchPanelProps) {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="파일 및 본문 검색..."
+          placeholder={t('sidebar.searchPlaceholder')}
           className="w-full rounded border border-zinc-700 bg-[#1e1e24] px-3 py-1.5 pl-8 text-zinc-100 placeholder-zinc-500 outline-hidden focus:border-violet-500"
           autoFocus
         />
@@ -41,7 +43,7 @@ export default function SearchPanel({ nodes, onSelectFile }: SearchPanelProps) {
 
       <div className="flex-1 overflow-y-auto space-y-1">
         <div className="text-[11px] font-medium text-zinc-500 mb-1 px-1">
-          {filtered.length}개 파일 결과
+          {t('sidebar.searchResults', { count: filtered.length })}
         </div>
         {filtered.map((file) => (
           <div
@@ -58,7 +60,7 @@ export default function SearchPanel({ nodes, onSelectFile }: SearchPanelProps) {
           </div>
         ))}
         {filtered.length === 0 && (
-          <div className="py-8 text-center text-zinc-500">일치하는 검색 결과가 없습니다.</div>
+          <div className="py-8 text-center text-zinc-500">{t('sidebar.searchEmpty')}</div>
         )}
       </div>
     </div>

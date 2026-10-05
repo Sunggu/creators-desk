@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface ExplorerContextMenuProps {
   x: number;
@@ -22,6 +23,7 @@ export default function ExplorerContextMenu({
   onRename,
   onDelete,
 }: ExplorerContextMenuProps) {
+  const t = useTranslate();
   const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -57,7 +59,7 @@ export default function ExplorerContextMenu({
         onClick={() => { onNewFile(parentId); onClose(); }}
         className="w-full flex items-center justify-between rounded px-2 py-1 hover:bg-violet-600/30 hover:text-white transition"
       >
-        <span>새 노트</span>
+        <span>{t('sidebar.newNote')}</span>
         <span className="text-[10px] text-zinc-500">+</span>
       </button>
 
@@ -65,7 +67,7 @@ export default function ExplorerContextMenu({
         onClick={() => { onNewFolder(parentId); onClose(); }}
         className="w-full flex items-center justify-between rounded px-2 py-1 hover:bg-violet-600/30 hover:text-white transition"
       >
-        <span>새 폴더</span>
+        <span>{t('sidebar.newFolder')}</span>
       </button>
 
       {targetNode && (
@@ -75,7 +77,7 @@ export default function ExplorerContextMenu({
             onClick={() => { onRename(targetNode.id); onClose(); }}
             className="w-full flex items-center justify-between rounded px-2 py-1 hover:bg-violet-600/30 hover:text-white transition"
           >
-            <span>이름 바꾸기</span>
+            <span>{t('sidebar.rename')}</span>
             <span className="text-[10px] text-zinc-500">F2</span>
           </button>
 
@@ -86,7 +88,7 @@ export default function ExplorerContextMenu({
             }}
             className="w-full flex items-center justify-between rounded px-2 py-1 hover:bg-violet-600/30 hover:text-white transition"
           >
-            <span>이름 복사</span>
+            <span>{t('sidebar.copyName')}</span>
           </button>
 
           <div className="my-1 border-t border-[#26262e]" />
@@ -94,7 +96,7 @@ export default function ExplorerContextMenu({
             onClick={() => { onDelete(targetNode.id); onClose(); }}
             className="w-full flex items-center justify-between rounded px-2 py-1 text-rose-400 hover:bg-rose-950/40 hover:text-rose-300 transition"
           >
-            <span>삭제</span>
+            <span>{t('sidebar.remove')}</span>
             <span className="text-[10px] text-rose-500">Del</span>
           </button>
         </>

@@ -6,6 +6,7 @@ import ExplorerContextMenu from './explorer-context-menu';
 import FileExplorerToolbar from './file-explorer-toolbar';
 import FileTreeItem from './file-tree-item';
 import VaultDropdown from './vault-dropdown';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface ObsidianSidebarProps {
   vault: VaultDto;
@@ -32,6 +33,7 @@ export default function ObsidianSidebar({
   onDeleteNode, onDeleteNodes, onMoveNode,
   onRefresh, onCloseMobile,
 }: ObsidianSidebarProps) {
+  const t = useTranslate();
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; node: FileNodeDto | null } | null>(null);
   const { selectedIds, handleItemClick, clearSelection } = useTreeSelection();
@@ -75,7 +77,11 @@ export default function ObsidianSidebar({
   };
 
   const handleBulkDelete = async () => {
-    if (selectedIds.size === 0 || !confirm(`선택한 ${selectedIds.size}개 항목을 모두 삭제하시겠습니까?`)) return;
+    if (
+      selectedIds.size === 0 ||
+      !confirm(t('sidebar.bulkDeleteConfirm', { count: selectedIds.size }))
+    )
+      return;
     const ids = Array.from(selectedIds);
     if (onDeleteNodes) await onDeleteNodes(ids);
     else for (const id of ids) await onDeleteNode(id);
@@ -144,12 +150,12 @@ export default function ObsidianSidebar({
       >
         {nodes.length === 0 ? (
           <div className="p-4 text-center text-xs text-zinc-500">
-            노트가 없습니다.
+            {t('sidebar.empty')}
             <button
               onClick={() => onCreateFile(undefined, null)}
               className="mt-2 block w-full text-center text-violet-400 hover:underline cursor-pointer"
             >
-              + 새 노트 만들기
+              {t('sidebar.createNote')}
             </button>
           </div>
         ) : (
@@ -173,12 +179,15 @@ export default function ObsidianSidebar({
           onNewFile={(pid) => onCreateFile(undefined, pid)}
           onNewFolder={(pid) => onCreateFolder(undefined, pid)}
           onRename={(id) => {
-            const next = prompt('새 이름:', nodes.find((n) => n.id === id)?.name.replace(/\.md$/i, ''));
+            const next = prompt(
+              t('sidebar.renamePrompt'),
+              nodes.find((n) => n.id === id)?.name.replace(/\.md$/i, ''),
+            );
             if (next) onRenameNode(id, next);
           }}
           onDelete={(id) => {
             const node = nodes.find((n) => n.id === id);
-            if (confirm(`'${node?.name}'을(를) 삭제하시겠습니까?`)) onDeleteNode(id);
+            if (confirm(t('sidebar.deleteConfirm', { name: node?.name ?? '' }))) onDeleteNode(id);
           }}
         />
       )}

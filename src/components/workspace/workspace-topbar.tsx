@@ -1,4 +1,5 @@
 import type { VaultDto } from '../../core/domain/vault.dto';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface WorkspaceTopbarProps {
   vault: VaultDto;
@@ -13,6 +14,7 @@ export default function WorkspaceTopbar({
   onExitVault,
   isSaving = false,
 }: WorkspaceTopbarProps) {
+  const t = useTranslate();
   return (
     <header className="flex h-12 w-full items-center justify-between border-b border-zinc-800 bg-zinc-950 px-4 select-none">
       {/* Left: Vault Switcher */}
@@ -20,7 +22,7 @@ export default function WorkspaceTopbar({
         <button
           onClick={onExitVault}
           className="flex items-center space-x-2 rounded-md px-2.5 py-1 text-xs font-medium text-zinc-300 hover:bg-zinc-800 hover:text-zinc-100 transition"
-          title="Vault 전환하기"
+          title={t('mobile.switchVault')}
         >
           <span className="flex h-2 w-2 rounded-full bg-sky-400" />
           <span className="font-semibold">{vault.name}</span>
@@ -35,7 +37,7 @@ export default function WorkspaceTopbar({
         {activeFileName ? (
           <span className="font-medium text-zinc-200">{activeFileName}</span>
         ) : (
-          <span className="italic text-zinc-600">선택된 파일 없음</span>
+          <span className="italic text-zinc-600">{t('sidebar.noFileSelected')}</span>
         )}
       </div>
 
@@ -44,12 +46,12 @@ export default function WorkspaceTopbar({
         {isSaving ? (
           <span className="flex items-center space-x-1.5 text-amber-400">
             <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span>저장 중...</span>
+            <span>{t('statusbar.saving')}</span>
           </span>
         ) : (
           <span className="flex items-center space-x-1.5 text-zinc-500">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500/70" />
-            <span>저장됨</span>
+            <span>{t('statusbar.saved')}</span>
           </span>
         )}
       </div>

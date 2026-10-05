@@ -1,4 +1,5 @@
 import type { VaultDto } from '../../core/domain/vault.dto';
+import { useI18n } from '../../i18n/use-i18n';
 
 interface VaultCardProps {
   vault: VaultDto;
@@ -7,11 +8,11 @@ interface VaultCardProps {
 }
 
 export default function VaultCard({ vault, onSelect, onDelete }: VaultCardProps) {
-  const formattedDate = new Date(vault.updatedAt).toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  const { t, formatDate } = useI18n();
+
+  // `updatedAt` is epoch milliseconds; the configured time zone is applied here,
+  // at the edge, rather than baked into the stored value.
+  const formattedDate = formatDate(vault.updatedAt);
 
   return (
     <div
@@ -27,19 +28,21 @@ export default function VaultCard({ vault, onSelect, onDelete }: VaultCardProps)
           </div>
           <div>
             <h3 className="font-semibold text-zinc-100 group-hover:text-sky-300">{vault.name}</h3>
-            <p className="text-xs text-zinc-400">최근 수정: {formattedDate}</p>
+            <p className="text-xs text-zinc-400">
+              {t('vault.lastModified', { date: formattedDate })}
+            </p>
           </div>
         </div>
 
         <button
           onClick={(e) => {
             e.stopPropagation();
-            if (confirm(`'${vault.name}' Vault를 삭제하시겠습니까? 모든 파일이 삭제됩니다.`)) {
+            if (confirm(t('vault.deleteConfirmWithFiles', { name: vault.name }))) {
               onDelete(vault.id);
             }
           }}
           className="opacity-0 transition-opacity duration-150 hover:text-rose-400 group-hover:opacity-100 text-zinc-500 p-1"
-          title="Vault 삭제"
+          title={t('vault.deleteTitle')}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

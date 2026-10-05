@@ -1,3 +1,4 @@
+import { useTranslate } from '../../i18n/use-i18n';
 interface FileTreeActionsProps {
   isFolder: boolean;
   onNewFile?: () => void;
@@ -13,13 +14,15 @@ export default function FileTreeActions({
   onRename,
   onDelete,
 }: FileTreeActionsProps) {
+  const t = useTranslate();
+
   return (
     <div className="hidden items-center space-x-1 group-hover:flex">
       {isFolder && (
         <>
           <button
             onClick={(e) => { e.stopPropagation(); onNewFile?.(); }}
-            title="새 노트 (+)"
+            title={t('sidebar.newNoteShortcut')}
             className="p-0.5 text-zinc-500 hover:text-zinc-200 cursor-pointer"
           >
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -28,7 +31,7 @@ export default function FileTreeActions({
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onNewFolder?.(); }}
-            title="새 폴더"
+            title={t('sidebar.newFolderTitle')}
             className="p-0.5 text-zinc-500 hover:text-zinc-200 cursor-pointer"
           >
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -40,7 +43,7 @@ export default function FileTreeActions({
 
       <button
         onClick={(e) => { e.stopPropagation(); onRename(); }}
-        title="이름 바꾸기"
+        title={t('sidebar.rename')}
         className="p-0.5 text-zinc-500 hover:text-zinc-200 cursor-pointer"
       >
         <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -50,7 +53,7 @@ export default function FileTreeActions({
 
       <button
         onClick={(e) => { e.stopPropagation(); onDelete(); }}
-        title="삭제"
+        title={t('sidebar.remove')}
         className="p-0.5 text-zinc-500 hover:text-rose-400 cursor-pointer"
       >
         <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">

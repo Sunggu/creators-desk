@@ -1,7 +1,8 @@
 /** BASELINE BUNDLE - Korean. See `./common.ts` for the baseline contract. */
 export const statusbarKo = {
-  backlinks_zero: '백링크 없음',
-  backlinks_other: '백링크 {{count}}개',
+  // Base key only: Korean has a single plural form, so `t()` picks this
+  // directly. English supplies `_zero`/`_one`/`_other` variants of the same key.
+  backlinks: '백링크 {{count}}개',
   saving: '저장 중...',
   saved: '저장됨',
   words: '단어 {{count}}',

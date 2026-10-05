@@ -1,6 +1,7 @@
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import { useResizable } from '../../hooks/use-resizable';
 import OutlinePanel from './outline-panel';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface RightSidebarPanelProps {
   isOpen: boolean;
@@ -13,6 +14,7 @@ export default function RightSidebarPanel({
   onClose,
   activeFile,
 }: RightSidebarPanelProps) {
+  const t = useTranslate();
   const { size: width, startResize, isResizing } = useResizable({
     initial: 260,
     min: 200,
@@ -34,7 +36,7 @@ export default function RightSidebarPanel({
         className={`absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-violet-500/60 transition z-10 ${
           isResizing ? 'bg-violet-500 w-1.5' : ''
         }`}
-        title="드래그하여 목차 너비 조절"
+        title={t('sidebar.outlineResize')}
       />
 
       {/* Panel Header */}
@@ -44,13 +46,13 @@ export default function RightSidebarPanel({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h10M4 18h14" />
           </svg>
           <span className="text-xs font-bold tracking-tight text-zinc-200">
-            문서 목차
+            {t('sidebar.outlineTitle')}
           </span>
         </div>
         <button
           onClick={onClose}
           className="rounded p-1 text-zinc-400 hover:bg-[#26262e] hover:text-zinc-100 transition cursor-pointer"
-          title="목차 패널 닫기"
+          title={t('sidebar.outlineClose')}
         >
           <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

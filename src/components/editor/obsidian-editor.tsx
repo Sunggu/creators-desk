@@ -4,6 +4,7 @@ import type { EditorStats } from '../../hooks/use-codemirror';
 import { fileContentUseCase } from '../../infrastructure/di';
 import ObsidianMarkdownPreview from './obsidian-markdown-preview';
 import ObsidianMarkdownView from './obsidian-markdown-view';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface ObsidianEditorProps {
   activeFile: FileNodeDto | null;
@@ -28,6 +29,7 @@ export default function ObsidianEditor({
   onRenameFile,
   autoFocusTitle = false,
 }: ObsidianEditorProps) {
+  const t = useTranslate();
   const [content, setContent] = useState<string | null>(null);
   const [loadedFileId, setLoadedFileId] = useState<string | null>(null);
 
@@ -80,9 +82,9 @@ export default function ObsidianEditor({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
         </div>
-        <p className="text-sm font-semibold text-zinc-200">열려있는 노트가 없습니다</p>
+        <p className="text-sm font-semibold text-zinc-200">{t('editor.noNoteTitle')}</p>
         <p className="mt-1 text-xs text-zinc-500 text-center max-w-sm">
-          탐색기에서 노트를 클릭하여 열거나 드래그 앤 드롭으로 파일을 이동할 수 있습니다.
+          {t('editor.noNoteBody')}
         </p>
 
         <div className="mt-4 flex items-center space-x-2">
@@ -90,15 +92,15 @@ export default function ObsidianEditor({
             onClick={onNewNote}
             className="rounded-md bg-violet-600 px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-violet-500 active:bg-violet-700 transition cursor-pointer"
           >
-            + 새 노트 만들기
+            {t('editor.createNote')}
           </button>
         </div>
 
         <div className="mt-8 grid grid-cols-2 gap-x-6 gap-y-2 text-[11px] text-zinc-500 border-t border-[#26262e] pt-4">
-          <div><span className="text-zinc-400">드래그 앤 드롭</span>: 파일/폴더 이동</div>
-          <div><span className="text-zinc-400">Shift + 클릭</span>: 연속 범위 다중 선택</div>
-          <div><span className="text-zinc-400">Ctrl/Cmd + 클릭</span>: 개별 추가 다중 선택</div>
-          <div><span className="text-zinc-400">우클릭</span>: 컨텍스트 메뉴</div>
+          <ShortcutHint hint="editor.dragDropHint" label="editor.dragDropLabel" />
+          <ShortcutHint hint="editor.shiftClickHint" label="editor.shiftClickLabel" />
+          <ShortcutHint hint="editor.ctrlClickHint" label="editor.ctrlClickLabel" />
+          <ShortcutHint hint="editor.rightClickHint" label="editor.rightClickLabel" />
         </div>
       </div>
     );
@@ -107,7 +109,7 @@ export default function ObsidianEditor({
   if (loadedFileId !== activeFile.id || content === null) {
     return (
       <div className="flex h-full w-full items-center justify-center bg-[#1e1e22] text-xs text-zinc-500">
-        노트를 불러오는 중...
+        {t('editor.loadingNote')}
       </div>
     );
   }
@@ -135,5 +137,24 @@ export default function ObsidianEditor({
       onRenameFile={onRenameFile}
       autoFocusTitle={autoFocusTitle}
     />
+  );
+}
+
+interface ShortcutHintProps {
+  hint: 'editor.dragDropHint' | 'editor.shiftClickHint' | 'editor.ctrlClickHint' | 'editor.rightClickHint';
+  label:
+    | 'editor.dragDropLabel'
+    | 'editor.shiftClickLabel'
+    | 'editor.ctrlClickLabel'
+    | 'editor.rightClickLabel';
+}
+
+/** One "gesture: what it does" row in the editor's empty state. */
+function ShortcutHint({ hint, label }: ShortcutHintProps) {
+  const t = useTranslate();
+  return (
+    <div>
+      <span className="text-zinc-400">{t(hint)}</span>: {t(label)}
+    </div>
   );
 }

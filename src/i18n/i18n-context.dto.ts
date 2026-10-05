@@ -23,6 +23,8 @@ export interface I18nContextValue {
   readonly timeZone: TimeZoneSetting;
   /** The concrete zone in effect, with `'system'` already expanded. */
   readonly resolvedTimeZone: TimeZoneSetting;
+  /** True when the stored preference is the follow-the-runtime sentinel. */
+  readonly isSystemTimeZone: boolean;
   /** Merges and persists a preference patch; returns the stored result. */
   readonly updatePreferences: (patch: UpdatePreferencesDto) => PreferencesDto;
   /** Rows for the time-zone picker. Memoized - built on first call. */

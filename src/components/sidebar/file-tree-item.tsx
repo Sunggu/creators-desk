@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import { INVALID_FILE_NAME_CHARS_REGEX, sanitizeFileName } from '../../utils/name-generator';
 import FileTreeActions from './file-tree-actions';
+import { useTranslate } from '../../i18n/use-i18n';
 
 interface FileTreeItemProps {
   node: FileNodeDto;
@@ -36,6 +37,7 @@ export default function FileTreeItem({
   onCreateChildFile,
   onCreateChildFolder,
 }: FileTreeItemProps) {
+  const t = useTranslate();
   const isFolder = node.type === 'folder';
   const cleanName = isFolder ? node.name : node.name.replace(/\.md$/i, '');
 
@@ -172,7 +174,7 @@ export default function FileTreeItem({
         onNewFolder={() => onCreateChildFolder(node.id)}
         onRename={() => { setEditName(cleanName); setIsEditing(true); }}
         onDelete={() => {
-          if (confirm(`'${cleanName}'을(를) 삭제하시겠습니까?`)) onDelete(node.id);
+          if (confirm(t('sidebar.deleteConfirm', { name: cleanName }))) onDelete(node.id);
         }}
       />
     </div>
