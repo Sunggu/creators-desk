@@ -3,11 +3,18 @@ import { execSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+const sessionDir = resolve(process.cwd(), '.wrangler-session');
+
 function run(cmd, capture = true) {
   try {
     return execSync(cmd, {
       encoding: 'utf-8',
       stdio: capture ? ['pipe', 'pipe', 'pipe'] : 'inherit',
+      env: {
+        ...process.env,
+        XDG_CONFIG_HOME: sessionDir,
+        WRANGLER_HOME: sessionDir,
+      },
     });
   } catch (err) {
     if (capture && err.stderr) {
@@ -24,8 +31,8 @@ console.log('🔍 1. Cloudflare 인증 상태 확인 중...');
 const whoamiOut = run('npx wrangler whoami');
 if (whoamiOut.includes('You are not logged in') || whoamiOut.includes('ERROR:')) {
   console.error('\n❌ Cloudflare 계정에 로그인되어 있지 않습니다.');
-  console.log('👉 먼저 다음 명령어를 실행하여 원하는 계정으로 로그인해주세요:');
-  console.log('   npx wrangler login\n');
+  console.log('👉 먼저 다음 명령어를 실행하여 이 프로젝트에 사용할 계정으로 로그인해주세요:');
+  console.log('   pnpm wrangler login\n');
   process.exit(1);
 }
 

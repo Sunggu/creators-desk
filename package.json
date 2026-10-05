@@ -15,7 +15,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "setup": "node scripts/setup-cloudflare.mjs",
-    "setup:cloudflare": "node scripts/setup-cloudflare.mjs"
+    "setup:cloudflare": "node scripts/setup-cloudflare.mjs",
+    "wrangler": "node scripts/run-wrangler.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.11.1",

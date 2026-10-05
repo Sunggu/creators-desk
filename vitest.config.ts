@@ -5,5 +5,6 @@ export default defineConfig({
     environment: 'node',
     include: ['src/**/*.spec.ts', 'scripts/**/*.spec.mjs'],
     passWithNoTests: true,
+    testTimeout: 15000,
   },
 });

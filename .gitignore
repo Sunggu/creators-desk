@@ -18,6 +18,7 @@ data
 
 # Cloudflare & Wrangler
 .wrangler
+.wrangler-session
 _worker.bundle
 _routes.json
 
