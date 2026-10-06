@@ -10,7 +10,7 @@ directory = "./dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "creators-desk-db"
-database_id = "creators-desk-db-id"
+database_id = "35ac78cd-1380-463b-80fc-84cbe09695ff"
 
 # Cloudflare R2 Bucket binding
 [[r2_buckets]]

@@ -3,6 +3,7 @@ import { TAB_DRAG_MIME } from '../../core/domain/tab-drag.dto';
 import type { TabDropPosition } from '../../core/domain/tab-drag.dto';
 import { resolveTabDropPosition } from '../../utils/tab-drop-position';
 import { useTranslate } from '../../i18n/use-i18n';
+import MonochromeIcon from '../../ui/icon/monochrome-icon';
 
 interface TabItemProps {
   fileId: string;
@@ -87,9 +88,7 @@ export default function TabItem({
         className="rounded p-0.5 text-zinc-400 opacity-60 hover:bg-[#2b2b32] hover:opacity-100 hover:text-zinc-100 transition"
         title={t('tab.closeTab')}
       >
-        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <MonochromeIcon name="close" className="h-3 w-3" />
       </button>
       {dropPosition === 'after' && (
         <span className="absolute right-0 top-0 bottom-0 w-0.5 bg-violet-400 pointer-events-none" />

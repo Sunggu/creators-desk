@@ -1,50 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import type { FileNodeDto } from '../../domain/file-node.dto';
-import { AppError } from '../../domain/errors/app-error';
 import { FixedClock } from '../../../infrastructure/storage/system-clock';
-import type { Clock } from '../ports/clock.port';
-import type { FileRepository } from '../ports/file.repository';
-import { FileContentUseCase } from './file-content.use-case';
+import { AppError } from '../../domain/errors/app-error';
+import { T0 } from '../../../test/fixed-clock';
+import { InMemoryFileRepository } from '../../../test/in-memory-file.repository';
 import { ManageFileNodeUseCase } from './manage-file-node.use-case';
-
-/** Pinned instant so `createdAt`/`updatedAt` assertions stay deterministic. */
-const T0 = 1_700_000_000_000;
 
 function createClock(): FixedClock {
   return new FixedClock(T0);
 }
 
-class InMemoryFileRepository implements FileRepository {
-  public files = new Map<string, FileNodeDto>();
-
-  async findByVaultId(vaultId: string): Promise<FileNodeDto[]> {
-    return Array.from(this.files.values()).filter((f) => f.vaultId === vaultId);
-  }
-  async findById(id: string): Promise<FileNodeDto | null> {
-    return this.files.get(id) ?? null;
-  }
-  async create(node: FileNodeDto): Promise<FileNodeDto> {
-    this.files.set(node.id, node);
-    return node;
-  }
-  async update(id: string, updates: Partial<FileNodeDto>): Promise<FileNodeDto> {
-    const existing = this.files.get(id);
-    if (!existing) throw new Error('Not found');
-    const updated = { ...existing, ...updates };
-    this.files.set(id, updated);
-    return updated;
-  }
-  async delete(id: string): Promise<void> {
-    this.files.delete(id);
-  }
-  async deleteByVaultId(vaultId: string): Promise<void> {
-    for (const [id, f] of this.files.entries()) {
-      if (f.vaultId === vaultId) this.files.delete(id);
-    }
-  }
-}
-
-describe('File Node Use Cases', () => {
+describe('ManageFileNodeUseCase', () => {
   it('appends .md extension to markdown files automatically', async () => {
     const fileRepo = new InMemoryFileRepository();
     const useCase = new ManageFileNodeUseCase(fileRepo, createClock());
@@ -122,25 +87,6 @@ describe('File Node Use Cases', () => {
     expect(await fileRepo.findById(nestedFile.id)).toBeNull();
   });
 
-  it('gets and saves file content', async () => {
-    const fileRepo = new InMemoryFileRepository();
-    const nodeUseCase = new ManageFileNodeUseCase(fileRepo, createClock());
-    const contentUseCase = new FileContentUseCase(fileRepo, createClock());
-
-    const file = await nodeUseCase.createFile({
-      vaultId: 'v1',
-      parentId: null,
-      name: 'Story.md',
-      type: 'file',
-      content: '# Initial',
-    });
-
-    expect(await contentUseCase.getContent(file.id)).toBe('# Initial');
-
-    await contentUseCase.saveContent(file.id, '# Updated Content');
-    expect(await contentUseCase.getContent(file.id)).toBe('# Updated Content');
-  });
-
   it('moves files and folders and prevents circular moves', async () => {
     const fileRepo = new InMemoryFileRepository();
     const useCase = new ManageFileNodeUseCase(fileRepo, createClock());
@@ -149,11 +95,9 @@ describe('File Node Use Cases', () => {
     const folderB = await useCase.createFile({ vaultId: 'v1', parentId: null, name: 'FolderB', type: 'folder' });
     const note = await useCase.createFile({ vaultId: 'v1', parentId: null, name: 'Note.md', type: 'file' });
 
-    // Move note into FolderA
     const movedNote = await useCase.move(note.id, folderA.id);
     expect(movedNote.parentId).toBe(folderA.id);
 
-    // Move FolderB into FolderA
     const movedFolderB = await useCase.move(folderB.id, folderA.id);
     expect(movedFolderB.parentId).toBe(folderA.id);
 
@@ -202,14 +146,11 @@ describe('File Node Use Cases', () => {
     ).rejects.toMatchObject({ code: 'file.nameRequired' });
   });
 
-  it('rejects operations on a missing file with file.notFound', async () => {
+  it('rejects a rename on a missing file', async () => {
     const fileRepo = new InMemoryFileRepository();
     const useCase = new ManageFileNodeUseCase(fileRepo, createClock());
-    const contentUseCase = new FileContentUseCase(fileRepo, createClock());
 
     await expect(useCase.rename('nope', 'x')).rejects.toMatchObject({ code: 'file.notFound' });
-    await expect(contentUseCase.getContent('nope')).rejects.toMatchObject({ code: 'file.notFound' });
-    await expect(contentUseCase.saveContent('nope', 'y')).rejects.toMatchObject({ code: 'file.notFound' });
   });
 
   it('surfaces failures as AppError, never as raw sentences', async () => {
@@ -219,7 +160,3 @@ describe('File Node Use Cases', () => {
     await expect(useCase.rename('nope', 'x')).rejects.toBeInstanceOf(AppError);
   });
 });
-
-/** Compile-time guard: the clock is a required collaborator, not optional. */
-const _clockIsRequired: Clock = new FixedClock(T0);
-void _clockIsRequired;

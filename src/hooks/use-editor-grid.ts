@@ -14,6 +14,7 @@ export function splitGroupHelper(
   fileId: string,
   direction: SplitDirection
 ): EditorGridLayoutDto {
+  if (!fileId) return layout;
   const newGroupId = `group-${Date.now()}`;
   const newGroup: EditorGroupDto = {
     id: newGroupId,

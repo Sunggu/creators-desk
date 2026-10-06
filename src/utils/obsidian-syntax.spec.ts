@@ -1,8 +1,8 @@
 import { marked } from 'marked';
 import { describe, expect, it } from 'vitest';
-import { processObsidianSyntax } from './obsidian-markdown-preview';
+import { processObsidianSyntax } from './obsidian-syntax';
 
-describe('ObsidianMarkdownPreview and Syntax Processing', () => {
+describe('processObsidianSyntax', () => {
   it('converts [[wikilinks]] into clickable anchor tags with encoded data attributes', () => {
     const raw = 'Check [[Daily Note]] and [[2026 Goals]]';
     const processed = processObsidianSyntax(raw);

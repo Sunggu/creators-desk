@@ -6,7 +6,6 @@ import { STARTER_CONTENT } from '../utils/starter-template';
 
 export function useActiveWorkspace(activeVaultId: string | null) {
   const [nodes, setNodes] = useState<FileNodeDto[]>([]);
-  const [openFileIds, setOpenFileIds] = useState<string[]>([]);
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
   const [newlyCreatedFileId, setNewlyCreatedFileId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -15,7 +14,6 @@ export function useActiveWorkspace(activeVaultId: string | null) {
     if (!activeVaultId) {
       setNodes([]);
       setActiveFileId(null);
-      setOpenFileIds([]);
       return [];
     }
     const list = await manageFileNodeUseCase.listByVault(activeVaultId);
@@ -44,7 +42,6 @@ export function useActiveWorkspace(activeVaultId: string | null) {
           currentList = [starter];
           setNodes(currentList);
           setActiveFileId(starter.id);
-          setOpenFileIds([starter.id]);
           manageSessionUseCase.setActiveFileId(activeVaultId, starter.id);
           return;
         }
@@ -55,12 +52,10 @@ export function useActiveWorkspace(activeVaultId: string | null) {
 
         if (fileExists && savedFileId) {
           setActiveFileId(savedFileId);
-          setOpenFileIds([savedFileId]);
         } else {
           const firstFile = currentList.find((n) => n.type === 'file');
           const fallbackId = firstFile ? firstFile.id : null;
           setActiveFileId(fallbackId);
-          setOpenFileIds(fallbackId ? [fallbackId] : []);
           manageSessionUseCase.setActiveFileId(activeVaultId, fallbackId);
         }
       } finally {
@@ -77,22 +72,17 @@ export function useActiveWorkspace(activeVaultId: string | null) {
       manageSessionUseCase.setActiveFileId(activeVaultId, fileId);
     }
     setActiveFileId(fileId);
-    if (fileId) {
-      setOpenFileIds((prev) => (prev.includes(fileId) ? prev : [...prev, fileId]));
-    }
   }, [activeVaultId]);
 
-  const closeFile = useCallback((fileId: string) => {
-    setOpenFileIds((prev) => {
-      const next = prev.filter((id) => id !== fileId);
-      if (activeFileId === fileId) {
-        const nextActive = next.length > 0 ? next[next.length - 1] : null;
-        setActiveFileId(nextActive);
-        if (activeVaultId) manageSessionUseCase.setActiveFileId(activeVaultId, nextActive);
-      }
-      return next;
+  /** Drops a deleted file from the mirrored active id. Tabs are owned by `useEditorGrid`. */
+  const forgetFile = useCallback((fileId: string) => {
+    setActiveFileId((prev) => {
+      if (prev !== fileId) return prev;
+      const nextActive = null;
+      if (activeVaultId) manageSessionUseCase.setActiveFileId(activeVaultId, nextActive);
+      return nextActive;
     });
-  }, [activeFileId, activeVaultId]);
+  }, [activeVaultId]);
 
   const createFile = useCallback(
     async (customName?: string, parentId: string | null = null) => {
@@ -107,7 +97,6 @@ export function useActiveWorkspace(activeVaultId: string | null) {
       });
       await refreshNodes();
       setNewlyCreatedFileId(created.id);
-      setOpenFileIds((prev) => (prev.includes(created.id) ? prev : [...prev, created.id]));
       selectFile(created.id);
       return created;
     },
@@ -142,18 +131,18 @@ export function useActiveWorkspace(activeVaultId: string | null) {
 
   const deleteNode = useCallback(async (id: string) => {
     await manageFileNodeUseCase.delete(id);
-    closeFile(id);
+    forgetFile(id);
     setNewlyCreatedFileId((prev) => (prev === id ? null : prev));
     await refreshNodes();
-  }, [closeFile, refreshNodes]);
+  }, [forgetFile, refreshNodes]);
 
   const deleteNodes = useCallback(async (ids: string[]) => {
     for (const id of ids) {
       await manageFileNodeUseCase.delete(id);
-      closeFile(id);
+      forgetFile(id);
     }
     await refreshNodes();
-  }, [closeFile, refreshNodes]);
+  }, [forgetFile, refreshNodes]);
 
   const moveNode = useCallback(async (id: string, newParentId: string | null) => {
     const updated = await manageFileNodeUseCase.move(id, newParentId);
@@ -161,19 +150,14 @@ export function useActiveWorkspace(activeVaultId: string | null) {
     return updated;
   }, [refreshNodes]);
 
-  const openFiles = openFileIds
-    .map((id) => nodes.find((n) => n.id === id && n.type === 'file'))
-    .filter((n): n is FileNodeDto => Boolean(n));
-
   const activeFile = nodes.find((n) => n.id === activeFileId && n.type === 'file') ?? null;
   const isNewFile = Boolean(activeFileId && activeFileId === newlyCreatedFileId);
 
   return {
     nodes,
-    openFiles,
-    openFileIds,
     activeFile,
     activeFileId,
+    newlyCreatedFileId,
     isNewFile,
     isLoading,
     createFile,
@@ -183,7 +167,6 @@ export function useActiveWorkspace(activeVaultId: string | null) {
     deleteNode,
     deleteNodes,
     selectFile,
-    closeFile,
     refreshNodes,
   };
 }

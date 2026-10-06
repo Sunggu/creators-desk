@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { VaultDto } from '../../core/domain/vault.dto';
 import CreateVaultDialog from './create-vault-dialog';
 import VaultCard from './vault-card';
+import MonochromeIcon from '../../ui/icon/monochrome-icon';
 
 interface VaultLauncherProps {
   vaults: VaultDto[];
@@ -25,9 +26,7 @@ export default function VaultLauncher({
       <div className="w-full max-w-2xl space-y-8">
         <header className="flex flex-col items-center text-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-sky-500/10 text-sky-400 ring-1 ring-sky-500/30">
-            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-            </svg>
+            <MonochromeIcon name="inbox" className="h-7 w-7" />
           </div>
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-zinc-100">
             Creators Desk
@@ -47,9 +46,7 @@ export default function VaultLauncher({
               onClick={() => setIsDialogOpen(true)}
               className="inline-flex items-center space-x-1.5 rounded-lg bg-sky-500 px-3.5 py-2 text-xs font-semibold text-zinc-950 shadow-xs hover:bg-sky-400 transition"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-              </svg>
+              <MonochromeIcon name="plus" />
               <span>새 Vault 만들기</span>
             </button>
           </div>
@@ -62,9 +59,7 @@ export default function VaultLauncher({
             ) : vaults.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <div className="rounded-full bg-zinc-800/60 p-3 text-zinc-500">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                  </svg>
+                  <MonochromeIcon name="inbox" className="h-6 w-6" />
                 </div>
                 <p className="mt-3 text-sm font-medium text-zinc-300">생성된 Vault가 없습니다</p>
                 <p className="mt-1 text-xs text-zinc-500">
@@ -74,7 +69,7 @@ export default function VaultLauncher({
                   onClick={() => setIsDialogOpen(true)}
                   className="mt-4 text-xs font-semibold text-sky-400 hover:text-sky-300 hover:underline"
                 >
-                  지금 생성하기 →
+                  지금 생성하기
                 </button>
               </div>
             ) : (

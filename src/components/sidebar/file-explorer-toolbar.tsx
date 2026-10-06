@@ -1,4 +1,5 @@
 import { useTranslate } from '../../i18n/use-i18n';
+import MonochromeIcon from '../../ui/icon/monochrome-icon';
 interface FileExplorerToolbarProps {
   onNewFile: () => void;
   onNewFolder: () => void;
@@ -33,27 +34,21 @@ export default function FileExplorerToolbar({
             className="rounded p-1 hover:bg-[#25252c] hover:text-zinc-100 transition"
             title={t('sidebar.newNoteShortcut')}
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
+            <MonochromeIcon name="plus" />
           </button>
           <button
             onClick={onNewFolder}
             className="rounded p-1 hover:bg-[#25252c] hover:text-zinc-100 transition"
             title={t('sidebar.newFolderTitle')}
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
-            </svg>
+            <MonochromeIcon name="folderPlus" />
           </button>
           <button
             onClick={onRefresh}
             className="rounded p-1 hover:bg-[#25252c] hover:text-zinc-100 transition"
             title={t('sidebar.refreshTitle')}
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+            <MonochromeIcon name="refresh" />
           </button>
           {onCloseMobile && (
             <button
@@ -61,9 +56,7 @@ export default function FileExplorerToolbar({
               className="md:hidden ml-1 rounded p-1 text-zinc-400 hover:text-zinc-100"
               title={t('sidebar.closeMobile')}
             >
-              <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <MonochromeIcon name="close" className="h-4.5 w-4.5" />
             </button>
           )}
         </div>

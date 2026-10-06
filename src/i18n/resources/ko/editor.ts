@@ -18,4 +18,6 @@ export const editorKo = {
   titleAriaLabel: '노트 제목',
   invalidCharsTitle: '파일명에 \\ / : * ? " < > | 문자는 사용할 수 없습니다',
   doubleClickToEdit: '더블클릭하여 편집 모드로 전환',
+  splitRightHint: '우측으로 창 분할',
+  splitBottomHint: '하단으로 창 분할',
 };

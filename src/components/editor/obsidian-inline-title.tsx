@@ -20,10 +20,6 @@ export default function ObsidianInlineTitle({
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    setVal(title);
-  }, [title]);
-
-  useEffect(() => {
     if (autoFocus && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.select();

@@ -72,7 +72,7 @@ export function useResizable({
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
     },
-    [direction, isRatio, max, min, size]
+    [direction, isRatio, max, min, reverse, size]
   );
 
   return { size, setSize, isResizing, startResize };

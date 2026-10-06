@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useTranslate } from '../../i18n/use-i18n';
+import MonochromeIcon from '../../ui/icon/monochrome-icon';
 
 interface TabContextMenuProps {
   x: number;
@@ -60,9 +61,7 @@ export default function TabContextMenu({
         className="w-full flex items-center justify-between rounded px-2.5 py-1.5 hover:bg-violet-600/30 hover:text-white transition cursor-pointer"
       >
         <span className="flex items-center space-x-2">
-          <svg className="h-3.5 w-3.5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 4H5a1 1 0 00-1 1v14a1 1 0 001 1h4V4zm2 0v16h8a1 1 0 001-1V5a1 1 0 00-1-1h-8z" />
-          </svg>
+          <MonochromeIcon name="splitRight" className="h-3.5 w-3.5 text-violet-400" />
           <span>{t('tab.menuSplitRight')}</span>
         </span>
         <span className="text-[10px] text-zinc-500 font-mono">Split Right</span>
@@ -76,9 +75,7 @@ export default function TabContextMenu({
         className="w-full flex items-center justify-between rounded px-2.5 py-1.5 hover:bg-violet-600/30 hover:text-white transition cursor-pointer"
       >
         <span className="flex items-center space-x-2">
-          <svg className="h-3.5 w-3.5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M4 9V5a1 1 0 011-1h14a1 1 0 011 1v4H4zm0 2h16v8a1 1 0 01-1 1H5a1 1 0 01-1-1v-8z" />
-          </svg>
+          <MonochromeIcon name="splitDown" className="h-3.5 w-3.5 text-violet-400" />
           <span>{t('tab.menuSplitDown')}</span>
         </span>
         <span className="text-[10px] text-zinc-500 font-mono">Split Down</span>

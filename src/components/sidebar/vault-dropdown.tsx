@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { VaultDto } from '../../core/domain/vault.dto';
 import { useTranslate } from '../../i18n/use-i18n';
+import MonochromeIcon from '../../ui/icon/monochrome-icon';
 
 interface VaultDropdownProps {
   activeVault: VaultDto;
@@ -73,9 +74,7 @@ export default function VaultDropdown({
                   </div>
 
                   {isSelected && (
-                    <svg className="h-3.5 w-3.5 text-violet-400 shrink-0 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                    </svg>
+                    <MonochromeIcon name="check" className="ml-1 h-3.5 w-3.5 shrink-0 text-violet-400" />
                   )}
                 </button>
               );
@@ -92,9 +91,7 @@ export default function VaultDropdown({
               className="w-full flex items-center justify-between rounded-md px-2 py-1.5 text-xs text-zinc-400 hover:bg-[#282830] hover:text-zinc-100 transition group"
             >
               <span className="flex items-center space-x-1.5">
-                <svg className="h-3.5 w-3.5 text-zinc-500 group-hover:text-violet-400 transition" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                </svg>
+                <MonochromeIcon name="listLines" className="h-3.5 w-3.5 text-zinc-500 transition group-hover:text-violet-400" />
                 <span>
                   {hasMore
                     ? t('vault.dropdownSeeAll', { count: vaults.length })
@@ -119,14 +116,10 @@ export default function VaultDropdown({
           <span className="h-2 w-2 rounded-full bg-violet-400 shrink-0 ring-1 ring-violet-500/40" />
           <span className="font-semibold text-zinc-100 truncate">{activeVault.name}</span>
         </div>
-        <svg
+        <MonochromeIcon
+          name="chevronDown"
           className={`h-3.5 w-3.5 text-zinc-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-        </svg>
+        />
       </button>
     </div>
   );

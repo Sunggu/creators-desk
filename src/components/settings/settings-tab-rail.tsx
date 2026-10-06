@@ -1,15 +1,27 @@
 import type { ResourceKey } from '../../i18n/resources';
 import { useTranslate } from '../../i18n/use-i18n';
+import MonochromeIcon, { type IconName } from '../../ui/icon/monochrome-icon';
 
 /** The settings modal's panes. Presentation-only, never persisted. */
 export type SettingsTab = 'licenses' | 'project' | 'preferences' | 'plugins';
 
-/** Resource id of each tab's label, in rail order. */
-const TAB_LABEL_KEYS: Record<SettingsTab, ResourceKey> = {
-  licenses: 'settings.tabLicenses',
-  project: 'settings.tabProject',
-  preferences: 'settings.tabPreferences',
-  plugins: 'settings.tabPlugins',
+interface TabDescriptor {
+  labelKey: ResourceKey;
+  icon: IconName;
+}
+
+/**
+ * Glyphs live here, not in the resource bundles.
+ *
+ * They used to be baked into `settings.tab*` strings, which made them
+ * impossible to restyle, impossible to reach by role/name, and impossible to
+ * keep monochrome. Labels are now text only; this map owns every icon.
+ */
+const TAB_META: Record<SettingsTab, TabDescriptor> = {
+  licenses: { labelKey: 'settings.tabLicenses', icon: 'scroll' },
+  project: { labelKey: 'settings.tabProject', icon: 'folder' },
+  preferences: { labelKey: 'settings.tabPreferences', icon: 'sliders' },
+  plugins: { labelKey: 'settings.tabPlugins', icon: 'puzzle' },
 };
 
 const TAB_ORDER: readonly SettingsTab[] = ['licenses', 'project', 'preferences', 'plugins'];
@@ -34,13 +46,15 @@ export default function SettingsTabRail({ activeTab, onSelect }: SettingsTabRail
         <button
           key={tab}
           onClick={() => onSelect(tab)}
-          className={`flex w-full cursor-pointer items-center space-x-2 rounded px-2.5 py-2 text-xs font-medium transition ${
+          aria-current={activeTab === tab ? 'page' : undefined}
+          className={`flex w-full cursor-pointer items-center gap-2.5 rounded px-2.5 py-2 text-xs font-medium transition ${
             activeTab === tab
               ? 'bg-violet-600/20 font-semibold text-violet-300'
               : 'text-zinc-400 hover:bg-[#1e1e24] hover:text-zinc-200'
           }`}
         >
-          <span>{t(TAB_LABEL_KEYS[tab])}</span>
+          <MonochromeIcon name={TAB_META[tab].icon} className="h-4 w-4 shrink-0" />
+          <span className="truncate">{t(TAB_META[tab].labelKey)}</span>
         </button>
       ))}
     </div>

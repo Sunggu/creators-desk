@@ -3,11 +3,15 @@
  * - Windows/Linux/macOS 파일시스템 금지 특수문자: \ / : * ? " < > |
  * - 제어 문자: ASCII 0x00 ~ 0x1F, 0x7F
  */
+// Control characters are exactly what this rule exists to reject, so the
+// `no-control-regex` warning is expected here.
+// eslint-disable-next-line no-control-regex
 export const INVALID_FILE_NAME_CHARS_REGEX = /[\\/:*?"<>|\x00-\x1f\x7f]/g;
 
 /**
  * 파일/폴더명 유효성 검사용 정규식
  */
+// eslint-disable-next-line no-control-regex
 export const INVALID_FILE_NAME_REGEX = /[\\/:*?"<>|\x00-\x1f\x7f]/;
 
 /**

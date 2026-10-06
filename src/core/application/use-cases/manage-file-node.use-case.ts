@@ -11,7 +11,7 @@ export class ManageFileNodeUseCase {
 
   constructor(fileRepo: FileRepository, clock?: Clock) {
     this.fileRepo = fileRepo;
-    this.clock = clock ?? { now: () => Date.now() as any };
+    this.clock = clock ?? { now: () => Date.now() };
   }
 
   async createFile(dto: CreateFileNodeDto): Promise<FileNodeDto> {

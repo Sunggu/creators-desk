@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { VaultDto } from '../../core/domain/vault.dto';
 import { useI18n } from '../../i18n/use-i18n';
 
@@ -18,11 +18,9 @@ interface ProjectSettingsTabProps {
  */
 export default function ProjectSettingsTab({ vault, onRenameVault }: ProjectSettingsTabProps) {
   const { t, formatDateTime } = useI18n();
+  // Seeded on mount; the parent remounts this tab when the active vault changes
+  // so an out-of-band alias update can never drift from the draft.
   const [alias, setAlias] = useState(vault.alias);
-
-  useEffect(() => {
-    setAlias(vault.alias);
-  }, [vault.alias]);
 
   const commit = () => {
     const next = alias.trim();

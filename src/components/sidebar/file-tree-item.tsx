@@ -3,6 +3,7 @@ import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import { INVALID_FILE_NAME_CHARS_REGEX, sanitizeFileName } from '../../utils/name-generator';
 import FileTreeActions from './file-tree-actions';
 import { useTranslate } from '../../i18n/use-i18n';
+import MonochromeIcon from '../../ui/icon/monochrome-icon';
 
 interface FileTreeItemProps {
   node: FileNodeDto;
@@ -120,12 +121,10 @@ export default function FileTreeItem({
             onClick={(e) => { e.stopPropagation(); onToggleExpand(node.id); }}
             className="flex h-3.5 w-3.5 shrink-0 items-center justify-center text-zinc-500 hover:text-zinc-300"
           >
-            <svg
+            <MonochromeIcon
+              name="chevronRight"
               className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
-              fill="none" viewBox="0 0 24 24" stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-            </svg>
+            />
           </button>
         ) : (
           <span className="w-3.5 shrink-0" />
@@ -134,18 +133,12 @@ export default function FileTreeItem({
         <span className="h-3.5 w-3.5 shrink-0 text-zinc-500">
           {isFolder ? (
             isExpanded ? (
-              <svg className="h-3.5 w-3.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
-              </svg>
+              <MonochromeIcon name="folderOpen" className="h-3.5 w-3.5 text-amber-400" />
             ) : (
-              <svg className="h-3.5 w-3.5 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-              </svg>
+              <MonochromeIcon name="folder" className="h-3.5 w-3.5 text-amber-500" />
             )
           ) : (
-            <svg className="h-3.5 w-3.5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
+            <MonochromeIcon name="file" className="h-3.5 w-3.5 text-zinc-400" />
           )}
         </span>
 

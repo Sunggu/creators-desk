@@ -21,4 +21,6 @@ export const editorEn = {
   titleAriaLabel: 'Note title',
   invalidCharsTitle: 'The characters \\ / : * ? " < > | are not allowed in file names',
   doubleClickToEdit: 'Double-click to switch to edit mode',
+  splitRightHint: 'Split to the right',
+  splitBottomHint: 'Split to the bottom',
 } satisfies LocaleBundleShape<typeof editorKo>;

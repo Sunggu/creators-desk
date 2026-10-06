@@ -1,16 +1,19 @@
 import type { EditorGroupDto, SplitDirection } from '../../core/domain/editor-grid.dto';
-import type { TabDropPosition } from '../../core/domain/tab-drag.dto';
+import type { EditorStats } from '../../core/domain/editor-stats.dto';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
-import type { EditorStats } from '../../hooks/use-codemirror';
+import type { TabDropPosition } from '../../core/domain/tab-drag.dto';
+import { useSplitDropTarget } from '../../hooks/use-split-drop-target';
 import ObsidianTabBar from '../tabs/obsidian-tab-bar';
-import EditorDropZone from './editor-drop-zone';
 import ObsidianEditor from './obsidian-editor';
+import SplitDropOverlay from './split-drop-overlay';
 
-interface EditorGroupViewProps {
+export interface EditorGroupViewProps {
   group: EditorGroupDto;
   nodes: FileNodeDto[];
   viewMode: 'edit' | 'preview';
   canCloseGroup: boolean;
+  /** File whose inline title should grab focus (e.g. a just-created note). */
+  autoFocusFileId?: string | null;
   onToggleViewMode: () => void;
   onSelectTab: (fileId: string) => void;
   onCloseTab: (fileId: string) => void;
@@ -22,6 +25,8 @@ interface EditorGroupViewProps {
   onSavingChange: (saving: boolean) => void;
   onStatsChange: (stats: EditorStats) => void;
   onRenameFile: (id: string, name: string) => Promise<unknown>;
+  onSwitchToEdit: () => void;
+  onNavigateWikilink?: (target: string) => void;
   isRightPanelOpen?: boolean;
   onToggleRightPanel?: () => void;
 }
@@ -31,6 +36,7 @@ export default function EditorGroupView({
   nodes,
   viewMode,
   canCloseGroup,
+  autoFocusFileId,
   onToggleViewMode,
   onSelectTab,
   onCloseTab,
@@ -42,6 +48,8 @@ export default function EditorGroupView({
   onSavingChange,
   onStatsChange,
   onRenameFile,
+  onSwitchToEdit,
+  onNavigateWikilink,
   isRightPanelOpen,
   onToggleRightPanel,
 }: EditorGroupViewProps) {
@@ -50,6 +58,8 @@ export default function EditorGroupView({
     .filter((n): n is FileNodeDto => Boolean(n));
 
   const activeFile = nodes.find((n) => n.id === group.activeFileId && n.type === 'file') ?? null;
+
+  const { edge, dropZoneProps } = useSplitDropTarget({ onSplitDrop: onSplit });
 
   return (
     <div className="relative flex flex-1 flex-col h-full overflow-hidden bg-[#1e1e22]">
@@ -65,35 +75,26 @@ export default function EditorGroupView({
         onNewNote={onNewNote}
         isRightPanelOpen={isRightPanelOpen}
         onToggleRightPanel={onToggleRightPanel}
-        onSplitHorizontal={
-          (targetId?: string) => {
-            const id = targetId ?? group.activeFileId;
-            if (id) onSplit(id, 'horizontal');
-          }
-        }
-        onSplitVertical={
-          (targetId?: string) => {
-            const id = targetId ?? group.activeFileId;
-            if (id) onSplit(id, 'vertical');
-          }
-        }
+        onSplitHorizontal={(targetId) => onSplit(targetId ?? group.activeFileId ?? '', 'horizontal')}
+        onSplitVertical={(targetId) => onSplit(targetId ?? group.activeFileId ?? '', 'vertical')}
         onCloseGroup={onCloseGroup}
         canCloseGroup={canCloseGroup}
       />
 
-      <div className="relative flex-1 overflow-hidden">
+      <div data-editor-pane className="relative flex-1 overflow-hidden" {...dropZoneProps}>
         <ObsidianEditor
           activeFile={activeFile}
           viewMode={viewMode}
-          onSwitchToEdit={() => {}}
+          onSwitchToEdit={onSwitchToEdit}
+          onNavigateWikilink={onNavigateWikilink}
+          autoFocusTitle={Boolean(activeFile && activeFile.id === autoFocusFileId)}
           onSavingChange={onSavingChange}
           onStatsChange={onStatsChange}
           onNewNote={onNewNote}
           onRenameFile={onRenameFile}
         />
 
-        {/* Tab Drop Zone Overlay */}
-        <EditorDropZone onSplitDrop={onSplit} />
+        <SplitDropOverlay edge={edge} />
       </div>
     </div>
   );

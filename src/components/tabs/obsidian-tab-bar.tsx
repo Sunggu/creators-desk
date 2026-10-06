@@ -5,6 +5,7 @@ import TabBarActions from './tab-bar-actions';
 import TabContextMenu from './tab-context-menu';
 import TabItem from './tab-item';
 import { useTranslate } from '../../i18n/use-i18n';
+import MonochromeIcon from '../../ui/icon/monochrome-icon';
 
 interface ObsidianTabBarProps {
   openFiles: FileNodeDto[];
@@ -70,9 +71,7 @@ export default function ObsidianTabBar({
           className="mb-1 ml-1 flex h-7 w-7 items-center justify-center rounded text-zinc-400 hover:bg-[#222228] hover:text-zinc-200 transition"
           title={t('tab.addTab')}
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
+          <MonochromeIcon name="plus" />
         </button>
       </div>
 

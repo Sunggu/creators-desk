@@ -1,27 +1,13 @@
 import { useMemo } from 'react';
 import { marked } from 'marked';
 import { useTranslate } from '../../i18n/use-i18n';
+import { processObsidianSyntax } from '../../utils/obsidian-syntax';
 
 interface ObsidianMarkdownPreviewProps {
   title: string;
   content: string;
   onSwitchToEdit?: () => void;
   onNavigateWikilink?: (target: string) => void;
-}
-
-export function processObsidianSyntax(rawText: string): string {
-  // Convert [[Note Name]] to clickable links
-  let processed = rawText.replace(/\[\[(.*?)\]\]/g, (_, target) => {
-    const cleanTarget = target.trim();
-    return `<a href="#wikilink" data-wikilink="${encodeURIComponent(cleanTarget)}" class="wikilink-badge text-violet-400 font-medium hover:underline hover:text-violet-300">[[${cleanTarget}]]</a>`;
-  });
-
-  // Convert #tags (excluding headings # and hex colors)
-  processed = processed.replace(/(^|\s)#([a-zA-Z0-9_\uAC00-\uD7A3]+)/g, (_, space, tag) => {
-    return `${space}<span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-950/60 text-violet-300 border border-violet-800/40">#${tag}</span>`;
-  });
-
-  return processed;
 }
 
 export default function ObsidianMarkdownPreview({

@@ -1,16 +1,17 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import type { EditorGridLayoutDto, SplitDirection } from '../../core/domain/editor-grid.dto';
-import type { TabDropPosition } from '../../core/domain/tab-drag.dto';
+import type { EditorStats } from '../../core/domain/editor-stats.dto';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
-import type { EditorStats } from '../../hooks/use-codemirror';
+import type { TabDropPosition } from '../../core/domain/tab-drag.dto';
 import { useResizable } from '../../hooks/use-resizable';
-import EditorGroupView from './editor-group-view';
+import EditorGroupPane from './editor-group-pane';
 import GridSplitter from './grid-splitter';
 
 interface ResizableEditorGridProps {
   layout: EditorGridLayoutDto;
   nodes: FileNodeDto[];
   viewMode: 'edit' | 'preview';
+  autoFocusFileId?: string | null;
   onToggleViewMode: () => void;
   onSelectTab: (groupId: string, fileId: string) => void;
   onCloseTab: (groupId: string, fileId: string) => void;
@@ -22,14 +23,21 @@ interface ResizableEditorGridProps {
   onSavingChange: (saving: boolean) => void;
   onStatsChange: (stats: EditorStats) => void;
   onRenameFile: (id: string, name: string) => Promise<unknown>;
+  onSwitchToEdit: () => void;
+  onNavigateWikilink?: (target: string) => void;
+  onSplitRatioChange?: (ratio: number) => void;
   isRightPanelOpen?: boolean;
   onToggleRightPanel?: () => void;
 }
+
+const PANE_STYLE = (direction: SplitDirection, value: string) =>
+  direction === 'horizontal' ? { width: value } : { height: value };
 
 export default function ResizableEditorGrid({
   layout,
   nodes,
   viewMode,
+  autoFocusFileId,
   onToggleViewMode,
   onSelectTab,
   onCloseTab,
@@ -41,118 +49,81 @@ export default function ResizableEditorGrid({
   onSavingChange,
   onStatsChange,
   onRenameFile,
+  onSwitchToEdit,
+  onNavigateWikilink,
+  onSplitRatioChange,
   isRightPanelOpen,
   onToggleRightPanel,
 }: ResizableEditorGridProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const isHorizontal = layout.direction === 'horizontal';
-
+  const direction = layout.direction;
   const { size: ratio, startResize, isResizing } = useResizable({
     initial: layout.splitRatio,
     min: 0.15,
     max: 0.85,
-    direction: isHorizontal ? 'horizontal' : 'vertical',
+    direction,
     isRatio: true,
   });
 
-  const groups = layout.groups;
-  if (groups.length === 1) {
-    return (
-      <div className="flex h-full w-full overflow-hidden bg-[#1e1e22]">
-        <EditorGroupView
-          group={groups[0]}
-          nodes={nodes}
-          viewMode={viewMode}
-          canCloseGroup={false}
-          onToggleViewMode={onToggleViewMode}
-          onSelectTab={(fileId) => onSelectTab(groups[0].id, fileId)}
-          onCloseTab={(fileId) => onCloseTab(groups[0].id, fileId)}
-          onCloseOtherTabs={(fileId) => onCloseOtherTabs?.(groups[0].id, fileId)}
-          onMoveTab={(sourceId, targetId, position) => onMoveTab?.(groups[0].id, sourceId, targetId, position)}
-          onNewNote={onNewNote}
-          onSplit={(fileId, dir) => onSplit(groups[0].id, fileId, dir)}
-          onCloseGroup={() => {}}
-          onSavingChange={onSavingChange}
-          onStatsChange={onStatsChange}
-          onRenameFile={onRenameFile}
-          isRightPanelOpen={isRightPanelOpen}
-          onToggleRightPanel={onToggleRightPanel}
-        />
-      </div>
-    );
-  }
+  // Keep the grid layout as the source of truth so the ratio survives a remount.
+  useEffect(() => {
+    if (ratio !== layout.splitRatio) onSplitRatioChange?.(ratio);
+  }, [ratio, layout.splitRatio, onSplitRatioChange]);
 
-  const handleSplitterMouseDown = (e: React.MouseEvent) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const containerSize = isHorizontal ? rect.width : rect.height;
-    startResize(e, containerSize);
+  const [first, second] = layout.groups;
+
+  const paneProps = {
+    nodes,
+    viewMode,
+    autoFocusFileId,
+    canCloseGroup: layout.groups.length > 1,
+    onToggleViewMode,
+    onSelectTab,
+    onCloseTab,
+    onCloseOtherTabs,
+    onMoveTab,
+    onNewNote,
+    onSplit,
+    onCloseGroup,
+    onSavingChange,
+    onStatsChange,
+    onRenameFile,
+    onSwitchToEdit,
+    onNavigateWikilink,
+    isRightPanelOpen,
+    onToggleRightPanel,
   };
-
-  const firstGroupStyle = isHorizontal
-    ? { width: `${ratio * 100}%` }
-    : { height: `${ratio * 100}%` };
-
-  const secondGroupStyle = isHorizontal
-    ? { width: `${(1 - ratio) * 100}%` }
-    : { height: `${(1 - ratio) * 100}%` };
 
   return (
     <div
       ref={containerRef}
       className={`flex h-full w-full overflow-hidden bg-[#1e1e22] ${
-        isHorizontal ? 'flex-row' : 'flex-col'
+        direction === 'horizontal' ? 'flex-row' : 'flex-col'
       }`}
     >
-      <div style={firstGroupStyle} className="flex overflow-hidden">
-        <EditorGroupView
-          group={groups[0]}
-          nodes={nodes}
-          viewMode={viewMode}
-          canCloseGroup={true}
-          onToggleViewMode={onToggleViewMode}
-          onSelectTab={(fileId) => onSelectTab(groups[0].id, fileId)}
-          onCloseTab={(fileId) => onCloseTab(groups[0].id, fileId)}
-          onCloseOtherTabs={(fileId) => onCloseOtherTabs?.(groups[0].id, fileId)}
-          onMoveTab={(sourceId, targetId, position) => onMoveTab?.(groups[0].id, sourceId, targetId, position)}
-          onNewNote={onNewNote}
-          onSplit={(fileId, dir) => onSplit(groups[0].id, fileId, dir)}
-          onCloseGroup={() => onCloseGroup(groups[0].id)}
-          onSavingChange={onSavingChange}
-          onStatsChange={onStatsChange}
-          onRenameFile={onRenameFile}
-          isRightPanelOpen={isRightPanelOpen}
-          onToggleRightPanel={onToggleRightPanel}
-        />
+      <div
+        style={second ? PANE_STYLE(direction, `${ratio * 100}%`) : undefined}
+        className={`overflow-hidden ${second ? '' : 'flex-1'} flex`}
+      >
+        <EditorGroupPane group={first} {...paneProps} />
       </div>
 
-      <GridSplitter
-        direction={layout.direction}
-        onMouseDown={handleSplitterMouseDown}
-        isResizing={isResizing}
-      />
-
-      <div style={secondGroupStyle} className="flex overflow-hidden">
-        <EditorGroupView
-          group={groups[1]}
-          nodes={nodes}
-          viewMode={viewMode}
-          canCloseGroup={true}
-          onToggleViewMode={onToggleViewMode}
-          onSelectTab={(fileId) => onSelectTab(groups[1].id, fileId)}
-          onCloseTab={(fileId) => onCloseTab(groups[1].id, fileId)}
-          onCloseOtherTabs={(fileId) => onCloseOtherTabs?.(groups[1].id, fileId)}
-          onMoveTab={(sourceId, targetId, position) => onMoveTab?.(groups[1].id, sourceId, targetId, position)}
-          onNewNote={onNewNote}
-          onSplit={(fileId, dir) => onSplit(groups[1].id, fileId, dir)}
-          onCloseGroup={() => onCloseGroup(groups[1].id)}
-          onSavingChange={onSavingChange}
-          onStatsChange={onStatsChange}
-          onRenameFile={onRenameFile}
-          isRightPanelOpen={isRightPanelOpen}
-          onToggleRightPanel={onToggleRightPanel}
-        />
-      </div>
+      {second && (
+        <>
+          <GridSplitter
+            direction={direction}
+            isResizing={isResizing}
+            onMouseDown={(e) => {
+              const rect = containerRef.current?.getBoundingClientRect();
+              if (!rect) return;
+              startResize(e, direction === 'horizontal' ? rect.width : rect.height);
+            }}
+          />
+          <div style={PANE_STYLE(direction, `${(1 - ratio) * 100}%`)} className="flex overflow-hidden">
+            <EditorGroupPane group={second} {...paneProps} />
+          </div>
+        </>
+      )}
     </div>
   );
 }

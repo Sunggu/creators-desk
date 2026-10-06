@@ -1,8 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { EMPTY_EDITOR_STATS } from '../../core/domain/editor-stats.dto';
+import type { EditorStats } from '../../core/domain/editor-stats.dto';
 import type { SidebarMenuId } from '../../core/domain/sidebar-panel.dto';
 import type { VaultDto } from '../../core/domain/vault.dto';
 import { useActiveWorkspace } from '../../hooks/use-active-workspace';
-import type { EditorStats } from '../../hooks/use-codemirror';
+import { useDrawerGesture } from '../../hooks/use-drawer-gesture';
 import { useEditorGrid } from '../../hooks/use-editor-grid';
 import ResizableEditorGrid from '../editor/resizable-editor-grid';
 import ObsidianMobileHeader from '../mobile/obsidian-mobile-header';
@@ -12,6 +14,9 @@ import RightSidebarPanel from '../sidebar/right-sidebar-panel';
 import SidebarPanelContainer from '../sidebar/sidebar-panel-container';
 import ObsidianStatusBar from '../statusbar/obsidian-status-bar';
 import ObsidianVaultModal from '../vault/obsidian-vault-modal';
+import MobileDrawer from './mobile-drawer';
+import { useSidebarPanelData } from './use-sidebar-panel-data';
+import { useWorkspaceCommands } from './use-workspace-commands';
 
 interface ObsidianShellProps {
   vault: VaultDto;
@@ -21,136 +26,132 @@ interface ObsidianShellProps {
   onDeleteVault: (id: string) => void;
 }
 
-export default function ObsidianShell({
-  vault,
-  vaults,
-  onSelectVault,
-  onCreateVault,
-  onDeleteVault,
-}: ObsidianShellProps) {
+export default function ObsidianShell({ vault, vaults, onSelectVault, onCreateVault, onDeleteVault }: ObsidianShellProps) {
   const [activeSideMenu, setActiveSideMenu] = useState<SidebarMenuId | null>('explorer');
+  // Mobile-only. Kept separate from `activeSideMenu` so a phone never inherits a
+  // desktop panel state, and so first paint on a phone lands on the editor.
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isRightPanelOpen, setIsRightPanelOpen] = useState(false);
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isVaultModalOpen, setIsVaultModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'edit' | 'preview'>('edit');
   const [isSaving, setIsSaving] = useState(false);
-  const [stats, setStats] = useState<EditorStats>({
-    words: 0,
-    chars: 0,
-    cursorLine: 1,
-    cursorCol: 1,
+  const [stats, setStats] = useState<EditorStats>(EMPTY_EDITOR_STATS);
+
+  const workspace = useActiveWorkspace(vault.id);
+  const grid = useEditorGrid();
+  const commands = useWorkspaceCommands({ workspace, grid, setViewMode });
+
+  const openDrawer = useCallback(() => setIsDrawerOpen(true), []);
+  const closeDrawer = useCallback(() => setIsDrawerOpen(false), []);
+  const toggleDrawer = useCallback(() => setIsDrawerOpen((prev) => !prev), []);
+  const gesture = useDrawerGesture({ onOpen: openDrawer, onClose: closeDrawer });
+
+  // Seed the grid with the restored session file, then keep it as the tab owner.
+  //
+  // Depends on the stable `openFile` callback, never on the `grid` object: the
+  // hook returns a fresh literal every render, so listing it as a dependency made
+  // this effect fire forever and `openFile` keep minting new layouts — the shell
+  // could never reach a stable render, which is why the editor surface felt dead.
+  const openFileInGrid = grid.openFile;
+  useEffect(() => {
+    if (workspace.activeFileId) openFileInGrid(workspace.activeFileId);
+  }, [workspace.activeFileId, openFileInGrid]);
+
+  const toggleViewMode = useCallback(
+    () => setViewMode((m) => (m === 'edit' ? 'preview' : 'edit')),
+    [],
+  );
+  const toggleSideMenu = useCallback(
+    (menu: SidebarMenuId) => setActiveSideMenu((prev) => (prev === menu ? null : menu)),
+    [],
+  );
+  /** Drawer navigation always lands on a panel; it never collapses to "none". */
+  const selectDrawerMenu = useCallback((menu: SidebarMenuId) => setActiveSideMenu(menu), []);
+  const openVaultModal = useCallback(() => {
+    closeDrawer();
+    setIsVaultModalOpen(true);
+  }, [closeDrawer]);
+  const openSettingsModal = useCallback(() => {
+    closeDrawer();
+    setIsSettingsModalOpen(true);
+  }, [closeDrawer]);
+
+  const panelData = useSidebarPanelData({
+    vault, vaults, workspace, commands, onSelectVault, onOpenVaultModal: openVaultModal,
   });
 
-  const touchStartXRef = useRef<number | null>(null);
-  const workspace = useActiveWorkspace(vault.id);
-  const editorGrid = useEditorGrid();
-
-  // Sync workspace open files to initial grid
-  useEffect(() => {
-    if (workspace.activeFileId) {
-      editorGrid.openFile(workspace.activeFileId);
-    }
-  }, [workspace.activeFileId]);
-
-  const toggleViewMode = () => setViewMode((m) => (m === 'edit' ? 'preview' : 'edit'));
-
-  const handleSelectSideMenu = (menu: SidebarMenuId) => {
-    setActiveSideMenu((prev) => (prev === menu ? null : menu));
-  };
-
-  const handleCreateNewNote = async () => {
-    setViewMode('edit');
-    const created = await workspace.createFile();
-    if (created) editorGrid.openFile(created.id);
-    setIsMobileSidebarOpen(false);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => { touchStartXRef.current = e.touches[0].clientX; };
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartXRef.current === null) return;
-    const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
-    if (touchStartXRef.current < 45 && deltaX > 50) setIsMobileSidebarOpen(true);
-    else if (isMobileSidebarOpen && deltaX < -50) setIsMobileSidebarOpen(false);
-    touchStartXRef.current = null;
-  };
-
   return (
-    <div
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      className="flex h-screen h-[100dvh] w-screen flex-col overflow-hidden bg-[#1e1e22] text-[#dcddde] font-sans antialiased"
-    >
+    <div className="flex h-screen h-[100dvh] w-screen flex-col overflow-hidden bg-[#1e1e22] text-[#dcddde] font-sans antialiased">
       <ObsidianMobileHeader
         vault={vault}
         activeFile={workspace.activeFile}
         viewMode={viewMode}
+        isDrawerOpen={isDrawerOpen}
+        isOutlineOpen={isRightPanelOpen}
+        onToggleDrawer={toggleDrawer}
         onToggleViewMode={toggleViewMode}
-        onOpenSidebar={() => setIsMobileSidebarOpen(true)}
-        onOpenVaultModal={() => setIsVaultModalOpen(true)}
-        onNewNote={handleCreateNewNote}
+        onToggleOutline={() => setIsRightPanelOpen((prev) => !prev)}
+        onOpenVaultModal={openVaultModal}
+        onNewNote={commands.createNote}
       />
 
-      <div className="flex flex-1 overflow-hidden relative">
+      <div {...gesture.edgeProps} data-workspace className="relative flex flex-1 overflow-hidden">
         <ObsidianRibbon
           activeMenu={activeSideMenu}
-          onSelectMenu={handleSelectSideMenu}
-          onOpenVaultModal={() => setIsVaultModalOpen(true)}
-          onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+          onSelectMenu={toggleSideMenu}
+          onOpenVaultModal={openVaultModal}
+          onOpenSettingsModal={openSettingsModal}
         />
 
-        {/* Resizable Primary Side Panel */}
         <SidebarPanelContainer
+          {...panelData}
           activeMenu={activeSideMenu}
           onClose={() => setActiveSideMenu(null)}
-          vault={vault}
-          vaults={vaults}
-          nodes={workspace.nodes}
-          activeFileId={workspace.activeFileId}
-          onSelectVault={onSelectVault}
-          onOpenVaultModal={() => setIsVaultModalOpen(true)}
-          onSelectFile={(id) => {
-            workspace.selectFile(id);
-            editorGrid.openFile(id);
-          }}
-          onCreateFile={workspace.createFile}
-          onCreateFolder={workspace.createFolder}
-          onRenameNode={workspace.renameNode}
-          onDeleteNode={workspace.deleteNode}
-          onDeleteNodes={workspace.deleteNodes}
-          onMoveNode={workspace.moveNode}
-          onRefresh={workspace.refreshNodes}
         />
 
-        {/* Central Resizable Grid Editor Area */}
         <main className="flex flex-1 flex-col overflow-hidden bg-[#1e1e22]">
           <ResizableEditorGrid
-            layout={editorGrid.layout}
+            layout={grid.layout}
             nodes={workspace.nodes}
             viewMode={viewMode}
+            autoFocusFileId={workspace.isNewFile ? workspace.newlyCreatedFileId : null}
             onToggleViewMode={toggleViewMode}
-            onSelectTab={editorGrid.selectFile}
-            onCloseTab={editorGrid.closeFile}
-            onCloseOtherTabs={editorGrid.closeOtherFiles}
-            onMoveTab={editorGrid.moveTab}
-            onNewNote={handleCreateNewNote}
-            onSplit={editorGrid.split}
-            onCloseGroup={editorGrid.closeGroup}
+            onSelectTab={commands.selectTab}
+            onCloseTab={grid.closeFile}
+            onCloseOtherTabs={grid.closeOtherFiles}
+            onMoveTab={commands.moveTab}
+            onNewNote={commands.createNote}
+            onSplit={grid.split}
+            onCloseGroup={grid.closeGroup}
             onSavingChange={setIsSaving}
             onStatsChange={setStats}
             onRenameFile={workspace.renameNode}
+            onSwitchToEdit={() => setViewMode('edit')}
+            onNavigateWikilink={commands.navigateWikilink}
+            onSplitRatioChange={grid.setSplitRatio}
             isRightPanelOpen={isRightPanelOpen}
             onToggleRightPanel={() => setIsRightPanelOpen((prev) => !prev)}
           />
         </main>
 
-        {/* Right Secondary Panel (문서 목차 Outline) */}
         <RightSidebarPanel
           isOpen={isRightPanelOpen}
           onClose={() => setIsRightPanelOpen(false)}
           activeFile={workspace.activeFile}
         />
       </div>
+
+      <MobileDrawer
+        {...panelData}
+        isOpen={isDrawerOpen}
+        activeMenu={activeSideMenu ?? 'explorer'}
+        onSelectMenu={selectDrawerMenu}
+        onClose={closeDrawer}
+        onOpenVaultModal={openVaultModal}
+        onOpenSettingsModal={openSettingsModal}
+        panelGestureProps={gesture.panelProps}
+      />
 
       <ObsidianStatusBar stats={stats} isSaving={isSaving} />
 

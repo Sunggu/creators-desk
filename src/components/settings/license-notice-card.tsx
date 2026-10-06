@@ -1,6 +1,7 @@
 import { APP_VERSION } from '../../core/app-version';
 import { NOTICE_PAGE_URL, PROJECT_LICENSE } from '../../core/project-license';
 import { useTranslate } from '../../i18n/use-i18n';
+import MonochromeIcon from '../../ui/icon/monochrome-icon';
 
 /**
  * Product license identity.
@@ -50,7 +51,7 @@ export function NoticePageLink({ className = '' }: { className?: string }) {
       rel="noreferrer noopener"
       className={`inline-flex items-center gap-1.5 rounded bg-violet-600 px-3 py-1.5 text-[11px] font-medium text-white transition hover:bg-violet-500 ${className}`}
     >
-      <span aria-hidden="true">📜</span>
+      <MonochromeIcon name="scroll" className="h-3.5 w-3.5" />
       {t('licenses.viewFull')}
     </a>
   );

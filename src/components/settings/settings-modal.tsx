@@ -7,6 +7,7 @@ import PluginsView from './plugins-view';
 import PreferencesTab from './preferences-tab';
 import ProjectSettingsTab from './project-settings-tab';
 import SettingsTabRail, { type SettingsTab } from './settings-tab-rail';
+import MonochromeIcon from '../../ui/icon/monochrome-icon';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -59,9 +60,7 @@ export default function SettingsModal({
             className="cursor-pointer rounded p-1 text-zinc-400 transition hover:bg-[#26262e] hover:text-zinc-100"
             title={t('settings.closeTitle')}
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <MonochromeIcon name="close" />
           </button>
         </div>
 
@@ -72,7 +71,11 @@ export default function SettingsModal({
             {activeTab === 'licenses' && <OpenSourceLicensesView />}
             {activeTab === 'plugins' && <PluginsView />}
             {activeTab === 'project' && (
-              <ProjectSettingsTab vault={activeVault} onRenameVault={onRenameVault} />
+              <ProjectSettingsTab
+                key={activeVault.id}
+                vault={activeVault}
+                onRenameVault={onRenameVault}
+              />
             )}
             {activeTab === 'preferences' && <PreferencesTab />}
           </div>
