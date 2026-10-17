@@ -2,6 +2,8 @@ import { useCallback, useState } from 'react';
 import type { EditorGroupDto, EditorGridLayoutDto, SplitDirection } from '../core/domain/editor-grid.dto';
 import type { TabDropPosition } from '../core/domain/tab-drag.dto';
 
+export const MAX_SPLIT_GROUPS = 4;
+
 const DEFAULT_GRID_LAYOUT: EditorGridLayoutDto = {
   direction: 'horizontal',
   groups: [{ id: 'group-main', fileIds: [], activeFileId: null }],
@@ -15,15 +17,14 @@ export function splitGroupHelper(
   direction: SplitDirection
 ): EditorGridLayoutDto {
   if (!fileId) return layout;
-  const newGroupId = `group-${Date.now()}`;
+  const newGroupId = `group-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
   const newGroup: EditorGroupDto = {
     id: newGroupId,
     fileIds: [fileId],
     activeFileId: fileId,
   };
 
-  // If already split, add file to the other group
-  if (layout.groups.length >= 2) {
+  if (layout.groups.length >= MAX_SPLIT_GROUPS) {
     const targetGroup = layout.groups.find((g) => g.id !== sourceGroupId) || layout.groups[1];
     const fileIds = targetGroup.fileIds.includes(fileId) ? targetGroup.fileIds : [...targetGroup.fileIds, fileId];
     return {
@@ -33,56 +34,38 @@ export function splitGroupHelper(
   }
 
   return {
+    ...layout,
     direction,
     groups: [...layout.groups, newGroup],
-    splitRatio: 0.5,
+    splitRatio: layout.groups.length === 1 ? 0.5 : layout.splitRatio,
   };
 }
 
-export function closeFileInGroupHelper(
-  layout: EditorGridLayoutDto,
-  groupId: string,
-  fileId: string
-): EditorGridLayoutDto {
+export function closeFileInGroupHelper(layout: EditorGridLayoutDto, groupId: string, fileId: string): EditorGridLayoutDto {
   const updatedGroups = layout.groups.map((group) => {
     if (group.id !== groupId) return group;
     const fileIds = group.fileIds.filter((id) => id !== fileId);
-    let activeFileId = group.activeFileId;
-    if (activeFileId === fileId) {
-      activeFileId = fileIds[fileIds.length - 1] ?? null;
-    }
+    const activeFileId = group.activeFileId === fileId ? fileIds[fileIds.length - 1] ?? null : group.activeFileId;
     return { ...group, fileIds, activeFileId };
   });
 
-  // If a split group has 0 files and there are 2 groups, collapse to 1 group
-  if (updatedGroups.length > 1) {
-    const target = updatedGroups.find((g) => g.id === groupId);
-    if (target && target.fileIds.length === 0) {
-      return {
-        ...layout,
-        groups: updatedGroups.filter((g) => g.id !== groupId),
-      };
-    }
+  if (updatedGroups.length > 1 && updatedGroups.find((g) => g.id === groupId)?.fileIds.length === 0) {
+    return { ...layout, groups: updatedGroups.filter((g) => g.id !== groupId) };
   }
-
   return { ...layout, groups: updatedGroups };
 }
 
-export function closeOtherFilesInGroupHelper(
-  layout: EditorGridLayoutDto,
-  groupId: string,
-  keepFileId: string
-): EditorGridLayoutDto {
+export function closeOtherFilesInGroupHelper(layout: EditorGridLayoutDto, groupId: string, keepFileId: string): EditorGridLayoutDto {
   return {
     ...layout,
-    groups: layout.groups.map((group) => {
-      if (group.id !== groupId) return group;
-      return {
-        ...group,
-        fileIds: [keepFileId],
-        activeFileId: keepFileId,
-      };
-    }),
+    groups: layout.groups.map((g) => (g.id === groupId ? { ...g, fileIds: [keepFileId], activeFileId: keepFileId } : g)),
+  };
+}
+
+export function setGroupViewModeHelper(layout: EditorGridLayoutDto, groupId: string, viewMode: 'edit' | 'preview'): EditorGridLayoutDto {
+  return {
+    ...layout,
+    groups: layout.groups.map((g) => (g.id === groupId ? { ...g, viewMode } : g)),
   };
 }
 
@@ -93,21 +76,41 @@ export function reorderTabsHelper(
   targetFileId: string,
   position: TabDropPosition
 ): EditorGridLayoutDto {
-  return {
-    ...layout,
-    groups: layout.groups.map((group) => {
-      if (group.id !== groupId) return group;
-      if (sourceFileId === targetFileId) return group;
-      const fromIndex = group.fileIds.indexOf(sourceFileId);
-      if (fromIndex === -1 || !group.fileIds.includes(targetFileId)) return group;
+  if (sourceFileId === targetFileId) return layout;
+  const targetGroup = layout.groups.find((g) => g.id === groupId);
+  if (!targetGroup || !targetGroup.fileIds.includes(targetFileId)) return layout;
 
-      const fileIds = [...group.fileIds];
-      fileIds.splice(fromIndex, 1);
-      const anchorIndex = fileIds.indexOf(targetFileId);
-      fileIds.splice(position === 'before' ? anchorIndex : anchorIndex + 1, 0, sourceFileId);
-      return { ...group, fileIds };
-    }),
-  };
+  const fromIndex = targetGroup.fileIds.indexOf(sourceFileId);
+  if (fromIndex !== -1) {
+    const fileIds = [...targetGroup.fileIds];
+    fileIds.splice(fromIndex, 1);
+    const anchorIndex = fileIds.indexOf(targetFileId);
+    fileIds.splice(position === 'before' ? anchorIndex : anchorIndex + 1, 0, sourceFileId);
+    return { ...layout, groups: layout.groups.map((g) => (g.id === groupId ? { ...g, fileIds } : g)) };
+  }
+
+  const sourceGroup = layout.groups.find((g) => g.id !== groupId && g.fileIds.includes(sourceFileId));
+  if (!sourceGroup) return layout;
+
+  const sourceRemaining = sourceGroup.fileIds.filter((id) => id !== sourceFileId);
+  const sourceActive = sourceGroup.activeFileId === sourceFileId
+    ? sourceRemaining[sourceRemaining.length - 1] ?? null
+    : sourceGroup.activeFileId;
+
+  const anchorIndex = targetGroup.fileIds.indexOf(targetFileId);
+  const targetFileIds = [...targetGroup.fileIds];
+  targetFileIds.splice(position === 'before' ? anchorIndex : anchorIndex + 1, 0, sourceFileId);
+
+  let updatedGroups = layout.groups.map((g) => {
+    if (g.id === sourceGroup.id) return { ...g, fileIds: sourceRemaining, activeFileId: sourceActive };
+    if (g.id === targetGroup.id) return { ...g, fileIds: targetFileIds, activeFileId: sourceFileId };
+    return g;
+  });
+
+  if (updatedGroups.length > 1 && sourceRemaining.length === 0) {
+    updatedGroups = updatedGroups.filter((g) => g.id !== sourceGroup.id);
+  }
+  return { ...layout, groups: updatedGroups };
 }
 
 export function useEditorGrid(initialLayout: EditorGridLayoutDto = DEFAULT_GRID_LAYOUT) {
@@ -138,15 +141,12 @@ export function useEditorGrid(initialLayout: EditorGridLayoutDto = DEFAULT_GRID_
     }));
   }, []);
 
-  const moveTab = useCallback(
-    (groupId: string, sourceFileId: string, targetFileId: string, position: TabDropPosition) => {
-      setLayout((prev) => reorderTabsHelper(prev, groupId, sourceFileId, targetFileId, position));
-    },
-    []
-  );
+  const moveTab = useCallback((groupId: string, srcId: string, tgtId: string, pos: TabDropPosition) => {
+    setLayout((prev) => reorderTabsHelper(prev, groupId, srcId, tgtId, pos));
+  }, []);
 
-  const split = useCallback((sourceGroupId: string, fileId: string, direction: SplitDirection) => {
-    setLayout((prev) => splitGroupHelper(prev, sourceGroupId, fileId, direction));
+  const split = useCallback((srcGroupId: string, fileId: string, dir: SplitDirection) => {
+    setLayout((prev) => splitGroupHelper(prev, srcGroupId, fileId, dir));
   }, []);
 
   const closeOtherFiles = useCallback((groupId: string, keepFileId: string) => {
@@ -154,14 +154,15 @@ export function useEditorGrid(initialLayout: EditorGridLayoutDto = DEFAULT_GRID_
   }, []);
 
   const closeGroup = useCallback((groupId: string) => {
-    setLayout((prev) => {
-      if (prev.groups.length <= 1) return prev;
-      return { ...prev, groups: prev.groups.filter((g) => g.id !== groupId) };
-    });
+    setLayout((prev) => (prev.groups.length <= 1 ? prev : { ...prev, groups: prev.groups.filter((g) => g.id !== groupId) }));
   }, []);
 
   const setSplitRatio = useCallback((ratio: number) => {
     setLayout((prev) => ({ ...prev, splitRatio: Math.max(0.15, Math.min(0.85, ratio)) }));
+  }, []);
+
+  const setGroupViewMode = useCallback((groupId: string, viewMode: 'edit' | 'preview') => {
+    setLayout((prev) => setGroupViewModeHelper(prev, groupId, viewMode));
   }, []);
 
   return {
@@ -174,5 +175,6 @@ export function useEditorGrid(initialLayout: EditorGridLayoutDto = DEFAULT_GRID_
     split,
     closeGroup,
     setSplitRatio,
+    setGroupViewMode,
   };
 }

@@ -3,12 +3,13 @@
 # ==========================================
 
 # 1. Builder Stage
-FROM node:22-alpine AS builder
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
-# Enable pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Enable pnpm (version comes from package.json#packageManager)
+ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+RUN corepack enable
 
 # Install dependencies
 COPY package.json pnpm-lock.yaml ./
@@ -21,7 +22,7 @@ COPY . .
 RUN pnpm run build
 
 # 2. Production Runtime Stage
-FROM node:22-alpine AS runner
+FROM node:24-alpine AS runner
 
 WORKDIR /app
 ENV NODE_ENV=production

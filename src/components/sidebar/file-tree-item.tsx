@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import { INVALID_FILE_NAME_CHARS_REGEX, sanitizeFileName } from '../../utils/name-generator';
 import FileTreeActions from './file-tree-actions';
+import { TAB_DRAG_MIME } from '../../core/domain/tab-drag.dto';
 import { useTranslate } from '../../i18n/use-i18n';
 import MonochromeIcon from '../../ui/icon/monochrome-icon';
 
@@ -71,6 +72,9 @@ export default function FileTreeItem({
 
   const handleDragStart = (e: React.DragEvent) => {
     e.dataTransfer.setData('text/plain', node.id);
+    if (!isFolder) {
+      e.dataTransfer.setData(TAB_DRAG_MIME, node.id);
+    }
     e.dataTransfer.effectAllowed = 'move';
   };
 

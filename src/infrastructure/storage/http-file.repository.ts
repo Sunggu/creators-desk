@@ -28,12 +28,24 @@ export class HttpFileRepository implements FileRepository {
       const list = (await res.json()) as FileNodeDto[];
       for (const item of list) {
         const existing = this.cache.get(item.id);
-        this.cache.set(item.id, { ...item, content: existing?.content });
+        const shouldPreserveContent =
+          existing !== undefined && existing.updatedAt === item.updatedAt;
+        this.cache.set(item.id, {
+          ...item,
+          content: shouldPreserveContent ? existing.content : undefined,
+        });
       }
       return list;
     } catch (err) {
       if (this.fallback) return this.fallback.findByVaultId(vaultId);
       throw err;
+    }
+  }
+
+  invalidateContent(id: string): void {
+    const cached = this.cache.get(id);
+    if (cached) {
+      cached.content = undefined;
     }
   }
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { Fragment, useEffect, useRef } from 'react';
 import type { EditorGridLayoutDto, SplitDirection } from '../../core/domain/editor-grid.dto';
 import type { EditorStats } from '../../core/domain/editor-stats.dto';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
@@ -70,11 +70,8 @@ export default function ResizableEditorGrid({
     if (ratio !== layout.splitRatio) onSplitRatioChange?.(ratio);
   }, [ratio, layout.splitRatio, onSplitRatioChange]);
 
-  const [first, second] = layout.groups;
-
   const paneProps = {
     nodes,
-    viewMode,
     autoFocusFileId,
     canCloseGroup: layout.groups.length > 1,
     onToggleViewMode,
@@ -94,18 +91,35 @@ export default function ResizableEditorGrid({
     onToggleRightPanel,
   };
 
+  const containerClass = `flex h-full w-full overflow-hidden bg-[#1e1e22] ${
+    direction === 'horizontal' ? 'flex-row' : 'flex-col'
+  }`;
+
+  if (layout.groups.length > 2) {
+    return (
+      <div ref={containerRef} className={containerClass}>
+        {layout.groups.map((group, idx) => (
+          <Fragment key={group.id}>
+            {idx > 0 && <GridSplitter direction={direction} isResizing={false} onMouseDown={() => {}} />}
+            <div className="flex flex-1 overflow-hidden">
+              <EditorGroupPane group={group} {...paneProps} viewMode={group.viewMode ?? viewMode} />
+            </div>
+          </Fragment>
+        ))}
+      </div>
+    );
+  }
+
+  const [first, second] = layout.groups;
+  if (!first) return null;
+
   return (
-    <div
-      ref={containerRef}
-      className={`flex h-full w-full overflow-hidden bg-[#1e1e22] ${
-        direction === 'horizontal' ? 'flex-row' : 'flex-col'
-      }`}
-    >
+    <div ref={containerRef} className={containerClass}>
       <div
         style={second ? PANE_STYLE(direction, `${ratio * 100}%`) : undefined}
         className={`overflow-hidden ${second ? '' : 'flex-1'} flex`}
       >
-        <EditorGroupPane group={first} {...paneProps} />
+        <EditorGroupPane group={first} {...paneProps} viewMode={first.viewMode ?? viewMode} />
       </div>
 
       {second && (
@@ -120,7 +134,7 @@ export default function ResizableEditorGrid({
             }}
           />
           <div style={PANE_STYLE(direction, `${(1 - ratio) * 100}%`)} className="flex overflow-hidden">
-            <EditorGroupPane group={second} {...paneProps} />
+            <EditorGroupPane group={second} {...paneProps} viewMode={second.viewMode ?? viewMode} />
           </div>
         </>
       )}

@@ -3,12 +3,19 @@ import type { FileNodeDto } from '../core/domain/file-node.dto';
 import { manageFileNodeUseCase, manageSessionUseCase } from '../infrastructure/di';
 import { getUniqueFileName, getUniqueFolderName } from '../utils/name-generator';
 import { STARTER_CONTENT } from '../utils/starter-template';
+import { broadcastWorkspaceSync } from '../utils/workspace-sync-channel';
 
 export function useActiveWorkspace(activeVaultId: string | null) {
   const [nodes, setNodes] = useState<FileNodeDto[]>([]);
   const [activeFileId, setActiveFileId] = useState<string | null>(null);
   const [newlyCreatedFileId, setNewlyCreatedFileId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const notifyTreeChanged = useCallback(() => {
+    if (activeVaultId) {
+      broadcastWorkspaceSync({ type: 'tree-changed', vaultId: activeVaultId, updatedAt: Date.now() });
+    }
+  }, [activeVaultId]);
 
   const refreshNodes = useCallback(async () => {
     if (!activeVaultId) {
@@ -96,11 +103,12 @@ export function useActiveWorkspace(activeVaultId: string | null) {
         content: '',
       });
       await refreshNodes();
+      notifyTreeChanged();
       setNewlyCreatedFileId(created.id);
       selectFile(created.id);
       return created;
     },
-    [activeVaultId, nodes, refreshNodes, selectFile],
+    [activeVaultId, nodes, notifyTreeChanged, refreshNodes, selectFile],
   );
 
   const createFolder = useCallback(
@@ -114,9 +122,10 @@ export function useActiveWorkspace(activeVaultId: string | null) {
         type: 'folder',
       });
       await refreshNodes();
+      notifyTreeChanged();
       return created;
     },
-    [activeVaultId, nodes, refreshNodes],
+    [activeVaultId, nodes, notifyTreeChanged, refreshNodes],
   );
 
   const renameNode = useCallback(
@@ -124,9 +133,10 @@ export function useActiveWorkspace(activeVaultId: string | null) {
       const updated = await manageFileNodeUseCase.rename(id, newName);
       setNewlyCreatedFileId((prev) => (prev === id ? null : prev));
       await refreshNodes();
+      notifyTreeChanged();
       return updated;
     },
-    [refreshNodes],
+    [notifyTreeChanged, refreshNodes],
   );
 
   const deleteNode = useCallback(async (id: string) => {
@@ -134,7 +144,8 @@ export function useActiveWorkspace(activeVaultId: string | null) {
     forgetFile(id);
     setNewlyCreatedFileId((prev) => (prev === id ? null : prev));
     await refreshNodes();
-  }, [forgetFile, refreshNodes]);
+    notifyTreeChanged();
+  }, [forgetFile, notifyTreeChanged, refreshNodes]);
 
   const deleteNodes = useCallback(async (ids: string[]) => {
     for (const id of ids) {
@@ -142,13 +153,15 @@ export function useActiveWorkspace(activeVaultId: string | null) {
       forgetFile(id);
     }
     await refreshNodes();
-  }, [forgetFile, refreshNodes]);
+    notifyTreeChanged();
+  }, [forgetFile, notifyTreeChanged, refreshNodes]);
 
   const moveNode = useCallback(async (id: string, newParentId: string | null) => {
     const updated = await manageFileNodeUseCase.move(id, newParentId);
     await refreshNodes();
+    notifyTreeChanged();
     return updated;
-  }, [refreshNodes]);
+  }, [notifyTreeChanged, refreshNodes]);
 
   const activeFile = nodes.find((n) => n.id === activeFileId && n.type === 'file') ?? null;
   const isNewFile = Boolean(activeFileId && activeFileId === newlyCreatedFileId);

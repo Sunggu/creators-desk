@@ -127,6 +127,14 @@ filesRouter.patch('/:key/files/:id', async (c) => {
     const trimmed = body.name.trim();
     if (!trimmed) return c.json({ error: 'Name cannot be empty' }, 400);
     newName = existing.type === 'file' && !trimmed.endsWith('.md') ? `${trimmed}.md` : trimmed;
+    if (existing.type === 'file') {
+      const oldTarget = (existing.name as string).replace(/\.md$/i, '');
+      const newTarget = newName.replace(/\.md$/i, '');
+      await db.run(
+        'UPDATE links SET target_file_name = ? WHERE vault_key = ? AND LOWER(target_file_name) = LOWER(?)',
+        [newTarget, vaultKey, oldTarget],
+      );
+    }
   }
   const newParentId = body.parentId !== undefined ? body.parentId : existing.parent_id;
 

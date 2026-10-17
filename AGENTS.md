@@ -56,17 +56,18 @@ All modifications, implementations, and reviews MUST strictly satisfy these 7 co
 
 ---
 
-## 2. Documentation Map of Content (MOC)
+## 2. Documentation Map of Content (MOC) & Multi-Agent SSOT
 
-When working on specific domains, agents must cross-reference and update the corresponding index documents before and after modifying code:
+All AI coding agents (Claude Code, Cursor, Codex, Windsurf, Antigravity, etc.) MUST use `docs/` as the vendor-neutral Single Source of Truth (do NOT isolate project context inside `.gemini/` or `.antigravity/`). Cross-reference and update the corresponding documents before and after modifying code:
 
 | Index Doc (MOC) | Scope & Coverage | Target Directory |
 |---|---|---|
-| `docs/moc/architecture.md` | Layer rules, dependency graph, interface contracts, dual targets | `src/core/`, `src/modules/`, `functions/` |
-| `docs/moc/domain-lore.md` | Lore engine specs, entity relations, data schemas | `src/modules/lore/` |
-| `docs/moc/domain-pipeline.md` | Multi-project tracking, status machines, workflows | `src/modules/pipeline/` |
-| `docs/moc/ui-components.md` | Component catalog, design tokens, Lego assembly rules | `src/components/`, `src/ui/` |
-| `docs/moc/testing.md` | Mocking patterns, test setups, coverage standards | `tests/` |
+| `docs/core-analysis-and-roadmap.md` | **[Active Core Specs]** As-Is gap analysis, Track 1~3 engineering tasks (Multi-tab sync, Split/DnD, Node Graph) | `src/`, `d1/` |
+| `docs/agent-collaboration.md` | Multi-agent hand-off workflow, task ID tracking, vendor-neutral SSOT protocol | `docs/` |
+| `docs/roadmap.md` | High-level product milestones and phase completion status | `docs/` |
+| `docs/moc/architecture.md` | Layer rules, dependency graph, interface contracts, dual targets | `src/core/`, `src/infrastructure/`, `src/server/`, `functions/` |
+| `docs/moc/ui-components.md` | Component catalog, design tokens, Lego assembly & DnD overlay rules | `src/components/`, `src/editor/`, `src/hooks/`, `src/ui/` |
+| `docs/moc/testing.md` | Mocking patterns, test setups, coverage standards | `src/test/`, `**/*.spec.ts(x)` |
 
 ---
 

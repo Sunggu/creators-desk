@@ -39,6 +39,8 @@ export function useMarkdownEditor({
   const pendingDocRef = useRef<string | null>(null);
   const onDocChangeRef = useRef(onDocChange);
   const onStatsChangeRef = useRef(onStatsChange);
+  const isApplyingRemoteRef = useRef(false);
+  const initialContentRef = useRef(initialContent);
 
   useEffect(() => {
     onDocChangeRef.current = onDocChange;
@@ -51,7 +53,7 @@ export function useMarkdownEditor({
 
     const view = new EditorView({
       state: EditorState.create({
-        doc: initialContent,
+        doc: initialContentRef.current,
         extensions: [
           history(),
           syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
@@ -64,6 +66,8 @@ export function useMarkdownEditor({
               onStatsChangeRef.current(computeEditorStats(update.state));
             }
             if (!update.docChanged) return;
+            if (isApplyingRemoteRef.current) return;
+
             pendingDocRef.current = update.state.doc.toString();
             if (timerRef.current) clearTimeout(timerRef.current);
             timerRef.current = setTimeout(() => {
@@ -92,6 +96,27 @@ export function useMarkdownEditor({
       view.destroy();
       viewRef.current = null;
     };
+  }, []);
+
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!view) return;
+    if (pendingDocRef.current !== null) return;
+    if (view.state.doc.toString() === initialContent) return;
+
+    const mainSel = view.state.selection.main;
+    const clampedAnchor = Math.min(mainSel.anchor, initialContent.length);
+    const clampedHead = Math.min(mainSel.head, initialContent.length);
+
+    isApplyingRemoteRef.current = true;
+    try {
+      view.dispatch({
+        changes: { from: 0, to: view.state.doc.length, insert: initialContent },
+        selection: { anchor: clampedAnchor, head: clampedHead },
+      });
+    } finally {
+      isApplyingRemoteRef.current = false;
+    }
   }, [initialContent]);
 
   const focus = useCallback(() => {

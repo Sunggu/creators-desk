@@ -82,7 +82,10 @@ Domain Layer (Pure DTOs, Entities, Invariants)
 | Mobile Drawer | — | `MobileDrawer`, `ObsidianMobileHeader`, `useDrawerGesture`, `resolveDrawerSwipe` |
 | Icon System | — | `MonochromeIcon`, `ICON_PATHS` |
 | Resizable Grid Editor | `useEditorGrid`, `useResizable`, `useSplitDropTarget` | `ResizableEditorGrid`, `EditorGroupPane`, `EditorGroupView`, `GridSplitter`, `SplitDropOverlay` |
+| Multi-Tab & Focus Auto-Sync | `useWorkspaceSync`, `LocalSessionRepository` | `src/utils/workspace-url.ts`, `src/utils/workspace-sync-channel.ts`, `HttpFileRepository` (`updatedAt` cache invalidation) |
+| Node Connections & Backlinks | `computeNodeConnections`, `useWikilinkNavigation` | `BacklinksPanel`, `RightSidebarPanel`, `src/server/routes/links.ts` |
 | Settings & Open-Source Notice | `scripts/generate-notices.mjs` (build-time) | `SettingsModal`, `OpenSourceLicensesView`, `LicenseNoticeCard`, `SourceCodeOffer`, `public/notice.html` |
-| CodeMirror Markdown | `FileContentUseCase` | `src/editor/use-markdown-editor.ts`, `src/editor/editor-stats.ts`, `src/editor/obsidian-editor-theme.ts`, `ObsidianMarkdownView`, `ObsidianEditor`, `HttpFileRepository` |
-| Hono Universal API | `/api/vaults`, `/api/files`, `/api/search` | `src/server/app.ts`, `src/server/routes/*`, `functions/api/[[route]].ts` |
+| CodeMirror Markdown | `FileContentUseCase` | `src/editor/use-markdown-editor.ts` (non-destructive dispatch), `src/editor/editor-stats.ts`, `src/editor/obsidian-editor-theme.ts`, `ObsidianMarkdownView`, `ObsidianEditor`, `HttpFileRepository` |
+| Hono Universal API | `/api/vaults`, `/api/files`, `/api/links`, `/api/search` | `src/server/app.ts`, `src/server/routes/*`, `functions/api/[[route]].ts` |
+
 

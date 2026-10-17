@@ -4,6 +4,7 @@ import {
   closeFileInGroupHelper,
   closeOtherFilesInGroupHelper,
   reorderTabsHelper,
+  setGroupViewModeHelper,
   splitGroupHelper,
 } from './use-editor-grid';
 
@@ -28,6 +29,26 @@ describe('useEditorGrid pure helpers', () => {
     expect(split.direction).toBe('vertical');
   });
 
+  it('splits up to 4 groups and reuses existing group when at limit', () => {
+    let layout: EditorGridLayoutDto = {
+      direction: 'horizontal',
+      groups: [{ id: 'g1', fileIds: ['f1'], activeFileId: 'f1' }],
+      splitRatio: 0.5,
+    };
+    layout = splitGroupHelper(layout, 'g1', 'f2', 'horizontal');
+    expect(layout.groups).toHaveLength(2);
+
+    layout = splitGroupHelper(layout, 'g1', 'f3', 'vertical');
+    expect(layout.groups).toHaveLength(3);
+
+    layout = splitGroupHelper(layout, 'g1', 'f4', 'horizontal');
+    expect(layout.groups).toHaveLength(4);
+
+    const atMax = splitGroupHelper(layout, 'g1', 'f5', 'horizontal');
+    expect(atMax.groups).toHaveLength(4);
+    expect(atMax.groups[1].fileIds).toContain('f5');
+  });
+
   it('collapses split group when all its files are closed', () => {
     const split = splitGroupHelper(initialLayout, 'group-main', 'file-2', 'horizontal');
     const secondGroupId = split.groups[1].id;
@@ -46,6 +67,20 @@ describe('useEditorGrid pure helpers', () => {
     const result = closeOtherFilesInGroupHelper(threeFilesLayout, 'group-main', 'file-2');
     expect(result.groups[0].fileIds).toEqual(['file-2']);
     expect(result.groups[0].activeFileId).toBe('file-2');
+  });
+
+  it('sets group viewMode independently', () => {
+    const layout: EditorGridLayoutDto = {
+      direction: 'horizontal',
+      groups: [
+        { id: 'g1', fileIds: ['f1'], activeFileId: 'f1' },
+        { id: 'g2', fileIds: ['f2'], activeFileId: 'f2' },
+      ],
+      splitRatio: 0.5,
+    };
+    const updated = setGroupViewModeHelper(layout, 'g2', 'preview');
+    expect(updated.groups[0].viewMode).toBeUndefined();
+    expect(updated.groups[1].viewMode).toBe('preview');
   });
 });
 
@@ -101,5 +136,37 @@ describe('reorderTabsHelper', () => {
     const result = reorderTabsHelper(split, split.groups[0].id, 'file-1', 'file-3', 'before');
     expect(result.groups[0].fileIds).toEqual(['file-2', 'file-1', 'file-3']);
     expect(result.groups[1].fileIds).toEqual(['file-3']);
+  });
+
+  it('moves a tab across panes before or after the target tab', () => {
+    const twoPanesLayout: EditorGridLayoutDto = {
+      direction: 'horizontal',
+      groups: [
+        { id: 'group-1', fileIds: ['file-1', 'file-2'], activeFileId: 'file-1' },
+        { id: 'group-2', fileIds: ['file-3', 'file-4'], activeFileId: 'file-3' },
+      ],
+      splitRatio: 0.5,
+    };
+    const moved = reorderTabsHelper(twoPanesLayout, 'group-2', 'file-1', 'file-4', 'before');
+    expect(moved.groups[0].fileIds).toEqual(['file-2']);
+    expect(moved.groups[0].activeFileId).toBe('file-2');
+    expect(moved.groups[1].fileIds).toEqual(['file-3', 'file-1', 'file-4']);
+    expect(moved.groups[1].activeFileId).toBe('file-1');
+  });
+
+  it('collapses the source group when its last tab is moved across panes', () => {
+    const twoPanesLayout: EditorGridLayoutDto = {
+      direction: 'horizontal',
+      groups: [
+        { id: 'group-1', fileIds: ['file-1'], activeFileId: 'file-1' },
+        { id: 'group-2', fileIds: ['file-2'], activeFileId: 'file-2' },
+      ],
+      splitRatio: 0.5,
+    };
+    const moved = reorderTabsHelper(twoPanesLayout, 'group-2', 'file-1', 'file-2', 'after');
+    expect(moved.groups).toHaveLength(1);
+    expect(moved.groups[0].id).toBe('group-2');
+    expect(moved.groups[0].fileIds).toEqual(['file-2', 'file-1']);
+    expect(moved.groups[0].activeFileId).toBe('file-1');
   });
 });

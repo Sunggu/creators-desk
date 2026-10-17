@@ -4,6 +4,7 @@ export interface EditorGroupDto {
   id: string;
   fileIds: string[];
   activeFileId: string | null;
+  viewMode?: 'edit' | 'preview';
 }
 
 export interface EditorGridLayoutDto {

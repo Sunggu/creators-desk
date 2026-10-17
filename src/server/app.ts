@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import type { AppContext } from './bindings';
 import { filesRouter } from './routes/files';
+import { linksRouter } from './routes/links';
 import { searchRouter } from './routes/search';
 import { vaultsRouter } from './routes/vaults';
 
@@ -26,3 +27,4 @@ app.get('/api/health', (c) => {
 app.route('/api/vaults', vaultsRouter);
 app.route('/api/vaults', filesRouter);
 app.route('/api/vaults', searchRouter);
+app.route('/api/vaults', linksRouter);

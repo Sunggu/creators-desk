@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
-import { fileContentUseCase } from '../../infrastructure/di';
+import { fileContentUseCase, fileRepository } from '../../infrastructure/di';
+import {
+  broadcastWorkspaceSync,
+  subscribeWorkspaceSync,
+} from '../../utils/workspace-sync-channel';
 
 interface UseNoteDocumentOptions {
   activeFile: FileNodeDto | null;
@@ -28,12 +32,14 @@ export function useNoteDocument({
   const [content, setContent] = useState<string | null>(null);
   const [loadedFileId, setLoadedFileId] = useState<string | null>(null);
   const fileId = activeFile?.id ?? null;
+  const vaultId = activeFile?.vaultId;
+  const updatedAt = activeFile?.updatedAt;
 
   useEffect(() => {
     let mounted = true;
     if (!fileId) return;
 
-    void (async () => {
+    const fetchContent = async () => {
       try {
         const text = await fileContentUseCase.getContent(fileId);
         if (!mounted) return;
@@ -46,12 +52,23 @@ export function useNoteDocument({
         setContent(activeFile?.content ?? '');
         setLoadedFileId(fileId);
       }
-    })();
+    };
+
+    void fetchContent();
+
+    const unsubscribe = subscribeWorkspaceSync((msg) => {
+      if (msg.fileId === fileId) {
+        const repo = fileRepository as { invalidateContent?: (id: string) => void };
+        repo.invalidateContent?.(fileId);
+        void fetchContent();
+      }
+    });
 
     return () => {
       mounted = false;
+      unsubscribe();
     };
-  }, [fileId, activeFile?.content]);
+  }, [fileId, activeFile?.content, updatedAt]);
 
   const save = useCallback(
     async (doc: string) => {
@@ -59,16 +76,26 @@ export function useNoteDocument({
       onSavingChange(true);
       try {
         await fileContentUseCase.saveContent(fileId, doc);
+        broadcastWorkspaceSync({
+          type: 'file-saved',
+          fileId,
+          vaultId,
+          updatedAt: Date.now(),
+        });
       } catch (err) {
         console.error('Failed to save file content:', err);
       } finally {
         onSavingChange(false);
       }
     },
-    [fileId, onSavingChange],
+    [fileId, vaultId, onSavingChange],
   );
 
   // Derived, not reset: a stale body from the previous note is never renderable
   // because readiness requires the loaded id to match the requested one.
-  return { content, isReady: Boolean(fileId) && loadedFileId === fileId && content !== null, save };
+  return {
+    content,
+    isReady: Boolean(fileId) && loadedFileId === fileId && content !== null,
+    save,
+  };
 }

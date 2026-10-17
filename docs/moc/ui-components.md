@@ -34,9 +34,10 @@
 | `SidebarPanelBody` | `src/components/sidebar/sidebar-panel-body.tsx` | `{ activeMenu, vault, vaults, nodes, activeFileId, onSelectVault, ... , onCloseMobile? }` | Chrome-free, sizeless explorer/search switch. **Composed unchanged by both the desktop container and the mobile drawer** — the extraction that stopped the two hosts drifting (they previously disagreed on `onCloseMobile`) |
 | `SidebarPanelContainer` | `src/components/sidebar/sidebar-panel-container.tsx` | `{ activeMenu, onClose, ...SidebarPanelBodyProps }` | Desktop-only chrome for the primary panel: drag-resizable width, header, close. `hidden md:flex` |
 | `MobileDrawer` | `src/components/layout/mobile-drawer.tsx` | `{ isOpen, activeMenu, onSelectMenu, onClose, onOpenVaultModal, onOpenSettingsModal, panelGestureProps, ...SidebarPanelBodyProps }` | Off-canvas mobile drawer. Stays mounted for the slide transition and is `inert` + `pointer-events-none` while closed. Also the only mobile route to **search** and **settings**, which the `hidden md:flex` ribbon otherwise denied phones |
-| `SearchPanel` | `src/components/sidebar/search-panel.tsx` | `{ nodes, onSelectFile }` | Fast live query filter searching file names and markdown contents |
-| `RightSidebarPanel` | `src/components/sidebar/right-sidebar-panel.tsx` | `{ isOpen, onClose, activeFile }` | Live document outline. Resizable **docked column** at `md+`, full-width **overlay** below, so it can never squeeze the editor on a phone |
+| `SearchPanel` | `src/components/sidebar/search-panel.tsx` | `{ nodes, vaultId?, onSelectFile, onCloseMobile? }` | Live query filter combining instant local node filtering with server FTS5 (`/api/vaults/:key/search`) results |
+| `RightSidebarPanel` | `src/components/sidebar/right-sidebar-panel.tsx` | `{ isOpen, onClose, activeFile, nodes?, vaultId?, onSelectFile?, onNavigateWikilink? }` | Resizable right sidebar with tab switcher between Document Outline (`OutlinePanel`) and Node Links (`BacklinksPanel`) |
 | `OutlinePanel` | `src/components/sidebar/outline-panel.tsx` | `{ activeFile }` | Live markdown document outline parsing H1-H6 heading hierarchy |
+| `BacklinksPanel` | `src/components/sidebar/backlinks-panel.tsx` | `{ activeFile, nodes, remoteConnections?, onSelectFile?, onNavigateWikilink? }` | Displays incoming backlinks and outgoing `[[wikilink]]` node connections for the active note |
 | `PluginsView` | `src/components/settings/plugins-view.tsx` | `{}` | Extensible plugin architecture and supported file formats status inside SettingsModal |
 | `SettingsModal` | `src/components/settings/settings-modal.tsx` | `{ isOpen, activeVault, onClose, onRenameVault }` | Project settings, editor preferences, extensible plugins, and open-source notice modal |
 | `OpenSourceLicensesView` | `src/components/settings/open-source-licenses-view.tsx` | `{}` | AGPL-3.0 product licence summary, source-code offer, and entry point to the full generated notice |
@@ -51,7 +52,7 @@ and the CodeMirror surface has a single implementation.
 
 | Module | File | Purpose |
 |---|---|---|
-| `useMarkdownEditor` | `src/editor/use-markdown-editor.ts` | Mount/unmount lifecycle, stats reporting, debounced autosave, **flush-on-unmount** so tab switches never drop the last keystrokes |
+| `useMarkdownEditor` | `src/editor/use-markdown-editor.ts` | Mount/unmount lifecycle, stats reporting, debounced autosave, **flush-on-unmount**, and **non-destructive remote dispatch** so focus sync never resets cursor/scroll |
 | `computeEditorStats` / `countWords` | `src/editor/editor-stats.ts` | Pure status-bar derivation |
 | `obsidianEditorTheme` | `src/editor/obsidian-editor-theme.ts` | `EditorView.theme` token styling |
 
@@ -59,13 +60,17 @@ Supporting hooks and utils:
 
 | Module | File | Purpose |
 |---|---|---|
-| `useNoteDocument` | `src/components/editor/use-note-document.ts` | Loads/saves a note body through `FileContentUseCase`; readiness is derived, never reset in an effect |
+| `useNoteDocument` | `src/components/editor/use-note-document.ts` | Loads/saves a note body through `FileContentUseCase`, revalidates on `updatedAt` / `BroadcastChannel` updates |
+| `useWorkspaceSync` | `src/hooks/use-workspace-sync.ts` | Listens to `window.focus`, `visibilitychange`, and `BroadcastChannel` to auto-sync multi-monitor/tab workspaces without reload |
+| `parseWorkspaceUrl` / `syncWorkspaceUrlToHistory` | `src/utils/workspace-url.ts` | Pure URL query (`?vault=&file=`) parser/builder and history state synchronizer for independent multi-tab routing |
+| `broadcastWorkspaceSync` / `subscribeWorkspaceSync` | `src/utils/workspace-sync-channel.ts` | Cross-tab event bus over `BroadcastChannel('creators_desk_sync')` |
+| `computeNodeConnections` | `src/utils/compute-node-connections.ts` | Pure derivation of outgoing `[[wikilinks]]` and incoming backlinks across vault nodes |
 | `useSplitDropTarget` | `src/hooks/use-split-drop-target.ts` | Arms the split edge from handlers bound to the **pane**, not to an overlay |
 | `bindEditorPaneHandlers` | `src/components/editor/editor-group-binding.ts` | Pure group-id → handler binding |
 | `resolveSplitDropEdge` | `src/utils/split-drop-edge.ts` | Pure pointer → edge resolution |
 | `resolveWikilinkTarget` | `src/utils/resolve-wikilink-target.ts` | Pure `[[wikilink]]` → file resolution |
 | `useWorkspaceCommands` | `src/components/layout/use-workspace-commands.ts` | Single place composing the file tree, the tab grid, and the view mode |
-| `useWikilinkNavigation` | `src/components/layout/use-wikilink-navigation.ts` | Turns a wikilink activation into an open-file action |
+| `useWikilinkNavigation` | `src/components/layout/use-wikilink-navigation.ts` | Turns a wikilink activation into an open-file action or auto-creates missing notes (Click-to-Create) |
 | `useSidebarPanelData` | `src/components/layout/use-sidebar-panel-data.ts` | Assembles the shared panel bundle once so the desktop panel and the mobile drawer always receive identical handlers |
 | `useDrawerGesture` | `src/hooks/use-drawer-gesture.ts` | Binds the pure swipe rules to React touch events. One binding per zone: `edgeProps` can only open, `panelProps` can only close |
 | `resolveDrawerSwipe` | `src/utils/drawer-swipe.ts` | Pure gesture → action resolution (edge/drawer/content origin, vertical-intent rejection) |

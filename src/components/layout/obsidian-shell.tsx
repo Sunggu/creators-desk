@@ -6,6 +6,7 @@ import type { VaultDto } from '../../core/domain/vault.dto';
 import { useActiveWorkspace } from '../../hooks/use-active-workspace';
 import { useDrawerGesture } from '../../hooks/use-drawer-gesture';
 import { useEditorGrid } from '../../hooks/use-editor-grid';
+import { useWorkspaceSync } from '../../hooks/use-workspace-sync';
 import ResizableEditorGrid from '../editor/resizable-editor-grid';
 import ObsidianMobileHeader from '../mobile/obsidian-mobile-header';
 import ObsidianRibbon from '../ribbon/obsidian-ribbon';
@@ -41,6 +42,7 @@ export default function ObsidianShell({ vault, vaults, onSelectVault, onCreateVa
   const workspace = useActiveWorkspace(vault.id);
   const grid = useEditorGrid();
   const commands = useWorkspaceCommands({ workspace, grid, setViewMode });
+  useWorkspaceSync({ onRevalidate: workspace.refreshNodes });
 
   const openDrawer = useCallback(() => setIsDrawerOpen(true), []);
   const closeDrawer = useCallback(() => setIsDrawerOpen(false), []);
@@ -48,11 +50,6 @@ export default function ObsidianShell({ vault, vaults, onSelectVault, onCreateVa
   const gesture = useDrawerGesture({ onOpen: openDrawer, onClose: closeDrawer });
 
   // Seed the grid with the restored session file, then keep it as the tab owner.
-  //
-  // Depends on the stable `openFile` callback, never on the `grid` object: the
-  // hook returns a fresh literal every render, so listing it as a dependency made
-  // this effect fire forever and `openFile` keep minting new layouts — the shell
-  // could never reach a stable render, which is why the editor surface felt dead.
   const openFileInGrid = grid.openFile;
   useEffect(() => {
     if (workspace.activeFileId) openFileInGrid(workspace.activeFileId);
@@ -139,6 +136,10 @@ export default function ObsidianShell({ vault, vaults, onSelectVault, onCreateVa
           isOpen={isRightPanelOpen}
           onClose={() => setIsRightPanelOpen(false)}
           activeFile={workspace.activeFile}
+          nodes={workspace.nodes}
+          vaultId={vault.id}
+          onSelectFile={commands.openFile}
+          onNavigateWikilink={commands.navigateWikilink}
         />
       </div>
 

@@ -110,4 +110,50 @@ describe('HttpFileRepository', () => {
     );
     expect(updated.name).toBe('new.md');
   });
+
+  it('invalidates cached content when findByVaultId returns newer updatedAt', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [
+        { id: 'f5', vaultId: 'v1', parentId: null, name: 'doc.md', type: 'file', createdAt: 1, updatedAt: 100 },
+      ],
+    });
+    await repo.findByVaultId('v1');
+
+    mockFetch.mockResolvedValueOnce({ ok: true, text: async () => 'Version 1' });
+    const first = await repo.findById('f5');
+    expect(first?.content).toBe('Version 1');
+
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [
+        { id: 'f5', vaultId: 'v1', parentId: null, name: 'doc.md', type: 'file', createdAt: 1, updatedAt: 200 },
+      ],
+    });
+    await repo.findByVaultId('v1');
+
+    mockFetch.mockResolvedValueOnce({ ok: true, text: async () => 'Version 2' });
+    const second = await repo.findById('f5');
+    expect(mockFetch).toHaveBeenCalledWith('/api/vaults/v1/files/f5/content');
+    expect(second?.content).toBe('Version 2');
+  });
+
+  it('manually invalidates content via invalidateContent', async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => [
+        { id: 'f6', vaultId: 'v1', parentId: null, name: 'inv.md', type: 'file', createdAt: 1, updatedAt: 1 },
+      ],
+    });
+    await repo.findByVaultId('v1');
+
+    mockFetch.mockResolvedValueOnce({ ok: true, text: async () => 'Initial' });
+    await repo.findById('f6');
+
+    repo.invalidateContent('f6');
+
+    mockFetch.mockResolvedValueOnce({ ok: true, text: async () => 'Re-fetched' });
+    const refetched = await repo.findById('f6');
+    expect(refetched?.content).toBe('Re-fetched');
+  });
 });

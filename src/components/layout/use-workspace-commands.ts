@@ -28,7 +28,20 @@ export function useWorkspaceCommands({ workspace, grid, setViewMode }: UseWorksp
     [workspace, grid],
   );
 
-  const navigateWikilink = useWikilinkNavigation(workspace.nodes, openFile);
+  const createAndOpenWikilink = useCallback(
+    async (targetName: string) => {
+      setViewMode('edit');
+      const created = await workspace.createFile(targetName);
+      if (created) grid.openFile(created.id);
+    },
+    [setViewMode, workspace, grid],
+  );
+
+  const navigateWikilink = useWikilinkNavigation(
+    workspace.nodes,
+    openFile,
+    createAndOpenWikilink,
+  );
 
   /** Tabs live in the grid; the mirrored active id keeps the chrome in sync. */
   const selectTab = useCallback(

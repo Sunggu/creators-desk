@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import { useTranslate } from '../../i18n/use-i18n';
 import MonochromeIcon from '../../ui/icon/monochrome-icon';
@@ -8,20 +8,82 @@ interface SearchPanelProps {
   onSelectFile: (fileId: string) => void;
   /** Dismisses the mobile drawer once a result is picked. */
   onCloseMobile?: () => void;
+  vaultId?: string;
 }
 
-export default function SearchPanel({ nodes, onSelectFile, onCloseMobile }: SearchPanelProps) {
+export default function SearchPanel({
+  nodes,
+  onSelectFile,
+  onCloseMobile,
+  vaultId,
+}: SearchPanelProps) {
   const t = useTranslate();
   const [query, setQuery] = useState('');
+  const [serverSnippets, setServerSnippets] = useState<Record<string, string>>({});
 
-  const files = nodes.filter((n) => n.type === 'file');
-  const filtered = query.trim()
-    ? files.filter(
-        (f) =>
-          f.name.toLowerCase().includes(query.toLowerCase()) ||
-          (f.content && f.content.toLowerCase().includes(query.toLowerCase()))
+  const targetVaultId = vaultId || nodes[0]?.vaultId;
+
+  useEffect(() => {
+    const trimmed = query.trim();
+    if (!targetVaultId || !trimmed) {
+      setServerSnippets({});
+      return;
+    }
+
+    let cancelled = false;
+    fetch(`/api/vaults/${targetVaultId}/search?q=${encodeURIComponent(trimmed)}`)
+      .then((res) =>
+        res.ok
+          ? (res.json() as Promise<Array<{ file_id: string; match_snippet: string }>>)
+          : [],
       )
-    : files;
+      .then((data) => {
+        if (cancelled || !Array.isArray(data)) return;
+        const snippets: Record<string, string> = {};
+        for (const item of data) {
+          snippets[item.file_id] = item.match_snippet;
+        }
+        setServerSnippets(snippets);
+      })
+      .catch(() => {
+        // Safe fallback when offline or in test environments
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [targetVaultId, query]);
+
+  const files = useMemo(() => nodes.filter((n) => n.type === 'file'), [nodes]);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) {
+      return files.map((file) => ({ file, snippet: file.content }));
+    }
+
+    const matchedMap = new Map<string, { file: FileNodeDto; snippet?: string }>();
+
+    // 1. Local nodes matching title or local content
+    for (const f of files) {
+      const matchName = f.name.toLowerCase().includes(q);
+      const matchContent = Boolean(f.content && f.content.toLowerCase().includes(q));
+      if (matchName || matchContent) {
+        matchedMap.set(f.id, { file: f, snippet: f.content });
+      }
+    }
+
+    // 2. Server FTS5 search matches (including lazily unloaded file bodies)
+    for (const [fileId, snippet] of Object.entries(serverSnippets)) {
+      const node = files.find((f) => f.id === fileId);
+      if (node) {
+        const cleanSnippet = snippet.replace(/<[^>]+>/g, '');
+        matchedMap.set(fileId, { file: node, snippet: cleanSnippet });
+      }
+    }
+
+    return Array.from(matchedMap.values());
+  }, [files, query, serverSnippets]);
 
   return (
     <div className="flex h-full flex-col p-3 text-xs text-zinc-300">
@@ -41,7 +103,7 @@ export default function SearchPanel({ nodes, onSelectFile, onCloseMobile }: Sear
         <div className="text-[11px] font-medium text-zinc-500 mb-1 px-1">
           {t('sidebar.searchResults', { count: filtered.length })}
         </div>
-        {filtered.map((file) => (
+        {filtered.map(({ file, snippet }) => (
           <div
             key={file.id}
             onClick={() => {
@@ -51,9 +113,9 @@ export default function SearchPanel({ nodes, onSelectFile, onCloseMobile }: Sear
             className="flex flex-col rounded p-2 hover:bg-[#222228] transition cursor-pointer"
           >
             <div className="font-semibold text-zinc-200">{file.name.replace(/\.md$/i, '')}</div>
-            {file.content && (
+            {snippet && (
               <div className="mt-0.5 line-clamp-2 text-[11px] text-zinc-500 leading-normal">
-                {file.content}
+                {snippet}
               </div>
             )}
           </div>

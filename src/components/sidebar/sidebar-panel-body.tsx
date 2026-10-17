@@ -71,7 +71,12 @@ export default function SidebarPanelBody({
         />
       )}
       {activeMenu === 'search' && (
-        <SearchPanel nodes={nodes} onSelectFile={onSelectFile} onCloseMobile={onCloseMobile} />
+        <SearchPanel
+          vaultId={vault.id}
+          nodes={nodes}
+          onSelectFile={onSelectFile}
+          onCloseMobile={onCloseMobile}
+        />
       )}
     </div>
   );
