@@ -1,14 +1,22 @@
 import { useCallback, useState } from 'react';
 import type { EditorGroupDto, EditorGridLayoutDto, SplitDirection } from '../core/domain/editor-grid.dto';
 import type { TabDropPosition } from '../core/domain/tab-drag.dto';
+import { ensureSplitTree, insertSplitIntoTree, pruneSplitTree } from '../utils/editor-split-tree';
 
-export const MAX_SPLIT_GROUPS = 4;
+export const MAX_SPLIT_GROUPS = 6;
 
 const DEFAULT_GRID_LAYOUT: EditorGridLayoutDto = {
   direction: 'horizontal',
   groups: [{ id: 'group-main', fileIds: [], activeFileId: null }],
   splitRatio: 0.5,
 };
+
+function syncTreeWithGroups(layout: EditorGridLayoutDto, groups: EditorGroupDto[]): EditorGridLayoutDto {
+  const validIds = new Set(groups.map((g) => g.id));
+  const nextRoot = pruneSplitTree(layout.root, validIds);
+  const nextDirection = nextRoot?.type === 'split' ? nextRoot.direction : layout.direction;
+  return { ...layout, direction: nextDirection, groups, root: nextRoot };
+}
 
 export function splitGroupHelper(
   layout: EditorGridLayoutDto,
@@ -33,11 +41,16 @@ export function splitGroupHelper(
     };
   }
 
+  const currentTree = ensureSplitTree(layout);
+  const nextRoot = insertSplitIntoTree(currentTree, sourceGroupId, newGroupId, direction);
+  const rootDirection = nextRoot.type === 'split' ? nextRoot.direction : direction;
+
   return {
     ...layout,
-    direction,
+    direction: rootDirection,
     groups: [...layout.groups, newGroup],
     splitRatio: layout.groups.length === 1 ? 0.5 : layout.splitRatio,
+    root: nextRoot,
   };
 }
 
@@ -50,7 +63,7 @@ export function closeFileInGroupHelper(layout: EditorGridLayoutDto, groupId: str
   });
 
   if (updatedGroups.length > 1 && updatedGroups.find((g) => g.id === groupId)?.fileIds.length === 0) {
-    return { ...layout, groups: updatedGroups.filter((g) => g.id !== groupId) };
+    return syncTreeWithGroups(layout, updatedGroups.filter((g) => g.id !== groupId));
   }
   return { ...layout, groups: updatedGroups };
 }
@@ -109,6 +122,7 @@ export function reorderTabsHelper(
 
   if (updatedGroups.length > 1 && sourceRemaining.length === 0) {
     updatedGroups = updatedGroups.filter((g) => g.id !== sourceGroup.id);
+    return syncTreeWithGroups(layout, updatedGroups);
   }
   return { ...layout, groups: updatedGroups };
 }
@@ -154,7 +168,9 @@ export function useEditorGrid(initialLayout: EditorGridLayoutDto = DEFAULT_GRID_
   }, []);
 
   const closeGroup = useCallback((groupId: string) => {
-    setLayout((prev) => (prev.groups.length <= 1 ? prev : { ...prev, groups: prev.groups.filter((g) => g.id !== groupId) }));
+    setLayout((prev) =>
+      prev.groups.length <= 1 ? prev : syncTreeWithGroups(prev, prev.groups.filter((g) => g.id !== groupId))
+    );
   }, []);
 
   const setSplitRatio = useCallback((ratio: number) => {
@@ -178,3 +194,4 @@ export function useEditorGrid(initialLayout: EditorGridLayoutDto = DEFAULT_GRID_
     setGroupViewMode,
   };
 }
+

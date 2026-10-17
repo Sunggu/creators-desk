@@ -1,9 +1,10 @@
 import { Fragment, useEffect, useRef } from 'react';
-import type { EditorGridLayoutDto, SplitDirection } from '../../core/domain/editor-grid.dto';
+import type { EditorGridLayoutDto, EditorSplitNodeDto, SplitDirection } from '../../core/domain/editor-grid.dto';
 import type { EditorStats } from '../../core/domain/editor-stats.dto';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import type { TabDropPosition } from '../../core/domain/tab-drag.dto';
 import { useResizable } from '../../hooks/use-resizable';
+import { ensureSplitTree } from '../../utils/editor-split-tree';
 import EditorGroupPane from './editor-group-pane';
 import GridSplitter from './grid-splitter';
 
@@ -91,24 +92,45 @@ export default function ResizableEditorGrid({
     onToggleRightPanel,
   };
 
+  const renderSplitNode = (node: EditorSplitNodeDto): React.ReactNode => {
+    if (node.type === 'leaf') {
+      const group = layout.groups.find((g) => g.id === node.groupId);
+      if (!group) return null;
+      return <EditorGroupPane group={group} {...paneProps} viewMode={group.viewMode ?? viewMode} />;
+    }
+    return (
+      <div
+        data-split-direction={node.direction}
+        className={`flex flex-1 h-full w-full min-w-0 min-h-0 overflow-hidden bg-[#1e1e22] ${
+          node.direction === 'horizontal' ? 'flex-row' : 'flex-col'
+        }`}
+      >
+        {node.children.map((child, idx) => {
+          const key = child.type === 'leaf' ? child.groupId : child.id;
+          return (
+            <Fragment key={key}>
+              {idx > 0 && <GridSplitter direction={node.direction} isResizing={false} onMouseDown={() => {}} />}
+              <div className="flex flex-1 min-w-0 min-h-0 overflow-hidden">{renderSplitNode(child)}</div>
+            </Fragment>
+          );
+        })}
+      </div>
+    );
+  };
+
+  if (layout.groups.length > 2) {
+    const rootTree = ensureSplitTree(layout);
+    return (
+      <div ref={containerRef} className="flex h-full w-full overflow-hidden bg-[#1e1e22]">
+        {renderSplitNode(rootTree)}
+      </div>
+    );
+  }
+
   const containerClass = `flex h-full w-full overflow-hidden bg-[#1e1e22] ${
     direction === 'horizontal' ? 'flex-row' : 'flex-col'
   }`;
 
-  if (layout.groups.length > 2) {
-    return (
-      <div ref={containerRef} className={containerClass}>
-        {layout.groups.map((group, idx) => (
-          <Fragment key={group.id}>
-            {idx > 0 && <GridSplitter direction={direction} isResizing={false} onMouseDown={() => {}} />}
-            <div className="flex flex-1 overflow-hidden">
-              <EditorGroupPane group={group} {...paneProps} viewMode={group.viewMode ?? viewMode} />
-            </div>
-          </Fragment>
-        ))}
-      </div>
-    );
-  }
 
   const [first, second] = layout.groups;
   if (!first) return null;

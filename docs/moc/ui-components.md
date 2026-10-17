@@ -65,6 +65,7 @@ Supporting hooks and utils:
 | `parseWorkspaceUrl` / `syncWorkspaceUrlToHistory` | `src/utils/workspace-url.ts` | Pure URL query (`?vault=&file=`) parser/builder and history state synchronizer for independent multi-tab routing |
 | `broadcastWorkspaceSync` / `subscribeWorkspaceSync` | `src/utils/workspace-sync-channel.ts` | Cross-tab event bus over `BroadcastChannel('creators_desk_sync')` |
 | `computeNodeConnections` | `src/utils/compute-node-connections.ts` | Pure derivation of outgoing `[[wikilinks]]` and incoming backlinks across vault nodes |
+| `ensureSplitTree` / `insertSplitIntoTree` / `pruneSplitTree` | `src/utils/editor-split-tree.ts` | Pure 2D nested split tree operations so column (`horizontal`) and row (`vertical`) splits compose hierarchically |
 | `useSplitDropTarget` | `src/hooks/use-split-drop-target.ts` | Arms the split edge from handlers bound to the **pane**, not to an overlay |
 | `bindEditorPaneHandlers` | `src/components/editor/editor-group-binding.ts` | Pure group-id → handler binding |
 | `resolveSplitDropEdge` | `src/utils/split-drop-edge.ts` | Pure pointer → edge resolution |

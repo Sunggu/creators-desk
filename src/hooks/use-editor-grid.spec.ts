@@ -29,25 +29,54 @@ describe('useEditorGrid pure helpers', () => {
     expect(split.direction).toBe('vertical');
   });
 
-  it('splits up to 4 groups and reuses existing group when at limit', () => {
+  it('splits up to MAX_SPLIT_GROUPS and reuses existing group when at limit', () => {
     let layout: EditorGridLayoutDto = {
       direction: 'horizontal',
       groups: [{ id: 'g1', fileIds: ['f1'], activeFileId: 'f1' }],
       splitRatio: 0.5,
     };
     layout = splitGroupHelper(layout, 'g1', 'f2', 'horizontal');
-    expect(layout.groups).toHaveLength(2);
-
     layout = splitGroupHelper(layout, 'g1', 'f3', 'vertical');
-    expect(layout.groups).toHaveLength(3);
-
     layout = splitGroupHelper(layout, 'g1', 'f4', 'horizontal');
-    expect(layout.groups).toHaveLength(4);
+    layout = splitGroupHelper(layout, 'g1', 'f5', 'vertical');
+    layout = splitGroupHelper(layout, 'g1', 'f6', 'horizontal');
+    expect(layout.groups).toHaveLength(6);
 
-    const atMax = splitGroupHelper(layout, 'g1', 'f5', 'horizontal');
-    expect(atMax.groups).toHaveLength(4);
-    expect(atMax.groups[1].fileIds).toContain('f5');
+    const atMax = splitGroupHelper(layout, 'g1', 'f7', 'horizontal');
+    expect(atMax.groups).toHaveLength(6);
+    expect(atMax.groups[1].fileIds).toContain('f7');
   });
+
+  it('preserves 3-column horizontal layout when splitting one column vertically into rows', () => {
+    let layout: EditorGridLayoutDto = {
+      direction: 'horizontal',
+      groups: [{ id: 'col-1', fileIds: ['f1'], activeFileId: 'f1' }],
+      splitRatio: 0.5,
+    };
+    layout = splitGroupHelper(layout, 'col-1', 'f2', 'horizontal');
+    const col2Id = layout.groups[1].id;
+    layout = splitGroupHelper(layout, col2Id, 'f3', 'horizontal');
+    expect(layout.groups).toHaveLength(3);
+    expect(layout.direction).toBe('horizontal');
+
+    // Split middle column vertically (into rows)
+    const afterRowSplit = splitGroupHelper(layout, col2Id, 'f4', 'vertical');
+    expect(afterRowSplit.groups).toHaveLength(4);
+    // Root direction MUST remain horizontal (columns must not collapse into rows)
+    expect(afterRowSplit.direction).toBe('horizontal');
+    expect(afterRowSplit.root?.type).toBe('split');
+    if (afterRowSplit.root?.type === 'split') {
+      expect(afterRowSplit.root.direction).toBe('horizontal');
+      expect(afterRowSplit.root.children).toHaveLength(3);
+      const middleChild = afterRowSplit.root.children[1];
+      expect(middleChild.type).toBe('split');
+      if (middleChild.type === 'split') {
+        expect(middleChild.direction).toBe('vertical');
+        expect(middleChild.children).toHaveLength(2);
+      }
+    }
+  });
+
 
   it('collapses split group when all its files are closed', () => {
     const split = splitGroupHelper(initialLayout, 'group-main', 'file-2', 'horizontal');
@@ -102,16 +131,8 @@ describe('reorderTabsHelper', () => {
   });
 
   it('handles adjacent swaps in both directions', () => {
-    expect(reorderTabsHelper(threeFilesLayout, 'group-main', 'file-2', 'file-3', 'before').groups[0].fileIds).toEqual([
-      'file-1',
-      'file-2',
-      'file-3',
-    ]);
-    expect(reorderTabsHelper(threeFilesLayout, 'group-main', 'file-2', 'file-1', 'before').groups[0].fileIds).toEqual([
-      'file-2',
-      'file-1',
-      'file-3',
-    ]);
+    expect(reorderTabsHelper(threeFilesLayout, 'group-main', 'file-2', 'file-3', 'before').groups[0].fileIds).toEqual(['file-1', 'file-2', 'file-3']);
+    expect(reorderTabsHelper(threeFilesLayout, 'group-main', 'file-2', 'file-1', 'before').groups[0].fileIds).toEqual(['file-2', 'file-1', 'file-3']);
   });
 
   it('keeps the active tab selected after reordering', () => {

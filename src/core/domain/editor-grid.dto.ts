@@ -7,8 +7,22 @@ export interface EditorGroupDto {
   viewMode?: 'edit' | 'preview';
 }
 
+export type EditorSplitNodeDto =
+  | {
+      type: 'leaf';
+      groupId: string;
+    }
+  | {
+      type: 'split';
+      id: string;
+      direction: SplitDirection;
+      children: EditorSplitNodeDto[];
+    };
+
 export interface EditorGridLayoutDto {
   direction: SplitDirection;
   groups: EditorGroupDto[];
   splitRatio: number;
+  root?: EditorSplitNodeDto;
 }
+
