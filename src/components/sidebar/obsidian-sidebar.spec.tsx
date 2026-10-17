@@ -43,13 +43,16 @@ function renderSidebar(props: Partial<Parameters<typeof ObsidianSidebar>[0]> = {
 }
 
 describe('ObsidianSidebar', () => {
-  it('renders single toolbar without duplicate headers or close X button', () => {
+  it('renders single toolbar without duplicate headers or close X button, and without collapseAll/selectMode', () => {
     const { container } = renderSidebar();
     const toolbar = container.querySelector('.h-9') as HTMLElement;
     expect(within(toolbar).getByText('탐색기')).toBeInTheDocument();
-    expect(screen.queryByTitle('닫기')).toBeNull();
-    expect(within(toolbar).getByTitle('선택 모드')).toBeInTheDocument();
     expect(within(toolbar).getByTitle('새 노트 (+)')).toBeInTheDocument();
+    expect(within(toolbar).getByTitle('새 폴더')).toBeInTheDocument();
+    expect(within(toolbar).getByTitle('새로고침')).toBeInTheDocument();
+    expect(screen.queryByTitle('닫기')).toBeNull();
+    expect(screen.queryByTitle('선택 모드')).toBeNull();
+    expect(screen.queryByTitle('폴더 모두 접기')).toBeNull();
   });
 
   it('sorts folders before files in natural alphabetical order', () => {
@@ -66,7 +69,6 @@ describe('ObsidianSidebar', () => {
 
     await user.click(screen.getByText('Apple'));
     expect(onSelectFile).toHaveBeenCalledWith('f-apple');
-    expect(screen.queryByText('항목 선택')).toBeNull();
     expect(screen.queryByText(/개 선택됨/)).toBeNull();
 
     expect(screen.queryByText('Child')).toBeNull();
@@ -74,25 +76,30 @@ describe('ObsidianSidebar', () => {
     expect(screen.getByText('Child')).toBeInTheDocument();
   });
 
-  it('selection mode toggles in-place and updates count with bulk delete', async () => {
+  it('Ctrl+Click selects items and switches toolbar in-place to bulk delete without selectAll', async () => {
+    const { container } = renderSidebar();
     const user = userEvent.setup();
-    renderSidebar();
 
-    await user.click(screen.getByTitle('선택 모드'));
-    expect(screen.getByText('항목 선택')).toBeInTheDocument();
-    expect(screen.getByText('전체 선택')).toBeInTheDocument();
-    expect(screen.getByText('취소')).toBeInTheDocument();
-
-    const deleteBtn = screen.getByTitle('선택된 항목 일괄 삭제');
-    expect(deleteBtn).toBeDisabled();
-
-    await user.click(screen.getByText('Apple'));
+    fireEvent.click(screen.getByText('Apple'), { ctrlKey: true });
     expect(screen.getByText('1개 선택됨')).toBeInTheDocument();
-    expect(deleteBtn).not.toBeDisabled();
+    expect(screen.queryByText('전체 선택')).toBeNull();
+    expect(screen.getByTitle('선택된 항목 일괄 삭제')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('Zebra'), { ctrlKey: true });
+    expect(screen.getByText('2개 선택됨')).toBeInTheDocument();
 
     await user.click(screen.getByText('취소'));
-    expect(screen.queryByText('1개 선택됨')).toBeNull();
-    expect(screen.getByTitle('선택 모드')).toBeInTheDocument();
+    expect(screen.queryByText(/개 선택됨/)).toBeNull();
+    const toolbar = container.querySelector('.h-9') as HTMLElement;
+    expect(within(toolbar).getByTitle('새 노트 (+)')).toBeInTheDocument();
+  });
+
+  it('active file row has no border-l-2 class to avoid margin shift', () => {
+    renderSidebar({ activeFileId: 'f-apple' });
+    const appleRow = screen.getByText('Apple').closest('.group')!;
+    expect(appleRow.className).toContain('bg-[#23232b]');
+    expect(appleRow.className).toContain('text-violet-200');
+    expect(appleRow.className).not.toContain('border-l-2');
   });
 
   it('opens inline input on context menu rename without window.prompt', async () => {
@@ -109,16 +116,5 @@ describe('ObsidianSidebar', () => {
     expect(input).toBeInTheDocument();
     expect(input.tagName).toBe('INPUT');
     promptSpy.mockRestore();
-  });
-
-  it('collapses expanded folders on collapseAll button click', async () => {
-    const user = userEvent.setup();
-    renderSidebar();
-
-    await user.click(screen.getByText('AlphaFolder'));
-    expect(screen.getByText('Child')).toBeInTheDocument();
-
-    await user.click(screen.getByTitle('폴더 모두 접기'));
-    expect(screen.queryByText('Child')).toBeNull();
   });
 });

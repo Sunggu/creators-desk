@@ -11,7 +11,6 @@ interface FileTreeItemProps {
   depth: number;
   isActive: boolean;
   isSelected?: boolean;
-  isSelectionMode?: boolean;
   isExpanded: boolean;
   isEditingExternal?: boolean;
   onItemClick?: (e: React.MouseEvent) => void;
@@ -28,7 +27,7 @@ interface FileTreeItemProps {
 }
 
 export default function FileTreeItem({
-  node, depth, isActive, isSelected = false, isSelectionMode = false,
+  node, depth, isActive, isSelected = false,
   isExpanded, isEditingExternal, onItemClick, onSelect, onToggleExpand,
   onRename, onDelete, onMove, onContextMenu,
   onCreateChildFile, onCreateChildFolder, onStartEditing, onStopEditing,
@@ -101,7 +100,7 @@ export default function FileTreeItem({
     : isSelected
     ? 'bg-violet-600/25 text-violet-100 ring-1 ring-inset ring-violet-500/40'
     : isActive
-    ? 'bg-[#23232b] text-violet-200 font-semibold border-l-2 border-violet-500'
+    ? 'bg-[#23232b] text-violet-200 font-semibold'
     : 'text-zinc-400 hover:bg-[#202026] hover:text-zinc-200';
 
   return (
@@ -131,16 +130,6 @@ export default function FileTreeItem({
           </button>
         ) : (
           <span className="w-3.5 shrink-0" />
-        )}
-
-        {(isSelectionMode || isSelected) && (
-          <span
-            className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-xs border transition-colors ${
-              isSelected ? 'border-violet-500 bg-violet-600 text-white' : 'border-zinc-600 bg-zinc-800/60 text-transparent'
-            }`}
-          >
-            {isSelected && <MonochromeIcon name="check" className="h-2.5 w-2.5" />}
-          </span>
         )}
 
         <span className="h-3.5 w-3.5 shrink-0 text-zinc-500">

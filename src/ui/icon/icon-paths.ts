@@ -17,14 +17,6 @@ export const ICON_PATHS = {
   close: ['M6 18L18 6M6 6l12 12'],
   plus: ['M12 4v16m8-8H4'],
   check: ['M5 13l4 4L19 7'],
-  checkSquare: [
-    'M9 11l3 3L22 4',
-    'M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11',
-  ],
-  collapseAll: [
-    'M7 11l5-5 5 5',
-    'M7 17l5-5 5 5',
-  ],
   chevronRight: ['M9 5l7 7-7 7'],
   chevronDown: ['M5 15l7-7 7 7'],
   folder: ['M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z'],

@@ -4,7 +4,6 @@ export interface SelectionClickEvent {
   shiftKey: boolean;
   ctrlKey: boolean;
   metaKey: boolean;
-  isSelectionMode?: boolean;
 }
 
 export function calculateTreeSelection(
@@ -30,8 +29,8 @@ export function calculateTreeSelection(
     }
   }
 
-  // 2. Ctrl / Cmd key OR explicit selection mode: Toggle item in multi-selection
-  if (event.ctrlKey || event.metaKey || event.isSelectionMode) {
+  // 2. Ctrl / Cmd key: Toggle item in multi-selection
+  if (event.ctrlKey || event.metaKey) {
     const next = new Set(selectedIds);
     if (next.has(clickedNode.id)) {
       next.delete(clickedNode.id);
@@ -44,7 +43,7 @@ export function calculateTreeSelection(
     };
   }
 
-  // 3. Normal click outside selection mode: Do not pollute multi-selection set,
+  // 3. Normal click outside modifier keys: Do not pollute multi-selection set,
   //    but record lastSelectedId as anchor for subsequent Shift+Click range selection.
   return {
     nextSelectedIds: new Set(),

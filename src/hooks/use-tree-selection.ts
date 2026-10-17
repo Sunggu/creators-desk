@@ -9,25 +9,6 @@ import {
 export function useTreeSelection() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
-  const [isSelectionMode, setIsSelectionMode] = useState<boolean>(false);
-
-  const isSelectionActive = isSelectionMode || selectedIds.size > 0;
-
-  const toggleSelectionMode = useCallback(() => {
-    setIsSelectionMode((prev) => {
-      const next = !prev;
-      if (!next) {
-        setSelectedIds(new Set());
-        setLastSelectedId(null);
-      }
-      return next;
-    });
-  }, []);
-
-  const selectAll = useCallback((nodes: readonly FileNodeDto[]) => {
-    setSelectedIds(new Set(nodes.map((n) => n.id)));
-    setIsSelectionMode(true);
-  }, []);
 
   const pruneSelection = useCallback((validNodes: readonly FileNodeDto[]) => {
     setSelectedIds((prev) => {
@@ -53,28 +34,22 @@ export function useTreeSelection() {
           shiftKey: e.shiftKey,
           ctrlKey: e.ctrlKey,
           metaKey: e.metaKey,
-          isSelectionMode,
         },
       );
       setSelectedIds(nextSelectedIds);
       setLastSelectedId(nextLastSelectedId);
     },
-    [isSelectionMode, lastSelectedId, selectedIds],
+    [lastSelectedId, selectedIds],
   );
 
   const clearSelection = useCallback(() => {
     setSelectedIds(new Set());
     setLastSelectedId(null);
-    setIsSelectionMode(false);
   }, []);
 
   return {
     selectedIds,
-    isSelectionMode,
-    isSelectionActive,
     setSelectedIds,
-    toggleSelectionMode,
-    selectAll,
     pruneSelection,
     handleItemClick,
     clearSelection,

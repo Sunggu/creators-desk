@@ -42,10 +42,7 @@ export default function ObsidianSidebar({
   const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; node: FileNodeDto | null } | null>(null);
 
-  const {
-    selectedIds, isSelectionMode, isSelectionActive, toggleSelectionMode,
-    selectAll, pruneSelection, handleItemClick, clearSelection,
-  } = useTreeSelection();
+  const { selectedIds, pruneSelection, handleItemClick, clearSelection } = useTreeSelection();
 
   useEffect(() => { pruneSelection(nodes); }, [nodes, pruneSelection]);
 
@@ -66,7 +63,7 @@ export default function ObsidianSidebar({
   const handleNodeClick = (node: FileNodeDto, e: React.MouseEvent) => {
     const isMultiKey = e.shiftKey || e.ctrlKey || e.metaKey;
     handleItemClick(node, flattenedVisibleNodes, e);
-    if (!isMultiKey && !isSelectionMode) {
+    if (!isMultiKey) {
       if (node.type === 'file') { onSelectFile(node.id); onCloseMobile?.(); } else toggleFolder(node.id);
     }
   };
@@ -99,7 +96,6 @@ export default function ObsidianSidebar({
               depth={depth}
               isActive={node.id === activeFileId}
               isSelected={selectedIds.has(node.id)}
-              isSelectionMode={isSelectionMode}
               isExpanded={expandedFolders.has(node.id)}
               isEditingExternal={editingNodeId === node.id}
               onItemClick={(e) => handleNodeClick(node, e)}
@@ -127,12 +123,8 @@ export default function ObsidianSidebar({
       <FileExplorerToolbar
         onNewFile={() => onCreateFile(undefined, null)}
         onNewFolder={() => onCreateFolder(undefined, null)}
-        onCollapseAll={() => setExpandedFolders(new Set())}
         onRefresh={onRefresh}
-        isSelectionActive={isSelectionActive}
         selectedCount={selectedIds.size}
-        onToggleSelectMode={toggleSelectionMode}
-        onSelectAll={() => selectAll(flattenedVisibleNodes)}
         onBulkDelete={handleBulkDelete}
         onClearSelection={clearSelection}
       />
