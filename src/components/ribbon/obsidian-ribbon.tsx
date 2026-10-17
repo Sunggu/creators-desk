@@ -36,9 +36,11 @@ export default function ObsidianRibbon({
           <button
             key={menu.id}
             onClick={() => onSelectMenu(menu.id)}
-            className={`flex h-8 w-8 items-center justify-center rounded-md transition cursor-pointer ${
+            aria-pressed={activeMenu === menu.id}
+            aria-expanded={activeMenu === menu.id}
+            className={`relative flex h-8 w-8 items-center justify-center rounded-md transition cursor-pointer ${
               activeMenu === menu.id
-                ? 'bg-[#202026] text-violet-400'
+                ? 'bg-[#202026] text-violet-400 before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-0.5 before:rounded-r before:bg-violet-400'
                 : 'hover:bg-[#1a1a1f] hover:text-zinc-200'
             }`}
             title={menu.title}

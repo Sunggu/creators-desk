@@ -4,13 +4,14 @@ export interface SelectionClickEvent {
   shiftKey: boolean;
   ctrlKey: boolean;
   metaKey: boolean;
+  isSelectionMode?: boolean;
 }
 
 export function calculateTreeSelection(
-  selectedIds: Set<string>,
+  selectedIds: ReadonlySet<string>,
   lastSelectedId: string | null,
   clickedNode: FileNodeDto,
-  flattenedVisibleNodes: FileNodeDto[],
+  flattenedVisibleNodes: readonly FileNodeDto[],
   event: SelectionClickEvent,
 ): { nextSelectedIds: Set<string>; nextLastSelectedId: string } {
   // 1. Shift key: Range selection between lastSelectedId and clickedNode
@@ -29,8 +30,8 @@ export function calculateTreeSelection(
     }
   }
 
-  // 2. Ctrl / Cmd key: Toggle multi-selection
-  if (event.ctrlKey || event.metaKey) {
+  // 2. Ctrl / Cmd key OR explicit selection mode: Toggle item in multi-selection
+  if (event.ctrlKey || event.metaKey || event.isSelectionMode) {
     const next = new Set(selectedIds);
     if (next.has(clickedNode.id)) {
       next.delete(clickedNode.id);
@@ -43,9 +44,23 @@ export function calculateTreeSelection(
     };
   }
 
-  // 3. Normal click: Single selection
+  // 3. Normal click outside selection mode: Do not pollute multi-selection set,
+  //    but record lastSelectedId as anchor for subsequent Shift+Click range selection.
   return {
-    nextSelectedIds: new Set([clickedNode.id]),
+    nextSelectedIds: new Set(),
     nextLastSelectedId: clickedNode.id,
   };
+}
+
+export function pruneStaleSelection(
+  selectedIds: ReadonlySet<string>,
+  validNodes: readonly FileNodeDto[],
+): Set<string> {
+  if (selectedIds.size === 0) return new Set();
+  const validIds = new Set(validNodes.map((n) => n.id));
+  const next = new Set<string>();
+  for (const id of selectedIds) {
+    if (validIds.has(id)) next.add(id);
+  }
+  return next;
 }

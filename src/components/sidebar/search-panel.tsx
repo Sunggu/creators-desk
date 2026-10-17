@@ -86,43 +86,51 @@ export default function SearchPanel({
   }, [files, query, serverSnippets]);
 
   return (
-    <div className="flex h-full flex-col p-3 text-xs text-zinc-300">
-      <div className="relative mb-3">
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t('sidebar.searchPlaceholder')}
-          className="w-full rounded border border-zinc-700 bg-[#1e1e24] px-3 py-1.5 pl-8 text-zinc-100 placeholder-zinc-500 outline-hidden focus:border-violet-500"
-          autoFocus
-        />
-        <MonochromeIcon name="search" className="absolute left-2.5 top-2 h-3.5 w-3.5 text-zinc-500" />
+    <div className="flex h-full w-full flex-col select-none">
+      <div className="flex h-9 shrink-0 items-center justify-between border-b border-[#26262e] px-3.5">
+        <span className="text-[11px] font-bold tracking-wider text-zinc-400 uppercase">
+          {t('ribbon.menuSearch')}
+        </span>
+        <span className="text-[11px] text-zinc-500">
+          {t('sidebar.searchResults', { count: filtered.length })}
+        </span>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-1">
-        <div className="text-[11px] font-medium text-zinc-500 mb-1 px-1">
-          {t('sidebar.searchResults', { count: filtered.length })}
+      <div className="flex min-h-0 flex-1 flex-col p-3 text-xs text-zinc-300">
+        <div className="relative mb-3">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t('sidebar.searchPlaceholder')}
+            className="w-full rounded border border-zinc-700 bg-[#1e1e24] px-3 py-1.5 pl-8 text-zinc-100 placeholder-zinc-500 outline-hidden focus:border-violet-500"
+            autoFocus
+          />
+          <MonochromeIcon name="search" className="absolute left-2.5 top-2 h-3.5 w-3.5 text-zinc-500" />
         </div>
-        {filtered.map(({ file, snippet }) => (
-          <div
-            key={file.id}
-            onClick={() => {
-              onSelectFile(file.id);
-              onCloseMobile?.();
-            }}
-            className="flex flex-col rounded p-2 hover:bg-[#222228] transition cursor-pointer"
-          >
-            <div className="font-semibold text-zinc-200">{file.name.replace(/\.md$/i, '')}</div>
-            {snippet && (
-              <div className="mt-0.5 line-clamp-2 text-[11px] text-zinc-500 leading-normal">
-                {snippet}
-              </div>
-            )}
-          </div>
-        ))}
-        {filtered.length === 0 && (
-          <div className="py-8 text-center text-zinc-500">{t('sidebar.searchEmpty')}</div>
-        )}
+
+        <div className="flex-1 overflow-y-auto space-y-1">
+          {filtered.map(({ file, snippet }) => (
+            <div
+              key={file.id}
+              onClick={() => {
+                onSelectFile(file.id);
+                onCloseMobile?.();
+              }}
+              className="flex flex-col rounded p-2 hover:bg-[#222228] transition cursor-pointer"
+            >
+              <div className="font-semibold text-zinc-200">{file.name.replace(/\.md$/i, '')}</div>
+              {snippet && (
+                <div className="mt-0.5 line-clamp-2 text-[11px] text-zinc-500 leading-normal">
+                  {snippet}
+                </div>
+              )}
+            </div>
+          ))}
+          {filtered.length === 0 && (
+            <div className="py-8 text-center text-zinc-500">{t('sidebar.searchEmpty')}</div>
+          )}
+        </div>
       </div>
     </div>
   );

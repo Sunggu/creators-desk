@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { FileNodeDto } from '../core/domain/file-node.dto';
-import { calculateTreeSelection } from './tree-selection';
+import { calculateTreeSelection, pruneStaleSelection } from './tree-selection';
 
 describe('calculateTreeSelection utility', () => {
   const mockNodes: FileNodeDto[] = [
@@ -10,53 +10,105 @@ describe('calculateTreeSelection utility', () => {
     { id: '4', vaultId: 'v1', parentId: null, name: 'D.md', type: 'file', createdAt: 0, updatedAt: 0 },
   ];
 
-  it('selects single item on normal click', () => {
+  it('clears multi-selection on normal click outside selection mode while setting anchor', () => {
     const { nextSelectedIds, nextLastSelectedId } = calculateTreeSelection(
-      new Set(),
+      new Set(['1', '3']),
       null,
       mockNodes[1],
       mockNodes,
       { shiftKey: false, ctrlKey: false, metaKey: false },
     );
 
-    expect(nextSelectedIds.size).toBe(1);
-    expect(nextSelectedIds.has('2')).toBe(true);
+    expect(nextSelectedIds.size).toBe(0);
     expect(nextLastSelectedId).toBe('2');
   });
 
-  it('toggles selection with Ctrl/Cmd key', () => {
+  it('toggles items in selection mode without modifier keys', () => {
+    const initial = new Set(['1']);
+    // Select item 2
+    const step1 = calculateTreeSelection(
+      initial,
+      '1',
+      mockNodes[1],
+      mockNodes,
+      { shiftKey: false, ctrlKey: false, metaKey: false, isSelectionMode: true },
+    );
+    expect(step1.nextSelectedIds.size).toBe(2);
+    expect(step1.nextSelectedIds.has('1')).toBe(true);
+    expect(step1.nextSelectedIds.has('2')).toBe(true);
+    expect(step1.nextLastSelectedId).toBe('2');
+
+    // Deselect item 1
+    const step2 = calculateTreeSelection(
+      step1.nextSelectedIds,
+      step1.nextLastSelectedId,
+      mockNodes[0],
+      mockNodes,
+      { shiftKey: false, ctrlKey: false, metaKey: false, isSelectionMode: true },
+    );
+    expect(step2.nextSelectedIds.size).toBe(1);
+    expect(step2.nextSelectedIds.has('1')).toBe(false);
+    expect(step2.nextSelectedIds.has('2')).toBe(true);
+  });
+
+  it('toggles selection with Ctrl/Cmd key even when isSelectionMode is false', () => {
     const initial = new Set(['1']);
     const step1 = calculateTreeSelection(
       initial,
       '1',
       mockNodes[2],
       mockNodes,
-      { shiftKey: false, ctrlKey: true, metaKey: false },
+      { shiftKey: false, ctrlKey: true, metaKey: false, isSelectionMode: false },
     );
 
     expect(step1.nextSelectedIds.size).toBe(2);
     expect(step1.nextSelectedIds.has('1')).toBe(true);
     expect(step1.nextSelectedIds.has('3')).toBe(true);
 
-    // Toggle off item 1
+    // Toggle off item 1 with metaKey
     const step2 = calculateTreeSelection(
       step1.nextSelectedIds,
       step1.nextLastSelectedId,
       mockNodes[0],
       mockNodes,
-      { shiftKey: false, ctrlKey: true, metaKey: false },
+      { shiftKey: false, ctrlKey: false, metaKey: true },
     );
     expect(step2.nextSelectedIds.size).toBe(1);
     expect(step2.nextSelectedIds.has('1')).toBe(false);
     expect(step2.nextSelectedIds.has('3')).toBe(true);
   });
 
-  it('selects range with Shift key', () => {
-    const initial = new Set(['1']);
+  it('selects range with Shift key using anchor from previous selection', () => {
+    const anchorRes = calculateTreeSelection(
+      new Set(),
+      null,
+      mockNodes[0],
+      mockNodes,
+      { shiftKey: false, ctrlKey: false, metaKey: false },
+    );
+    expect(anchorRes.nextLastSelectedId).toBe('1');
+
+    const rangeRes = calculateTreeSelection(
+      anchorRes.nextSelectedIds,
+      anchorRes.nextLastSelectedId,
+      mockNodes[2],
+      mockNodes,
+      { shiftKey: true, ctrlKey: false, metaKey: false },
+    );
+
+    expect(rangeRes.nextSelectedIds.size).toBe(3);
+    expect(rangeRes.nextSelectedIds.has('1')).toBe(true);
+    expect(rangeRes.nextSelectedIds.has('2')).toBe(true);
+    expect(rangeRes.nextSelectedIds.has('3')).toBe(true);
+    expect(rangeRes.nextSelectedIds.has('4')).toBe(false);
+    expect(rangeRes.nextLastSelectedId).toBe('3');
+  });
+
+  it('handles reverse range selection with Shift key', () => {
     const res = calculateTreeSelection(
-      initial,
-      '1',
-      mockNodes[2], // from 1 to 3 -> items 1, 2, 3
+      new Set(),
+      '3',
+      mockNodes[0],
       mockNodes,
       { shiftKey: true, ctrlKey: false, metaKey: false },
     );
@@ -65,6 +117,23 @@ describe('calculateTreeSelection utility', () => {
     expect(res.nextSelectedIds.has('1')).toBe(true);
     expect(res.nextSelectedIds.has('2')).toBe(true);
     expect(res.nextSelectedIds.has('3')).toBe(true);
-    expect(res.nextSelectedIds.has('4')).toBe(false);
+    expect(res.nextLastSelectedId).toBe('1');
+  });
+});
+
+describe('pruneStaleSelection utility', () => {
+  const validNodes: FileNodeDto[] = [
+    { id: '1', vaultId: 'v1', parentId: null, name: 'A.md', type: 'file', createdAt: 0, updatedAt: 0 },
+    { id: '2', vaultId: 'v1', parentId: null, name: 'B.md', type: 'file', createdAt: 0, updatedAt: 0 },
+  ];
+
+  it('returns empty set if selectedIds is empty', () => {
+    expect(pruneStaleSelection(new Set(), validNodes)).toEqual(new Set());
+  });
+
+  it('removes deleted IDs and keeps existing IDs', () => {
+    const selected = new Set(['1', 'stale-id-1', '2', 'stale-id-2']);
+    const pruned = pruneStaleSelection(selected, validNodes);
+    expect(Array.from(pruned).sort()).toEqual(['1', '2']);
   });
 });

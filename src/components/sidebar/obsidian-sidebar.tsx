@@ -1,7 +1,13 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { FileNodeDto } from '../../core/domain/file-node.dto';
 import type { VaultDto } from '../../core/domain/vault.dto';
 import { useTreeSelection } from '../../hooks/use-tree-selection';
+import {
+  flattenVisibleTree,
+  getAncestorFolderIds,
+  isDescendantOrSelf,
+  sortFileNodes,
+} from '../../utils/file-tree-nav';
 import ExplorerContextMenu from './explorer-context-menu';
 import FileExplorerToolbar from './file-explorer-toolbar';
 import FileTreeItem from './file-tree-item';
@@ -27,77 +33,63 @@ interface ObsidianSidebarProps {
 }
 
 export default function ObsidianSidebar({
-  vault, vaults, nodes, activeFileId,
-  onOpenVaultModal, onSelectVault, onSelectFile,
-  onCreateFile, onCreateFolder, onRenameNode,
-  onDeleteNode, onDeleteNodes, onMoveNode,
-  onRefresh, onCloseMobile,
+  vault, vaults, nodes, activeFileId, onOpenVaultModal, onSelectVault,
+  onSelectFile, onCreateFile, onCreateFolder, onRenameNode, onDeleteNode,
+  onDeleteNodes, onMoveNode, onRefresh, onCloseMobile,
 }: ObsidianSidebarProps) {
   const t = useTranslate();
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  const [editingNodeId, setEditingNodeId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; node: FileNodeDto | null } | null>(null);
-  const { selectedIds, handleItemClick, clearSelection } = useTreeSelection();
 
-  const toggleFolder = (id: string) => {
-    setExpandedFolders((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  };
+  const {
+    selectedIds, isSelectionMode, isSelectionActive, toggleSelectionMode,
+    selectAll, pruneSelection, handleItemClick, clearSelection,
+  } = useTreeSelection();
 
-  const flattenedVisibleNodes = useMemo(() => {
-    const list: FileNodeDto[] = [];
-    const traverse = (parentId: string | null) => {
-      const children = nodes.filter((n) => n.parentId === parentId);
-      for (const child of children) {
-        list.push(child);
-        if (child.type === 'folder' && expandedFolders.has(child.id)) {
-          traverse(child.id);
-        }
-      }
-    };
-    traverse(null);
-    return list;
-  }, [nodes, expandedFolders]);
+  useEffect(() => { pruneSelection(nodes); }, [nodes, pruneSelection]);
+
+  useEffect(() => {
+    if (!activeFileId) return;
+    const ancestors = getAncestorFolderIds(nodes, activeFileId);
+    if (ancestors.length > 0) setExpandedFolders((prev) => new Set([...prev, ...ancestors]));
+  }, [activeFileId, nodes]);
+
+  const toggleFolder = (id: string) => setExpandedFolders((prev) => {
+    const next = new Set(prev);
+    if (!next.delete(id)) next.add(id);
+    return next;
+  });
+
+  const flattenedVisibleNodes = useMemo(() => flattenVisibleTree(nodes, expandedFolders), [nodes, expandedFolders]);
 
   const handleNodeClick = (node: FileNodeDto, e: React.MouseEvent) => {
     const isMultiKey = e.shiftKey || e.ctrlKey || e.metaKey;
     handleItemClick(node, flattenedVisibleNodes, e);
-
-    if (!isMultiKey) {
-      if (node.type === 'file') {
-        onSelectFile(node.id);
-        onCloseMobile?.();
-      } else {
-        toggleFolder(node.id);
-      }
+    if (!isMultiKey && !isSelectionMode) {
+      if (node.type === 'file') { onSelectFile(node.id); onCloseMobile?.(); } else toggleFolder(node.id);
     }
   };
 
   const handleBulkDelete = async () => {
-    if (
-      selectedIds.size === 0 ||
-      !confirm(t('sidebar.bulkDeleteConfirm', { count: selectedIds.size }))
-    )
-      return;
+    if (selectedIds.size === 0 || !confirm(t('sidebar.bulkDeleteConfirm', { count: selectedIds.size }))) return;
     const ids = Array.from(selectedIds);
-    if (onDeleteNodes) await onDeleteNodes(ids);
-    else for (const id of ids) await onDeleteNode(id);
+    if (onDeleteNodes) await onDeleteNodes(ids); else for (const id of ids) await onDeleteNode(id);
     clearSelection();
   };
 
-  const handleRootDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    const draggedId = e.dataTransfer.getData('text/plain');
-    if (draggedId) onMoveNode?.(draggedId, null);
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') { clearSelection(); setEditingNodeId(null); }
+    if (e.key === 'F2' && !editingNodeId) {
+      const targetId = selectedIds.size === 1 ? Array.from(selectedIds)[0] : activeFileId;
+      if (targetId) setEditingNodeId(targetId);
+    }
+    if (e.key === 'Delete' && !editingNodeId && selectedIds.size > 0) handleBulkDelete();
   };
 
   const renderTree = (parentId: string | null, depth: number) => {
-    const children = nodes.filter((n) => n.parentId === parentId);
+    const children = sortFileNodes(nodes.filter((n) => n.parentId === parentId));
     if (children.length === 0) return null;
-
     return (
       <div className={depth > 0 ? 'border-l border-zinc-800/80 ml-3 pl-0.5' : ''}>
         {children.map((node) => (
@@ -107,15 +99,21 @@ export default function ObsidianSidebar({
               depth={depth}
               isActive={node.id === activeFileId}
               isSelected={selectedIds.has(node.id)}
+              isSelectionMode={isSelectionMode}
               isExpanded={expandedFolders.has(node.id)}
+              isEditingExternal={editingNodeId === node.id}
               onItemClick={(e) => handleNodeClick(node, e)}
               onToggleExpand={toggleFolder}
               onRename={(id, name) => onRenameNode(id, name)}
               onDelete={(id) => onDeleteNode(id)}
-              onMove={onMoveNode ? (id, pid) => onMoveNode(id, pid) : undefined}
+              onMove={onMoveNode ? (id, pid) => {
+                if (!isDescendantOrSelf(nodes, id, pid)) onMoveNode(id, pid);
+              } : undefined}
               onContextMenu={(n, x, y) => setContextMenu({ x, y, node: n })}
               onCreateChildFile={(pid) => { onCreateFile(undefined, pid); setExpandedFolders((s) => new Set(s).add(pid)); }}
               onCreateChildFolder={(pid) => { onCreateFolder(undefined, pid); setExpandedFolders((s) => new Set(s).add(pid)); }}
+              onStartEditing={setEditingNodeId}
+              onStopEditing={() => setEditingNodeId(null)}
             />
             {node.type === 'folder' && expandedFolders.has(node.id) && renderTree(node.id, depth + 1)}
           </div>
@@ -125,28 +123,37 @@ export default function ObsidianSidebar({
   };
 
   return (
-    <aside className="flex h-full w-full md:w-64 shrink-0 flex-col border-r border-[#26262e] bg-[#18181b] select-none text-zinc-300">
+    <aside className="flex h-full w-full shrink-0 flex-col bg-[#18181b] select-none text-zinc-300">
       <FileExplorerToolbar
         onNewFile={() => onCreateFile(undefined, null)}
         onNewFolder={() => onCreateFolder(undefined, null)}
+        onCollapseAll={() => setExpandedFolders(new Set())}
         onRefresh={onRefresh}
-        onCloseMobile={onCloseMobile}
+        isSelectionActive={isSelectionActive}
         selectedCount={selectedIds.size}
+        onToggleSelectMode={toggleSelectionMode}
+        onSelectAll={() => selectAll(flattenedVisibleNodes)}
         onBulkDelete={handleBulkDelete}
         onClearSelection={clearSelection}
       />
 
-      {/* Explorer Tree Drop Target */}
       <div
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        onClick={(e) => { if (e.target === e.currentTarget) clearSelection(); }}
         onDragOver={(e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }}
-        onDrop={handleRootDrop}
+        onDrop={(e) => {
+          e.preventDefault();
+          const id = e.dataTransfer.getData('text/plain');
+          if (id) onMoveNode?.(id, null);
+        }}
         onContextMenu={(e) => {
           if (e.target === e.currentTarget) {
             e.preventDefault();
             setContextMenu({ x: e.clientX, y: e.clientY, node: null });
           }
         }}
-        className="flex-1 overflow-y-auto py-1"
+        className="flex-1 overflow-y-auto py-1 outline-hidden"
       >
         {nodes.length === 0 ? (
           <div className="p-4 text-center text-xs text-zinc-500">
@@ -158,9 +165,7 @@ export default function ObsidianSidebar({
               {t('sidebar.createNote')}
             </button>
           </div>
-        ) : (
-          renderTree(null, 0)
-        )}
+        ) : renderTree(null, 0)}
       </div>
 
       <VaultDropdown
@@ -178,13 +183,7 @@ export default function ObsidianSidebar({
           onClose={() => setContextMenu(null)}
           onNewFile={(pid) => onCreateFile(undefined, pid)}
           onNewFolder={(pid) => onCreateFolder(undefined, pid)}
-          onRename={(id) => {
-            const next = prompt(
-              t('sidebar.renamePrompt'),
-              nodes.find((n) => n.id === id)?.name.replace(/\.md$/i, ''),
-            );
-            if (next) onRenameNode(id, next);
-          }}
+          onRename={setEditingNodeId}
           onDelete={(id) => {
             const node = nodes.find((n) => n.id === id);
             if (confirm(t('sidebar.deleteConfirm', { name: node?.name ?? '' }))) onDeleteNode(id);

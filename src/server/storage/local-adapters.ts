@@ -11,6 +11,7 @@ export function createLocalDbAdapter(dbPath: string): DbAdapter {
   }
 
   const db = new DatabaseSync(dbPath);
+  db.exec('PRAGMA busy_timeout = 5000;');
 
   // Initialize SQLite tables if not present
   db.exec(`

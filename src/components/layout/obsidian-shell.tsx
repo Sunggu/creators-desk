@@ -104,7 +104,6 @@ export default function ObsidianShell({ vault, vaults, onSelectVault, onCreateVa
         <SidebarPanelContainer
           {...panelData}
           activeMenu={activeSideMenu}
-          onClose={() => setActiveSideMenu(null)}
         />
 
         <main className="flex flex-1 flex-col overflow-hidden bg-[#1e1e22]">

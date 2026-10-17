@@ -1,11 +1,15 @@
 import { useTranslate } from '../../i18n/use-i18n';
 import MonochromeIcon from '../../ui/icon/monochrome-icon';
-interface FileExplorerToolbarProps {
+
+export interface FileExplorerToolbarProps {
   onNewFile: () => void;
   onNewFolder: () => void;
+  onCollapseAll?: () => void;
   onRefresh: () => void;
-  onCloseMobile?: () => void;
+  isSelectionActive?: boolean;
   selectedCount?: number;
+  onToggleSelectMode?: () => void;
+  onSelectAll?: () => void;
   onBulkDelete?: () => void;
   onClearSelection?: () => void;
 }
@@ -13,76 +17,104 @@ interface FileExplorerToolbarProps {
 export default function FileExplorerToolbar({
   onNewFile,
   onNewFolder,
+  onCollapseAll,
   onRefresh,
-  onCloseMobile,
+  isSelectionActive = false,
   selectedCount = 0,
+  onToggleSelectMode,
+  onSelectAll,
   onBulkDelete,
   onClearSelection,
 }: FileExplorerToolbarProps) {
   const t = useTranslate();
+  const selectionActive = isSelectionActive || selectedCount > 0;
 
-  return (
-    <div className="shrink-0 border-b border-[#24242a]">
-      {/* 1. Main Toolbar Header */}
-      <div className="flex h-11 items-center justify-between px-3.5">
-        <span className="text-[11px] font-bold tracking-wider text-zinc-400 uppercase">
-          {t('sidebar.heading')}
+  if (selectionActive) {
+    return (
+      <div className="flex h-9 shrink-0 items-center justify-between border-b border-violet-800/40 bg-violet-950/50 px-3 select-none">
+        <span className="text-xs font-medium text-violet-200 truncate">
+          {selectedCount > 0
+            ? t('sidebar.selectedCount', { count: selectedCount })
+            : t('sidebar.selectionModeEmpty')}
         </span>
         <div className="flex items-center space-x-1.5">
           <button
-            onClick={onNewFile}
-            className="rounded p-1 hover:bg-[#25252c] hover:text-zinc-100 transition"
-            title={t('sidebar.newNoteShortcut')}
+            type="button"
+            onClick={onSelectAll}
+            className="rounded px-1.5 py-0.5 text-[11px] text-violet-300 hover:bg-violet-800/40 transition cursor-pointer"
+            title={t('sidebar.selectAll')}
           >
-            <MonochromeIcon name="plus" />
+            {t('sidebar.selectAll')}
           </button>
           <button
-            onClick={onNewFolder}
-            className="rounded p-1 hover:bg-[#25252c] hover:text-zinc-100 transition"
-            title={t('sidebar.newFolderTitle')}
+            type="button"
+            onClick={onBulkDelete}
+            disabled={selectedCount === 0}
+            className="rounded px-2 py-0.5 bg-rose-600/30 hover:bg-rose-600/50 disabled:opacity-40 disabled:pointer-events-none text-rose-300 text-[11px] font-medium transition cursor-pointer"
+            title={t('sidebar.deleteSelected')}
           >
-            <MonochromeIcon name="folderPlus" />
+            {t('sidebar.remove')}
           </button>
           <button
-            onClick={onRefresh}
-            className="rounded p-1 hover:bg-[#25252c] hover:text-zinc-100 transition"
-            title={t('sidebar.refreshTitle')}
+            type="button"
+            onClick={onClearSelection}
+            className="rounded px-1.5 py-0.5 text-[11px] text-zinc-400 hover:bg-[#25252c] hover:text-zinc-200 transition cursor-pointer"
+            title={t('sidebar.clearSelection')}
           >
-            <MonochromeIcon name="refresh" />
+            {t('sidebar.clearSelection')}
           </button>
-          {onCloseMobile && (
-            <button
-              onClick={onCloseMobile}
-              className="md:hidden ml-1 rounded p-1 text-zinc-400 hover:text-zinc-100"
-              title={t('sidebar.closeMobile')}
-            >
-              <MonochromeIcon name="close" className="h-4.5 w-4.5" />
-            </button>
-          )}
         </div>
       </div>
+    );
+  }
 
-      {/* 2. Multi-selection Bar */}
-      {selectedCount > 1 && (
-        <div className="flex items-center justify-between bg-violet-950/70 border-t border-violet-800/40 px-3 py-1.5 text-xs text-violet-200 animate-in fade-in duration-100">
-          <span className="font-medium">{t('sidebar.selectedCount', { count: selectedCount })}</span>
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={onBulkDelete}
-              className="rounded px-2 py-0.5 bg-rose-600/30 hover:bg-rose-600/50 text-rose-300 font-medium transition cursor-pointer"
-              title={t('sidebar.deleteSelected')}
-            >
-              {t('sidebar.remove')}
-            </button>
-            <button
-              onClick={onClearSelection}
-              className="text-zinc-400 hover:text-zinc-200 text-[11px] cursor-pointer"
-            >
-              {t('sidebar.clearSelection')}
-            </button>
-          </div>
-        </div>
-      )}
+  return (
+    <div className="flex h-9 shrink-0 items-center justify-between border-b border-[#26262e] px-3 select-none">
+      <span className="text-[11px] font-bold tracking-wider text-zinc-400 uppercase truncate">
+        {t('sidebar.heading')}
+      </span>
+      <div className="flex items-center space-x-1">
+        <button
+          type="button"
+          onClick={onToggleSelectMode}
+          className="rounded p-1 text-zinc-400 hover:bg-[#25252c] hover:text-zinc-100 transition cursor-pointer"
+          title={t('sidebar.selectMode')}
+        >
+          <MonochromeIcon name="checkSquare" className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={onNewFile}
+          className="rounded p-1 text-zinc-400 hover:bg-[#25252c] hover:text-zinc-100 transition cursor-pointer"
+          title={t('sidebar.newNoteShortcut')}
+        >
+          <MonochromeIcon name="plus" className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={onNewFolder}
+          className="rounded p-1 text-zinc-400 hover:bg-[#25252c] hover:text-zinc-100 transition cursor-pointer"
+          title={t('sidebar.newFolderTitle')}
+        >
+          <MonochromeIcon name="folderPlus" className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={onCollapseAll}
+          className="rounded p-1 text-zinc-400 hover:bg-[#25252c] hover:text-zinc-100 transition cursor-pointer"
+          title={t('sidebar.collapseAll')}
+        >
+          <MonochromeIcon name="collapseAll" className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={onRefresh}
+          className="rounded p-1 text-zinc-400 hover:bg-[#25252c] hover:text-zinc-100 transition cursor-pointer"
+          title={t('sidebar.refreshTitle')}
+        >
+          <MonochromeIcon name="refresh" className="h-3.5 w-3.5" />
+        </button>
+      </div>
     </div>
   );
 }
